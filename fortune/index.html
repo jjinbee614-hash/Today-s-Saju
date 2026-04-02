@@ -765,11 +765,11 @@
   }
 </style>
   <style>
-  .menu-item { display:block; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; font-family:'Noto Sans KR',sans-serif; color:var(--ink); cursor:pointer; border-radius:8px; text-decoration:none; }
-  .menu-item:hover { background:var(--card); color:var(--gold); }
-  .page { display:none; }
-  .page.active { display:block; }
-</style>
+    .menu-item { display:block; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; font-family:'Noto Sans KR',sans-serif; color:var(--ink); cursor:pointer; border-radius:8px; text-decoration:none; }
+    .menu-item:hover { background:var(--card); color:var(--gold); }
+    .page { display:none; }
+    .page.active { display:block; }
+  </style>
 </head>
 <body>
 <nav>
@@ -1011,7 +1011,6 @@ function calcSaju(year, month, day, timeName) {
     elements, daymaster: dayMasterDesc };
 }
 
-
 let myProfile = null;
 try {
   const saved = localStorage.getItem('myProfile');
@@ -1031,17 +1030,15 @@ function autoFillFortune() {
   const note = document.getElementById('fortune-autofill-note');
   if (note) {
     note.style.display = 'flex';
-    note.innerHTML = `✅ ${name || ''}님의 생년월일이 자동 입력됐어요 <span style="color:var(--muted);font-size:12px;">(${calLabel})</span>`;
+    note.innerHTML = `✅ ${name || ''}님의 생년월일이 자동 입력됐어요`;
   }
   const notice = document.getElementById('fortune-register-notice');
   if (notice) notice.style.display = 'none';
 }
-
 document.addEventListener('DOMContentLoaded', function() {
   autoFillFortune();
   setFortuneDay('today');
 });
-
 
 let fortuneDay = 'today'; // 'today' or 'tomorrow'
 
@@ -1536,10 +1533,9 @@ window.addEventListener('load', () => {
 
 </body>
 </html
-
-
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
+  if (!menu) return;
   menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 document.addEventListener('click', function(e) {
@@ -1547,7 +1543,6 @@ document.addEventListener('click', function(e) {
   const btn = document.getElementById('menu-btn');
   if (menu && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
 });
-
 </script>
 </body>
 </html>
