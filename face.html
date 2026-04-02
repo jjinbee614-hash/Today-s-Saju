@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>관상 분석 — AI가 읽는 얼굴의 운명 | 오늘의 사주</title>
+  <meta name="description" content="사진 한 장으로 AI가 전통 관상학 관점에서 성격, 재물운, 애정운, 직업운을 분석해드립니다."/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#1a1008; --paper:#f5efe4; --card:#ede5d8; --border:rgba(26,16,8,0.15); --muted:#8a7860; --gold:#c9913a; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; }
+    nav { position:fixed; top:0; left:0; right:0; z-index:100; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; background:rgba(245,239,228,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+    .logo { font-family:'Noto Serif KR',serif; font-size:20px; font-weight:700; color:var(--ink); text-decoration:none; }
+    .logo span { color:var(--gold); }
+    .nav-links { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+    .nav-links::-webkit-scrollbar { display:none; }
+    .nav-btn { background:none; border:1px solid var(--border); padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer; color:var(--ink); font-family:'Noto Sans KR',sans-serif; text-decoration:none; display:inline-block; white-space:nowrap; }
+    .nav-btn:hover, .nav-btn.active { background:var(--gold); color:white; border-color:var(--gold); }
+    .main { max-width:640px; margin:0 auto; padding:90px 20px 60px; }
+    .submit-btn { width:100%; padding:15px; background:var(--ink); color:var(--paper); border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Noto Serif KR',serif; margin-top:8px; }
+    .submit-btn:hover { background:#2d1f0e; }
+    .submit-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .drop-zone { border:2px dashed var(--border); border-radius:12px; padding:40px 20px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--card); }
+    .drop-zone:hover { border-color:var(--gold); background:rgba(201,145,58,0.05); }
+    .saju-loading { text-align:center; padding:48px 24px; color:var(--muted); }
+    .big-spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--paper); padding:12px 24px; border-radius:24px; font-size:14px; z-index:9999; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
+    .toast.show { opacity:1; }
+    select { width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--card); font-family:'Noto Sans KR',sans-serif; }
+    label { font-size:13px; font-weight:600; display:block; margin-bottom:6px; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="https://saju-today.com" class="logo">오늘의<span>사주</span></a>
+  <div class="nav-links">
+    <a href="https://saju-today.com" class="nav-btn">🔮 사주풀이</a>
+    <a href="https://saju-today.com" class="nav-btn">🌅 운세</a>
+    <a href="/dream.html" class="nav-btn">🌙 꿈해몽</a>
+    <a href="/tarot.html" class="nav-btn">🃏 타로</a>
+    <a href="/face.html" class="nav-btn active">👁️ 관상</a>
+  </div>
+</nav>
+
+<div class="main">
+  <h1 style="font-family:'Noto Serif KR',serif;font-size:28px;font-weight:700;margin-bottom:8px;">👁️ 관상 분석</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:28px;line-height:1.7;">사진 한 장으로 AI가 전통 관상학 관점에서 성격, 재물운, 애정운을 분석해드립니다.<br>얼굴이 잘 보이는 정면 사진을 올려주세요.</p>
+
+  <!-- 성별 선택 -->
+  <div style="margin-bottom:20px;">
+    <label>성별</label>
+    <select id="face-gender">
+      <option value="남성">남성</option>
+      <option value="여성">여성</option>
+    </select>
+  </div>
+
+  <!-- 이미지 업로드 -->
+  <div style="margin-bottom:20px;">
+    <label>사진 업로드 <span style="color:var(--muted);font-weight:400;">(얼굴이 잘 보이는 정면 사진, 5MB 이하)</span></label>
+    <input type="file" id="face-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)"/>
+
+    <div id="drop-zone" class="drop-zone"
+      onclick="document.getElementById('face-input').click()"
+      ondrop="handleDrop(event)"
+      ondragover="handleDragOver(event)"
+      ondragleave="handleDragLeave(event)">
+
+      <div id="upload-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <div style="font-size:48px;">📷</div>
+        <div style="font-size:15px;font-weight:600;">사진을 클릭하거나 드래그해서 올려주세요</div>
+        <div style="font-size:12px;color:var(--muted);">JPG, PNG 등 이미지 파일 (최대 5MB)</div>
+      </div>
+
+      <div id="preview-area" style="display:none;position:relative;">
+        <img id="preview-img" style="max-width:100%;max-height:300px;border-radius:8px;object-fit:contain;"/>
+        <button onclick="event.stopPropagation();removeImage()"
+          style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주의사항 -->
+  <div style="background:rgba(26,74,107,0.05);border:1px solid rgba(26,74,107,0.2);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:var(--muted);line-height:1.8;">
+    ℹ️ <strong style="color:var(--ink);">안내사항</strong><br>
+    • 업로드한 사진은 AI 분석 후 저장되지 않습니다<br>
+    • 관상 분석은 재미와 참고용이며 과학적 근거가 없습니다<br>
+    • 얼굴이 잘 보이는 밝은 정면 사진일수록 정확도가 높아요
+  </div>
+
+  <button class="submit-btn" id="face-submit" onclick="runFaceReading()" disabled>👁️ 관상 분석하기 ✦</button>
+  <div id="face-result" style="display:none;margin-top:32px;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+const WORKER_URL = 'https://saju-proxy.jjinbee614.workers.dev';
+
+function callAPI(prompt) {
+  return fetch(WORKER_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model:"claude-sonnet-4-20250514",
+      max_tokens:2000,
+      messages:[{ role:"user", content:prompt }]
+    })
+  }).then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }).then(data => {
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content.map(i=>i.text||'').join('');
+    const s = raw.indexOf('{');
+    if (s < 0) throw new Error('JSON을 찾을 수 없습니다: ' + raw.slice(0,80));
+    const e = raw.lastIndexOf('}');
+    return JSON.parse(raw.slice(s, e+1));
+  });
+}
+
+let selectedImage = null;
+let imageBase64 = null;
+
+function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('이미지 파일만 업로드해주세요'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('5MB 이하 이미지만 가능합니다'); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    imageBase64 = ev.target.result.split(',')[1];
+    selectedImage = ev.target.result;
+    document.getElementById('preview-img').src = selectedImage;
+    document.getElementById('preview-area').style.display = 'block';
+    document.getElementById('upload-placeholder').style.display = 'none';
+    document.getElementById('face-submit').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('drop-zone').style.borderColor = 'var(--border)';
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const fakeEvent = { target: { files: [file] } };
+    handleImageUpload(fakeEvent);
+  }
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').style.borderColor = 'var(--gold)';
+}
+
+function handleDragLeave(e) {
+  document.getElementById('drop-zone').style.borderColor = 'var(--border)';
+}
+
+function removeImage() {
+  selectedImage = null;
+  imageBase64 = null;
+  document.getElementById('preview-area').style.display = 'none';
+  document.getElementById('upload-placeholder').style.display = 'flex';
+  document.getElementById('face-submit').disabled = true;
+  document.getElementById('face-input').value = '';
+  document.getElementById('face-result').style.display = 'none';
+}
+
+async function runFaceReading() {
+  if (!imageBase64) { showToast('사진을 먼저 업로드해주세요'); return; }
+
+  const gender = document.getElementById('face-gender').value;
+  const resultEl = document.getElementById('face-result');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<div class="saju-loading"><div class="big-spinner"></div><p>관상을 분석하고 있습니다...<br>얼굴의 특징을 하나하나 살피는 중이에요.</p></div>';
+  resultEl.scrollIntoView({behavior:'smooth', block:'start'});
+
+  const prompt = `당신은 동양 관상학 전문가입니다. 이 사람의 얼굴 사진을 보고 전통 관상학 관점에서 상세하게 분석해주세요.
+성별: ${gender}
+
+순수 JSON만 출력하세요. 코드블록 없이.
+
+{"overall":{"grade":"관상 등급(대길/길/평/흉)","score":85,"summary":"전체 관상 한줄 요약"},"personality":{"title":"성격 제목","description":"성격 분석 3문장"},"fortune":{"wealth":{"score":80,"description":"재물운 2문장"},"love":{"score":75,"description":"애정운 2문장"},"career":{"score":85,"description":"직업운 2문장"},"health":{"score":70,"description":"건강운 2문장"}},"features":[{"part":"이마","reading":"이마 관상 해석 2문장"},{"part":"눈","reading":"눈 관상 해석 2문장"},{"part":"코","reading":"코 관상 해석 2문장"},{"part":"입","reading":"입 관상 해석 2문장"},{"part":"귀","reading":"귀 관상 해석 2문장"},{"part":"턱","reading":"턱 관상 해석 2문장"}],"advice":"종합 조언 2문장"}`;
+
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content[0].text;
+    const clean = text.replace(/```json|```/g, '').trim();
+    const r = JSON.parse(clean);
+
+    const gradeColors = { '대길': '#27ae60', '길': '#c9913a', '평': '#1a4a6b', '흉': '#c0392b' };
+    const color = gradeColors[r.overall?.grade] || '#c9913a';
+    const score = r.overall?.score || 75;
+
+    let html = '';
+
+    // 전체 등급
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;text-align:center;">'
+      + '<div style="font-size:48px;margin-bottom:8px;">👁️</div>'
+      + '<div style="font-size:32px;font-weight:800;color:' + color + ';margin-bottom:6px;">' + (r.overall?.grade||'') + '</div>'
+      + '<div style="background:var(--border);border-radius:4px;height:8px;width:200px;margin:8px auto;">'
+      + '<div style="height:8px;border-radius:4px;width:' + score + '%;background:' + color + ';transition:width 0.8s;"></div></div>'
+      + '<p style="font-size:14px;color:var(--muted);margin-top:10px;">' + (r.overall?.summary||'') + '</p>'
+      + '</div>';
+
+    // 성격
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;">'
+      + '<h4 style="font-size:14px;font-weight:700;margin-bottom:10px;">🧠 ' + (r.personality?.title||'성격') + '</h4>'
+      + '<p style="font-size:13px;line-height:1.9;">' + (r.personality?.description||'') + '</p>'
+      + '</div>';
+
+    // 운세 4개
+    const fortunes = [
+      { key:'wealth', icon:'💰', label:'재물운' },
+      { key:'love',   icon:'💕', label:'애정운' },
+      { key:'career', icon:'💼', label:'직업운' },
+      { key:'health', icon:'💚', label:'건강운' },
+    ];
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">';
+    fortunes.forEach(f => {
+      const fd = r.fortune?.[f.key] || {};
+      const fs = fd.score || 70;
+      const fc = fs>=80 ? '#27ae60' : fs>=60 ? '#c9913a' : '#c0392b';
+      html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">'
+        + '<span style="font-size:16px;">' + f.icon + '</span>'
+        + '<span style="font-size:12px;font-weight:700;">' + f.label + '</span>'
+        + '<span style="font-size:18px;font-weight:800;color:' + fc + ';margin-left:auto;">' + fs + '</span>'
+        + '</div>'
+        + '<div style="background:var(--border);border-radius:3px;height:4px;margin-bottom:8px;">'
+        + '<div style="height:4px;border-radius:3px;width:' + fs + '%;background:' + fc + ';"></div></div>'
+        + '<p style="font-size:11px;line-height:1.7;color:var(--muted);">' + (fd.description||'') + '</p>'
+        + '</div>';
+    });
+    html += '</div>';
+
+    // 얼굴 특징별
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;">'
+      + '<h4 style="font-size:14px;font-weight:700;margin-bottom:14px;">🔍 부위별 관상 해설</h4>';
+    (r.features||[]).forEach(f => {
+      html += '<div style="padding:10px 0;border-bottom:1px solid var(--border);">'
+        + '<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:4px;">' + f.part + '</div>'
+        + '<p style="font-size:13px;line-height:1.8;">' + f.reading + '</p>'
+        + '</div>';
+    });
+    html += '</div>';
+
+    // 조언
+    html += '<div style="background:rgba(201,145,58,0.1);border-left:3px solid var(--gold);padding:14px 18px;border-radius:0 8px 8px 0;">'
+      + '<div style="font-size:11px;color:#c9913a;margin-bottom:6px;">💡 종합 조언</div>'
+      + '<p style="font-size:13px;line-height:1.8;">' + (r.advice||'') + '</p>'
+      + '</div>';
+
+    resultEl.innerHTML = html;
+  } catch(e) {
+    resultEl.innerHTML = '<div style="background:#fff3f3;border:1px solid #e74c3c;border-radius:8px;padding:16px;color:#c0392b;"><strong>⚠️ 오류:</strong> ' + e.message + '</div>';
+  }
+}
+
+</script>
+</body>
+</html>
