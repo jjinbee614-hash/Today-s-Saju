@@ -881,6 +881,7 @@
 </div>
 <div class="toast" id="toast"></div>
 <script>
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -1107,7 +1108,11 @@ function autoFillPage() {
   setCalType('saju', sajuCalType);
   const leapCheck = document.getElementById('saju-leap');
   if (leapCheck) leapCheck.checked = isLeap || false;
-  setSajuGender(gender || '남성');
+  const g = gender || '남성';
+  sajuGender = g;
+  document.querySelectorAll('#page-saju .gender-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.gender === g);
+  });
   const note = document.getElementById('saju-autofill-note');
   if (note && name) {
     note.style.display = 'flex';
@@ -1470,6 +1475,309 @@ function setFortuneDay(day) {
   if (content) content.style.display = 'none';
 }
 
+async function loadFortune() {
+  const birth = document.getElementById('fortune-birth').value.trim();
+  if (!birth) { showToast('생년월일을 입력해 주세요'); return; }
+
+  const baseDate = new Date();
+  if (fortuneDay === 'tomorrow') baseDate.setDate(baseDate.getDate() + 1);
+  const today = baseDate;
+  const days  = ['일','월','화','수','목','금','토'];
+  const todayStr = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+  const isToday = fortuneDay === 'today';
+
+  document.getElementById('fortune-today-date').textContent = `${todayStr} (${days[today.getDay()]})`;
+  document.getElementById('fortune-title').textContent = `${isToday ? '🌅' : '🌙'} ${birth.split('년')[0]}년생 ${isToday ? '오늘' : '내일'}의 운세`;
+
+  const fortuneContent = document.getElementById('fortune-content');
+  fortuneContent.style.display = 'block';
+
+  // ── 사주 계산 ──
+  const birthParts = birth.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
+  if (!birthParts) { showToast('생년월일 형식이 올바르지 않습니다'); return; }
+
+  const fy = parseInt(birthParts[1]);
+  const fm = parseInt(birthParts[2]);
+  const fd = parseInt(birthParts[3]);
+  const ftimeMatch = birth.match(/([가-힣]+시)/);
+  const ftime = ftimeMatch ? ftimeMatch[1] : '모름';
+  const fp = calcSaju(fy, fm, fd, ftime);
+
+  const yp = `${fp.yp.heavenly}${fp.yp.earthly}`;
+  const mp = `${fp.mp.heavenly}${fp.mp.earthly}`;
+  const dp = `${fp.dp.heavenly}${fp.dp.earthly}`;
+  const tp = fp.tp.hs >= 0 ? `${fp.tp.heavenly}${fp.tp.earthly}` : '없음';
+
+  // ── 오늘 일진 계산 ──
+  const todayPillars = calcSaju(today.getFullYear(), today.getMonth()+1, today.getDate(), '모름');
+  const todayYP = `${todayPillars.yp.heavenly}${todayPillars.yp.earthly}`;
+  const todayMP = `${todayPillars.mp.heavenly}${todayPillars.mp.earthly}`;
+  const todayDP = `${todayPillars.dp.heavenly}${todayPillars.dp.earthly}`;
+
+  // ── 캐시 확인 (생년월일+오늘날짜 기준) ──
+  // 캐시 키를 실제 분석 날짜 기준으로 통일 (어제의 내일 = 오늘의 오늘)
+  const cacheKey = `fortune_v3_${fy}_${fm}_${fd}_${ftime}_${today.getFullYear()}${today.getMonth()+1}${today.getDate()}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      renderFortune(JSON.parse(cached));
+      return;
+    } catch(e) { localStorage.removeItem(cacheKey); }
+  }
+
+  document.getElementById('fortune-score-cards').innerHTML = '';
+  document.getElementById('fortune-main-text').innerHTML =
+    `<div class="analysis-loading"><div class="spinner"></div> AI가 오늘의 운세를 살피고 있습니다...</div>`;
+
+  try {
+    const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 사주팔자와 오늘 일진을 바탕으로 오늘 하루 운세를 분석하세요.
+
+【이 사람의 사주】
+- 생년월일시: ${fy}년 ${fm}월 ${fd}일 ${ftime}
+- 연주: ${yp} / 월주: ${mp} / 일주: ${dp} / 시주: ${tp}
+- 일간(본질): ${fp.dp.heavenly} (${fp.daymaster})
+- 오행 분포: ${Object.entries(fp.elements).map(([k,v])=>k+' '+v+'%').join(', ')}
+
+【오늘 일진】
+- 날짜: ${todayStr}
+- 연주: ${todayYP} / 월주: ${todayMP} / 일주(오늘): ${todayDP}
+
+이 사람의 일간 ${fp.dp.heavenly}과 ${isToday ? '오늘' : '내일'} 일지 ${todayDP}의 관계, 오행 상생상극을 구체적으로 분석하여 이 사람만의 맞춤 ${isToday ? '오늘' : '내일'}의 운세를 작성하세요.
+숫자 점수는 오늘 일진과의 상호작용에 따라 사람마다 반드시 달라야 합니다.
+
+순수 JSON만 출력하세요. 코드블록 없이.
+
+{"overall":75,"overallDesc":"오늘 운세 핵심 1문장.","love":70,"loveDesc":"연애운 1문장.","money":80,"moneyDesc":"재물운 1문장.","work":65,"workDesc":"직업운 1문장.","health":72,"healthDesc":"건강운 1문장.","summary":"오늘 하루 전체 흐름 2~3문장.","advice":"구체적 행동 조언 1~2문장.","lucky":{"color":"행운 색깔","number":3,"direction":"행운 방향","time":"행운 시간대"}}`;
+
+    const r = await callAPI(prompt);
+
+    // 캐시 저장
+    try { localStorage.setItem(cacheKey, JSON.stringify(r)); } catch(e) {}
+
+    renderFortune(r);
+
+  } catch(err) {
+    document.getElementById('fortune-main-text').innerHTML =
+      `<div style="background:#fff3f3;border:1px solid #e74c3c;border-radius:8px;padding:16px;font-size:13px;color:#c0392b;"><strong>⚠️ 오류:</strong> ${err.message}</div>`;
+  }
+}
+
+function renderFortune(r) {
+  const currentYear = new Date().getFullYear();
+  const scoreItems = [
+    {label:'종합운', score:r.overall, icon:'⭐', desc:r.overallDesc},
+    {label:'애정운', score:r.love,    icon:'💕', desc:r.loveDesc},
+    {label:'재물운', score:r.money,   icon:'💰', desc:r.moneyDesc},
+    {label:'직업운', score:r.work,    icon:'💼', desc:r.workDesc},
+    {label:'건강운', score:r.health,  icon:'💚', desc:r.healthDesc},
+  ];
+  document.getElementById('fortune-score-cards').innerHTML = scoreItems.map((item, i) => {
+    const score = item.score || 70;
+    const color = score>=80?'#27ae60':score>=60?'#c9913a':'#c0392b';
+    const fullWidth = i === 0 ? 'grid-column:1/-1;' : '';
+    return `<div class="fortune-score-card" style="${fullWidth}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="font-size:24px;">${item.icon}</span>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-size:13px;color:var(--muted);font-weight:600;">${item.label}</span>
+            <span style="font-size:20px;font-weight:800;color:${color};">${score}</span>
+          </div>
+          <div style="background:var(--border);border-radius:4px;height:5px;width:100%;margin-top:4px;">
+            <div style="height:5px;border-radius:4px;width:${score}%;background:${color};transition:width 0.8s;"></div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:12px;line-height:1.8;color:var(--ink);margin:0;opacity:0.85;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${item.desc||''}</p>
+    </div>`;
+  }).join('');
+  document.getElementById('fortune-main-text').innerHTML = `
+    <p style="font-size:13px;line-height:2;margin-bottom:16px;color:#f0e6d3;">${r.summary||''}</p>
+    <div style="background:rgba(201,145,58,0.15);border-left:3px solid var(--gold);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;">
+      <div style="font-size:11px;color:#f5c97a;letter-spacing:1px;margin-bottom:6px;">💡 오늘의 조언</div>
+      <p style="font-size:12px;line-height:1.8;margin:0;color:#f0e6d3;">${r.advice||''}</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <span style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:5px 13px;font-size:12px;color:#f0e6d3;">🎨 ${r.lucky?.color||''}</span>
+      <span style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:5px 13px;font-size:12px;color:#f0e6d3;">🔢 행운숫자 ${r.lucky?.number||''}</span>
+      <span style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:5px 13px;font-size:12px;color:#f0e6d3;">🧭 ${r.lucky?.direction||''}</span>
+      <span style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:5px 13px;font-size:12px;color:#f0e6d3;">⏰ ${r.lucky?.time||''}</span>
+    </div>`;
+}
+
+// ─── 사주 관계 분석 (합충형파·십신·운성·장간) ───
+const SIPSIN_TABLE = {
+  // [일간hs][타천간hs] = 십신명
+  // 甲(0): 甲=비견,乙=겁재,丙=식신,丁=상관,戊=편재,己=정재,庚=편관,辛=정관,壬=편인,癸=정인
+  0: ['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'],
+  1: ['겁재','비견','상관','식신','정재','편재','정관','편관','정인','편인'],
+  2: ['편인','정인','비견','겁재','식신','상관','편재','정재','편관','정관'],
+  3: ['정인','편인','겁재','비견','상관','식신','정재','편재','정관','편관'],
+  4: ['편관','정관','편인','정인','비견','겁재','식신','상관','편재','정재'],
+  5: ['정관','편관','정인','편인','겁재','비견','상관','식신','정재','편재'],
+  6: ['편재','정재','편관','정관','편인','정인','비견','겁재','식신','상관'],
+  7: ['정재','편재','정관','편관','정인','편인','겁재','비견','상관','식신'],
+  8: ['식신','상관','편재','정재','편관','정관','편인','정인','비견','겁재'],
+  9: ['상관','식신','정재','편재','정관','편관','정인','편인','겁재','비견'],
+};
+// 십신 약자
+const SIPSIN_SHORT = {
+  '비견':'比肩','겁재':'劫財','식신':'食神','상관':'傷官',
+  '편재':'偏財','정재':'正財','편관':'偏官','정관':'正官',
+  '편인':'偏印','정인':'正印','본원':'本元'
+};
+
+const UNSEONG = ['장생','목욕','관대','건록','제왕','쇠','병','사','묘','절','태','양'];
+// 오행별 장생지(地支인덱스): 목=亥(11),화=寅(2),토=寅(2),금=巳(5),수=申(8)
+const UNSEONG_START = {목:11, 화:2, 토:2, 금:5, 수:8};
+
+function getUnseong(hs, eb) {
+  const elem = HS_ELEM[hs];
+  const start = UNSEONG_START[elem];
+  const idx = ((eb - start) % 12 + 12) % 12;
+  return UNSEONG[idx];
+}
+
+// 지지 장간(蔵干) — 주기(主氣)/중기/여기
+const JANGGAN = {
+  0:['壬','癸'],       // 子: 壬癸
+  1:['己','癸','辛'],  // 丑: 己癸辛
+  2:['甲','丙','戊'],  // 寅: 甲丙戊
+  3:['乙','甲'],       // 卯: 乙甲
+  4:['戊','乙','癸'],  // 辰: 戊乙癸
+  5:['丙','戊','庚'],  // 巳: 丙戊庚
+  6:['丁','己'],       // 午: 丁己
+  7:['己','丁','乙'],  // 未: 己丁乙
+  8:['庚','壬','戊'],  // 申: 庚壬戊
+  9:['辛','庚'],       // 酉: 辛庚
+  10:['戊','辛','丁'], // 戌: 戊辛丁
+  11:['壬','甲'],      // 亥: 壬甲
+};
+
+// 천간합(天干合)
+const HS_HO = [
+  [0,5,'甲己合土'],[1,6,'乙庚合金'],[2,7,'丙辛合水'],[3,8,'丁壬合木'],[4,9,'戊癸合火']
+];
+// 천간충(天干沖) — 6충
+const HS_CHUNG = [[0,6],[1,7],[2,8],[3,9],[4,10%10],[5,11%10]];
+
+// 지지 합(合)
+const EB_YUKAP = [[0,11,'子亥合'],[1,10,'丑戌合'],[2,9,'寅酉合'],[3,8,'卯申合'],[4,7,'辰未合'],[5,6,'巳午合']];
+const EB_SAMHAP = [[2,6,10,'寅午戌 삼합 火'],[5,9,1,'巳酉丑 삼합 金'],[8,0,4,'申子辰 삼합 水'],[11,3,7,'亥卯未 삼합 木']];
+const EB_BANHAP = [[2,6,'寅午 반합火'],[6,10,'午戌 반합火'],[2,10,'寅戌 반합火'],[5,9,'巳酉 반합金'],[9,1,'酉丑 반합金'],[5,1,'巳丑 반합金'],[8,0,'申子 반합水'],[0,4,'子辰 반합水'],[8,4,'申辰 반합水'],[11,3,'亥卯 반합木'],[3,7,'卯未 반합木'],[11,7,'亥未 반합木']];
+
+// 지지 충(地支沖)
+const EB_CHUNG = [[0,6,'子午沖'],[1,7,'丑未沖'],[2,8,'寅申沖'],[3,9,'卯酉沖'],[4,10,'辰戌沖'],[5,11,'巳亥沖']];
+// 형(刑)
+const EB_HYEONG = [[2,5,'寅巳刑(無禮)'],[5,2,'巳寅刑(無禮)'],[2,10,'寅戌刑(無禮)'],[3,0,'卯子刑(無禮)'],[6,6,'午午自刑'],[10,10,'戌戌自刑'],[11,11,'亥亥自刑'],[0,0,'子子自刑'],[1,10,'丑戌刑(持勢)'],[10,7,'戌未刑(持勢)'],[7,1,'未丑刑(持勢)'],[4,4,'辰辰自刑'],[8,11,'申亥刑(無恩)'],[11,8,'亥申刑(無恩)']];
+// 파(破)
+const EB_PA = [[0,3,'子酉破'],[3,0,'酉子破'],[1,4,'丑辰破'],[4,1,'辰丑破'],[2,11,'寅亥破'],[11,2,'亥寅破'],[5,8,'巳申破'],[8,5,'申巳破'],[6,9,'午酉破'],[9,6,'酉午破'],[7,10,'未戌破'],[10,7,'戌未破']];
+// 해(害)
+const EB_HAE = [[0,7,'子未害'],[7,0,'未子害'],[1,6,'丑午害'],[6,1,'午丑害'],[2,9,'寅酉害'],[9,2,'酉寅害'],[3,10,'卯戌害'],[10,3,'戌卯害'],[4,11,'辰亥害'],[11,4,'亥辰害'],[5,8,'巳申害'],[8,5,'申巳害']];
+
+function analyzeRelations(pillars) {
+  const keys = ['year','month','day','time'];
+  const labels = ['年','月','日','時'];
+  // hs >= 0인 기둥만 사용
+  const valid = keys.map((k,i) => ({ k, i, p: pillars[k] }))
+    .filter(x => x.p && typeof x.p.hs === 'number' && x.p.hs >= 0);
+  const results = [];
+
+  for (let a=0; a<valid.length; a++) for (let b=a+1; b<valid.length; b++) {
+    const A = valid[a], B = valid[b];
+    const la = labels[A.i], lb = labels[B.i];
+    const ahs = A.p.hs, bhs = B.p.hs, aeb = A.p.eb, beb = B.p.eb;
+
+    // 천간합
+    for (const [x,y,name] of HS_HO)
+      if ((ahs===x&&bhs===y)||(ahs===y&&bhs===x))
+        results.push(`${la}-${lb}: ${HEAVENLY_STEMS[ahs]}${HEAVENLY_STEMS[bhs]} ${name}`);
+    // 천간충
+    for (const [x,y] of HS_CHUNG)
+      if ((ahs===x&&bhs===y)||(ahs===y&&bhs===x))
+        results.push(`${la}-${lb}: ${HEAVENLY_STEMS[ahs]}${HEAVENLY_STEMS[bhs]} 天干沖`);
+    // 지지충
+    for (const [x,y,name] of EB_CHUNG)
+      if ((aeb===x&&beb===y)||(aeb===y&&beb===x))
+        results.push(`${la}-${lb}: ${EARTHLY_BRANCHES[aeb]}${EARTHLY_BRANCHES[beb]} ${name}`);
+    // 형
+    for (const [x,y,name] of EB_HYEONG)
+      if (aeb===x&&beb===y)
+        results.push(`${la}-${lb}: ${EARTHLY_BRANCHES[aeb]}${EARTHLY_BRANCHES[beb]} ${name}`);
+    // 파
+    for (const [x,y,name] of EB_PA)
+      if (aeb===x&&beb===y)
+        results.push(`${la}-${lb}: ${EARTHLY_BRANCHES[aeb]}${EARTHLY_BRANCHES[beb]} ${name}`);
+    // 해
+    for (const [x,y,name] of EB_HAE)
+      if (aeb===x&&beb===y)
+        results.push(`${la}-${lb}: ${EARTHLY_BRANCHES[aeb]}${EARTHLY_BRANCHES[beb]} ${name}`);
+    // 육합
+    for (const [x,y,name] of EB_YUKAP)
+      if ((aeb===x&&beb===y)||(aeb===y&&beb===x))
+        results.push(`${la}-${lb}: ${EARTHLY_BRANCHES[aeb]}${EARTHLY_BRANCHES[beb]} ${name}`);
+    // 반합
+    for (const [x,y,name] of EB_BANHAP)
+      if ((aeb===x&&beb===y)||(aeb===y&&beb===x))
+        results.push(`${la}-${lb}: ${EARTHLY_BRANCHES[aeb]}${EARTHLY_BRANCHES[beb]} ${name}`);
+  }
+  return results;
+}
+
+function buildSajuTable(pillars, gender) {
+  if (!pillars || !pillars.day) return '';
+  const pList  = ['time','day','month','year'];
+  const labels = ['時柱','日柱','月柱','年柱'];
+  const dayHs  = pillars.day?.hs ?? 0;
+
+  const rows = pList.map((k,i) => {
+    const p = pillars[k];
+    // 시주 없거나 hs<0이면 스킵
+    if (!p || typeof p.hs !== 'number' || p.hs < 0) return null;
+    const sipsin = (k === 'day') ? '本元' : (SIPSIN_TABLE[dayHs]?.[p.hs] || '');
+    const unseong = getUnseong(dayHs, p.eb);
+    const jg = (JANGGAN[p.eb] || []).join('');
+    const hsElem = HS_ELEM[p.hs] || '목';
+    const ebElem = EB_ELEM[p.eb] || '목';
+    const colorMap = {목:'#2e7d32', 화:'#c62828', 토:'#b45309', 금:'#6d4c41', 수:'#1565c0'};
+    const hsColor = colorMap[hsElem] || 'var(--ink)';
+    const ebColor = colorMap[ebElem] || 'var(--muted)';
+    const jgMainChar = JANGGAN[p.eb]?.[0];
+    const jgMainIdx = jgMainChar ? HEAVENLY_STEMS.indexOf(jgMainChar) : -1;
+    const ebSipsin = jgMainIdx >= 0
+      ? (jgMainIdx === dayHs ? '本元' : (SIPSIN_TABLE[dayHs]?.[jgMainIdx] || ''))
+      : '';
+    return { label:labels[i], p, sipsin, ebSipsin, unseong, jg, hsColor, ebColor };
+  }).filter(Boolean);
+
+  if (rows.length === 0) return '';
+
+  const relations = analyzeRelations(pillars);
+
+  return `
+    <div style="background:var(--ink);color:var(--paper);border-radius:12px;padding:20px;margin-bottom:8px;font-family:'Noto Serif SC','Noto Serif KR',serif;overflow-x:auto;">
+      <div style="font-size:13px;letter-spacing:2px;opacity:0.6;margin-bottom:12px;text-align:center;">四柱八字 (${gender})</div>
+      <div style="display:grid;grid-template-columns:repeat(${rows.length},1fr);gap:8px;min-width:${rows.length*70}px;">
+        ${rows.map(r=>`<div style="text-align:center;font-size:11px;opacity:0.5;letter-spacing:1px;">${r.label}</div>`).join('')}
+        ${rows.map(r=>`<div style="text-align:center;font-size:11px;color:#f5c97a;min-height:18px;">${r.sipsin ? (SIPSIN_SHORT[r.sipsin]||r.sipsin) : ''}</div>`).join('')}
+        ${rows.map(r=>`<div style="text-align:center;font-size:32px;font-weight:700;color:${r.hsColor};line-height:1.1;">${r.p.heavenly}</div>`).join('')}
+        ${rows.map(r=>`<div style="text-align:center;font-size:32px;font-weight:700;color:${r.ebColor};line-height:1.1;">${r.p.earthly}</div>`).join('')}
+        ${rows.map(r=>`<div style="text-align:center;font-size:11px;color:#f5c97a;min-height:18px;">${r.ebSipsin ? (SIPSIN_SHORT[r.ebSipsin]||r.ebSipsin) : ''}</div>`).join('')}
+        ${rows.map(r=>`<div style="text-align:center;font-size:11px;opacity:0.6;">${r.unseong}</div>`).join('')}
+        ${rows.map(r=>`<div style="text-align:center;font-size:11px;opacity:0.5;letter-spacing:1px;">${r.jg}</div>`).join('')}
+      </div>
+    </div>
+    ${relations.length>0?`
+    <div style="background:rgba(26,16,8,0.04);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:8px;">
+      <div style="font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;">八字關係</div>
+      ${relations.map(rel=>`<div style="font-size:13px;color:var(--ink);padding:3px 0;border-bottom:1px solid var(--border);">${rel}</div>`).join('')}
+    </div>`:''}`;
+}
+
+// ─── COMPAT PAGE ───
+let compatMyGender   = '남성';
+let compatTheirGender = '여성';
+
 
 
 function toggleMenu() {
@@ -1481,6 +1789,7 @@ document.addEventListener('click', function(e) {
   const btn = document.getElementById('menu-btn');
   if (menu && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
 });
+
 
 </script>
 </body>
