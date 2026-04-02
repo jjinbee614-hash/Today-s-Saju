@@ -2935,7 +2935,7 @@ ${style ? '원하는 스타일: '+style : ''}
 }
 
 // ── 이름 감정 (이름 자체 + 사주 궁합 통합) ──
-async function runJudge() {
+async async function runJudge() {
   const korean = document.getElementById('judge-korean').value.trim();
   const hanja  = document.getElementById('judge-hanja').value.trim();
   if (!korean) { showToast('이름을 입력해 주세요'); return; }
