@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>타로 카드 — AI 타로 점 | 오늘의 사주</title>
+  <meta name="description" content="카드 덱에서 직접 타로 카드를 선택하면 AI가 상세하게 해석해드립니다. 연애, 직업, 금전 등 다양한 주제의 타로 점."/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#1a1008; --paper:#f5efe4; --card:#ede5d8; --border:rgba(26,16,8,0.15); --muted:#8a7860; --gold:#c9913a; --blue:#1a4a6b; --dark:#120a04; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; }
+    nav { position:fixed; top:0; left:0; right:0; z-index:100; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; background:rgba(245,239,228,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+    .logo { font-family:'Noto Serif KR',serif; font-size:20px; font-weight:700; color:var(--ink); text-decoration:none; }
+    .logo span { color:var(--gold); }
+    .nav-links { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+    .nav-links::-webkit-scrollbar { display:none; }
+    .nav-btn { background:none; border:1px solid var(--border); padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer; color:var(--ink); font-family:'Noto Sans KR',sans-serif; text-decoration:none; display:inline-block; white-space:nowrap; }
+    .nav-btn:hover, .nav-btn.active { background:var(--gold); color:white; border-color:var(--gold); }
+    .main { max-width:720px; margin:0 auto; padding:90px 20px 60px; }
+    .page-title { font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700; margin-bottom:6px; }
+    .page-sub { color:var(--muted); font-size:14px; margin-bottom:24px; line-height:1.7; }
+    label { font-size:13px; font-weight:600; display:block; margin-bottom:6px; }
+    input[type=text], textarea, select { width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--card); font-family:'Noto Sans KR',sans-serif; }
+    textarea { min-height:80px; resize:vertical; line-height:1.8; }
+    .submit-btn { width:100%; padding:15px; background:var(--ink); color:var(--paper); border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Noto Serif KR',serif; }
+    .submit-btn:hover { background:#2d1f0e; }
+    .submit-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    /* 타로 덱 */
+    .deck-area { background:var(--dark); border-radius:16px; padding:24px 16px; margin:20px 0; text-align:center; }
+    .deck-title { color:var(--gold); font-size:13px; margin-bottom:16px; letter-spacing:1px; }
+    .deck-grid { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; max-height:320px; overflow-y:auto; padding:4px; }
+    .deck-grid::-webkit-scrollbar { width:4px; }
+    .deck-grid::-webkit-scrollbar-thumb { background:var(--gold); border-radius:2px; }
+
+    .tarot-card-btn {
+      width:52px; height:88px; border-radius:6px; cursor:pointer; border:2px solid #3a2a1a;
+      background:#1a0a02; position:relative; transition:all 0.2s; flex-shrink:0;
+      padding:0; overflow:hidden;
+    }
+    .tarot-card-btn:hover { border-color:var(--gold); transform:translateY(-5px); box-shadow:0 8px 20px rgba(201,145,58,0.5); }
+    .tarot-card-btn.selected { border-color:#ffd700; border-width:3px; transform:translateY(-10px); box-shadow:0 10px 24px rgba(201,145,58,0.7); }
+    .tarot-card-btn.disabled { opacity:0.25; cursor:not-allowed; pointer-events:none; }
+    .tarot-card-btn svg { width:100%; height:100%; display:block; }
+    /* 카드 뒤집기 */
+    .flip-container { perspective:600px; }
+    .flip-inner { position:relative; transform-style:preserve-3d; transition:transform 0.6s ease; }
+    .flip-inner.flipped { transform:rotateY(180deg); }
+    .flip-front, .flip-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:8px; overflow:hidden; }
+    .flip-front { transform:rotateY(0deg); }
+    .flip-back { transform:rotateY(180deg); }
+
+    .selected-cards { display:flex; gap:12px; justify-content:center; margin:16px 0; flex-wrap:wrap; }
+    .selected-card-display {
+      width:70px; height:105px; border-radius:8px; border:2px solid var(--gold);
+      background:linear-gradient(135deg, #2d1505, #5a3010);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      color:var(--gold); font-size:11px; text-align:center; padding:4px;
+      box-shadow:0 4px 12px rgba(201,145,58,0.3);
+    }
+    .selected-card-display .card-num { font-size:18px; font-weight:700; margin-bottom:4px; }
+    .selected-card-display .card-name { font-size:9px; line-height:1.3; opacity:0.8; }
+    .card-slot {
+      width:70px; height:105px; border-radius:8px; border:2px dashed rgba(201,145,58,0.3);
+      display:flex; align-items:center; justify-content:center;
+      color:rgba(201,145,58,0.4); font-size:24px;
+    }
+
+    .saju-loading { text-align:center; padding:48px 24px; color:var(--muted); }
+    .big-spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--paper); padding:12px 24px; border-radius:24px; font-size:14px; z-index:9999; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
+    .toast.show { opacity:1; }
+    .tarot-card-btn { position:relative; overflow:hidden; }
+    .tarot-card-btn::before { content:''; }
+    .card-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.1); border-radius:4px; transition:all 0.2s; }
+    .selected-overlay { background:rgba(201,145,58,0.25) !important; }
+    .tarot-card-btn.selected .card-overlay { background:rgba(201,145,58,0.3); }
+    .tarot-card-btn:hover .card-overlay { background:rgba(201,145,58,0.15); }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="https://saju-today.com" class="logo">오늘의<span>사주</span></a>
+  <div class="nav-links">
+    <a href="https://saju-today.com" class="nav-btn">🔮 사주풀이</a>
+    <a href="https://saju-today.com" class="nav-btn">🌅 운세</a>
+    <a href="/dream.html" class="nav-btn">🌙 꿈해몽</a>
+    <a href="/tarot.html" class="nav-btn active">🃏 타로</a>
+  </div>
+</nav>
+
+<div class="main">
+  <h1 class="page-title">🃏 타로 카드</h1>
+  <p class="page-sub">카드 덱에서 직접 카드를 선택하면 AI가 상세하게 해석해드립니다.</p>
+
+  <!-- 장수 선택 -->
+  <div style="margin-bottom:20px;">
+    <label>카드 장수</label>
+    <div style="display:flex;gap:8px;">
+      <button id="spread-1" onclick="setSpread(1)"
+        style="flex:1;padding:10px;border:2px solid var(--gold);border-radius:8px;background:var(--gold);color:white;cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
+        1장 — 오늘의 한 마디
+      </button>
+      <button id="spread-3" onclick="setSpread(3)"
+        style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
+        3장 — 과거·현재·미래
+      </button>
+    </div>
+  </div>
+
+  <!-- 질문 입력 -->
+  <div style="margin-bottom:20px;">
+    <label>질문 <span style="color:var(--muted);font-weight:400;">(선택 — 없으면 오늘의 전반적인 운세)</span></label>
+    <textarea id="tarot-question" placeholder="예: 지금 만나는 사람과 잘 될 수 있을까요? / 이직을 해도 될까요?"></textarea>
+  </div>
+
+  <!-- 카드 덱 -->
+  <div class="deck-area">
+    <div class="deck-title">♠ 카드를 골라주세요 ♠</div>
+    <div id="selected-display" class="selected-cards">
+      <div class="card-slot">?</div>
+    </div>
+    <div style="color:rgba(201,145,58,0.6);font-size:12px;margin-bottom:12px;" id="pick-guide">카드 1장을 선택해주세요</div>
+    <div class="deck-grid" id="deck-grid"></div>
+  </div>
+
+  <button class="submit-btn" id="tarot-submit" onclick="runTarot()" disabled>🃏 타로 해석하기 ✦</button>
+  <div id="tarot-result" style="display:none;margin-top:32px;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+const WORKER_URL = 'https://saju-proxy.jjinbee614.workers.dev';
+
+function callAPI(prompt) {
+  return fetch(WORKER_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model:"claude-sonnet-4-20250514",
+      max_tokens:2000,
+      messages:[{ role:"user", content:prompt }]
+    })
+  }).then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }).then(data => {
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content.map(i=>i.text||'').join('');
+    const s = raw.indexOf('{');
+    if (s < 0) throw new Error('JSON을 찾을 수 없습니다: ' + raw.slice(0,80));
+    const e = raw.lastIndexOf('}');
+    return JSON.parse(raw.slice(s, e+1));
+  });
+}
+
+// ─── 타로 데이터 (78장 주요 카드) ───
+const TAROT_CARDS = [
+  {id:0, name:"광대", en:"The Fool", symbol:"🌟", meaning:"새로운 시작, 모험, 순수함", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/RWS_Tarot_00_Fool.jpg/200px-RWS_Tarot_00_Fool.jpg"},
+  {id:1, name:"마법사", en:"The Magician", symbol:"⚡", meaning:"의지력, 창조, 집중", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/RWS_Tarot_01_Magician.jpg/150px-RWS_Tarot_01_Magician.jpg"},
+  {id:2, name:"여사제", en:"High Priestess", symbol:"🌙", meaning:"직관, 신비, 내면의 지혜", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/RWS_Tarot_02_High_Priestess.jpg/200px-RWS_Tarot_02_High_Priestess.jpg"},
+  {id:3, name:"여황제", en:"The Empress", symbol:"🌸", meaning:"풍요, 모성, 창조력", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/RWS_Tarot_03_Empress.jpg/200px-RWS_Tarot_03_Empress.jpg"},
+  {id:4, name:"황제", en:"The Emperor", symbol:"👑", meaning:"권위, 안정, 리더십", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/RWS_Tarot_04_Emperor.jpg/200px-RWS_Tarot_04_Emperor.jpg"},
+  {id:5, name:"교황", en:"The Hierophant", symbol:"✝️", meaning:"전통, 가르침, 영적 지도", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/RWS_Tarot_05_Hierophant.jpg/200px-RWS_Tarot_05_Hierophant.jpg"},
+  {id:6, name:"연인", en:"The Lovers", symbol:"💕", meaning:"사랑, 선택, 조화", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/VI-the_lovers.jpg/200px-VI-the_lovers.jpg"},
+  {id:7, name:"전차", en:"The Chariot", symbol:"🏆", meaning:"승리, 의지, 통제", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/RWS_Tarot_07_Chariot.jpg/200px-RWS_Tarot_07_Chariot.jpg"},
+  {id:8, name:"힘", en:"Strength", symbol:"🦁", meaning:"용기, 인내, 내면의 힘", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/RWS_Tarot_08_Strength.jpg/200px-RWS_Tarot_08_Strength.jpg"},
+  {id:9, name:"은둔자", en:"The Hermit", symbol:"🕯️", meaning:"고독, 내면 탐구, 지혜", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/RWS_Tarot_09_Hermit.jpg/200px-RWS_Tarot_09_Hermit.jpg"},
+  {id:10, name:"운명의 수레바퀴", en:"Wheel of Fortune", symbol:"☯️", meaning:"변화, 행운, 순환", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg/200px-RWS_Tarot_10_Wheel_of_Fortune.jpg"},
+  {id:11, name:"정의", en:"Justice", symbol:"⚖️", meaning:"공정, 진실, 균형", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/RWS_Tarot_11_Justice.jpg/200px-RWS_Tarot_11_Justice.jpg"},
+  {id:12, name:"매달린 사람", en:"The Hanged Man", symbol:"🌀", meaning:"희생, 새로운 관점, 대기", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/RWS_Tarot_12_Hanged_Man.jpg/200px-RWS_Tarot_12_Hanged_Man.jpg"},
+  {id:13, name:"죽음", en:"Death", symbol:"🌑", meaning:"변화, 끝과 시작, 변환", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/RWS_Tarot_13_Death.jpg/200px-RWS_Tarot_13_Death.jpg"},
+  {id:14, name:"절제", en:"Temperance", symbol:"🌈", meaning:"균형, 조화, 인내", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/RWS_Tarot_14_Temperance.jpg/200px-RWS_Tarot_14_Temperance.jpg"},
+  {id:15, name:"악마", en:"The Devil", symbol:"🔗", meaning:"유혹, 속박, 집착", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/RWS_Tarot_15_Devil.jpg/200px-RWS_Tarot_15_Devil.jpg"},
+  {id:16, name:"탑", en:"The Tower", symbol:"⚡", meaning:"갑작스러운 변화, 붕괴, 계시", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/RWS_Tarot_16_Tower.jpg/200px-RWS_Tarot_16_Tower.jpg"},
+  {id:17, name:"별", en:"The Star", symbol:"⭐", meaning:"희망, 영감, 치유", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/RWS_Tarot_17_Star.jpg/200px-RWS_Tarot_17_Star.jpg"},
+  {id:18, name:"달", en:"The Moon", symbol:"🌕", meaning:"환상, 불안, 무의식", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/RWS_Tarot_18_Moon.jpg/200px-RWS_Tarot_18_Moon.jpg"},
+  {id:19, name:"태양", en:"The Sun", symbol:"☀️", meaning:"기쁨, 성공, 활력", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/RWS_Tarot_19_Sun.jpg/200px-RWS_Tarot_19_Sun.jpg"},
+  {id:20, name:"심판", en:"Judgement", symbol:"🎺", meaning:"각성, 부활, 새 출발", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/RWS_Tarot_20_Judgement.jpg/200px-RWS_Tarot_20_Judgement.jpg"},
+  {id:21, name:"세계", en:"The World", symbol:"🌍", meaning:"완성, 성취, 통합", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/RWS_Tarot_21_World.jpg/200px-RWS_Tarot_21_World.jpg"},
+  {id:22, name:"완드 에이스", en:"Ace of Wands", symbol:"🔥", meaning:"새로운 열정, 창조적 에너지", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Wands01.jpg/200px-Wands01.jpg"},
+  {id:23, name:"완드 2", en:"Two of Wands", symbol:"🔥", meaning:"계획, 진행, 결단", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Wands02.jpg/200px-Wands02.jpg"},
+  {id:24, name:"완드 3", en:"Three of Wands", symbol:"🔥", meaning:"확장, 진취, 탐험", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wands03.jpg/200px-Wands03.jpg"},
+  {id:25, name:"완드 4", en:"Four of Wands", symbol:"🔥", meaning:"축하, 안정, 기반", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Wands04.jpg/200px-Wands04.jpg"},
+  {id:26, name:"완드 5", en:"Five of Wands", symbol:"🔥", meaning:"경쟁, 갈등, 도전", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Wands05.jpg/200px-Wands05.jpg"},
+  {id:27, name:"완드 6", en:"Six of Wands", symbol:"🔥", meaning:"승리, 인정, 성공", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Wands06.jpg/200px-Wands06.jpg"},
+  {id:28, name:"완드 7", en:"Seven of Wands", symbol:"🔥", meaning:"방어, 용기, 끈기", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Wands07.jpg/200px-Wands07.jpg"},
+  {id:29, name:"완드 8", en:"Eight of Wands", symbol:"🔥", meaning:"속도, 행동, 소식", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Wands08.jpg/200px-Wands08.jpg"},
+  {id:30, name:"완드 9", en:"Nine of Wands", symbol:"🔥", meaning:"회복력, 경계, 지속", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Tarot_Nine_of_Wands.jpg/200px-Tarot_Nine_of_Wands.jpg"},
+  {id:31, name:"완드 10", en:"Ten of Wands", symbol:"🔥", meaning:"부담, 책임, 완성 직전", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Wands10.jpg/200px-Wands10.jpg"},
+  {id:32, name:"완드 시종", en:"Page of Wands", symbol:"🔥", meaning:"탐험, 자유, 열정", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Wands11.jpg/200px-Wands11.jpg"},
+  {id:33, name:"완드 기사", en:"Knight of Wands", symbol:"🔥", meaning:"모험, 충동, 에너지", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Wands12.jpg/200px-Wands12.jpg"},
+  {id:34, name:"완드 여왕", en:"Queen of Wands", symbol:"🔥", meaning:"자신감, 따뜻함, 리더십", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Wands13.jpg/200px-Wands13.jpg"},
+  {id:35, name:"완드 왕", en:"King of Wands", symbol:"🔥", meaning:"비전, 기업가, 명예", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Wands14.jpg/200px-Wands14.jpg"},
+  {id:36, name:"컵 에이스", en:"Ace of Cups", symbol:"💧", meaning:"새로운 감정, 직관, 사랑의 시작", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Cups01.jpg/200px-Cups01.jpg"},
+  {id:37, name:"컵 2", en:"Two of Cups", symbol:"💧", meaning:"파트너십, 연결, 화합", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Cups02.jpg/200px-Cups02.jpg"},
+  {id:38, name:"컵 3", en:"Three of Cups", symbol:"💧", meaning:"축하, 우정, 공동체", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Cups03.jpg/200px-Cups03.jpg"},
+  {id:39, name:"컵 4", en:"Four of Cups", symbol:"💧", meaning:"명상, 재평가, 무관심", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Cups04.jpg/200px-Cups04.jpg"},
+  {id:40, name:"컵 5", en:"Five of Cups", symbol:"💧", meaning:"상실, 후회, 슬픔", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Cups05.jpg/200px-Cups05.jpg"},
+  {id:41, name:"컵 6", en:"Six of Cups", symbol:"💧", meaning:"추억, 순수함, 재회", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Cups06.jpg/200px-Cups06.jpg"},
+  {id:42, name:"컵 7", en:"Seven of Cups", symbol:"💧", meaning:"환상, 선택, 상상", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Cups07.jpg/200px-Cups07.jpg"},
+  {id:43, name:"컵 8", en:"Eight of Cups", symbol:"💧", meaning:"포기, 여행, 내면 탐구", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Cups08.jpg/200px-Cups08.jpg"},
+  {id:44, name:"컵 9", en:"Nine of Cups", symbol:"💧", meaning:"만족, 소원 성취, 기쁨", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Cups09.jpg/200px-Cups09.jpg"},
+  {id:45, name:"컵 10", en:"Ten of Cups", symbol:"💧", meaning:"행복, 가족, 완성", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Cups10.jpg/200px-Cups10.jpg"},
+  {id:46, name:"컵 시종", en:"Page of Cups", symbol:"💧", meaning:"창의성, 감수성, 메시지", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Cups11.jpg/200px-Cups11.jpg"},
+  {id:47, name:"컵 기사", en:"Knight of Cups", symbol:"💧", meaning:"낭만, 매력, 상상력", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Cups12.jpg/200px-Cups12.jpg"},
+  {id:48, name:"컵 여왕", en:"Queen of Cups", symbol:"💧", meaning:"공감, 직관, 배려", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Cups13.jpg/200px-Cups13.jpg"},
+  {id:49, name:"컵 왕", en:"King of Cups", symbol:"💧", meaning:"감정의 통제, 지혜, 포용", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Cups14.jpg/200px-Cups14.jpg"},
+  {id:50, name:"검 에이스", en:"Ace of Swords", symbol:"🌬️", meaning:"진실, 명료함, 새로운 아이디어", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Swords01.jpg/200px-Swords01.jpg"},
+  {id:51, name:"검 2", en:"Two of Swords", symbol:"🌬️", meaning:"교착 상태, 결정, 선택", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Swords02.jpg/200px-Swords02.jpg"},
+  {id:52, name:"검 3", en:"Three of Swords", symbol:"🌬️", meaning:"슬픔, 이별, 상처", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Swords03.jpg/200px-Swords03.jpg"},
+  {id:53, name:"검 4", en:"Four of Swords", symbol:"🌬️", meaning:"휴식, 회복, 명상", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Swords04.jpg/200px-Swords04.jpg"},
+  {id:54, name:"검 5", en:"Five of Swords", symbol:"🌬️", meaning:"갈등, 패배, 긴장", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Swords05.jpg/200px-Swords05.jpg"},
+  {id:55, name:"검 6", en:"Six of Swords", symbol:"🌬️", meaning:"전환, 이동, 평화", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Swords06.jpg/200px-Swords06.jpg"},
+  {id:56, name:"검 7", en:"Seven of Swords", symbol:"🌬️", meaning:"기만, 전략, 홀로 행동", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Swords07.jpg/200px-Swords07.jpg"},
+  {id:57, name:"검 8", en:"Eight of Swords", symbol:"🌬️", meaning:"제한, 자기 억압, 혼란", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Swords08.jpg/200px-Swords08.jpg"},
+  {id:58, name:"검 9", en:"Nine of Swords", symbol:"🌬️", meaning:"불안, 악몽, 걱정", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Swords09.jpg/200px-Swords09.jpg"},
+  {id:59, name:"검 10", en:"Ten of Swords", symbol:"🌬️", meaning:"끝, 배신, 새 시작", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Swords10.jpg/200px-Swords10.jpg"},
+  {id:60, name:"검 시종", en:"Page of Swords", symbol:"🌬️", meaning:"호기심, 경계, 새로운 생각", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Swords11.jpg/200px-Swords11.jpg"},
+  {id:61, name:"검 기사", en:"Knight of Swords", symbol:"🌬️", meaning:"야망, 행동, 결단", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Swords12.jpg/200px-Swords12.jpg"},
+  {id:62, name:"검 여왕", en:"Queen of Swords", symbol:"🌬️", meaning:"독립, 명료함, 직접성", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Swords13.jpg/200px-Swords13.jpg"},
+  {id:63, name:"검 왕", en:"King of Swords", symbol:"🌬️", meaning:"지적 권위, 진실, 윤리", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Swords14.jpg/200px-Swords14.jpg"},
+  {id:64, name:"별 에이스", en:"Ace of Pentacles", symbol:"🌿", meaning:"새로운 기회, 물질적 시작", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Pents01.jpg/200px-Pents01.jpg"},
+  {id:65, name:"별 2", en:"Two of Pentacles", symbol:"🌿", meaning:"균형, 적응, 유연성", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Pents02.jpg/200px-Pents02.jpg"},
+  {id:66, name:"별 3", en:"Three of Pentacles", symbol:"🌿", meaning:"팀워크, 기술, 협력", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Pents03.jpg/200px-Pents03.jpg"},
+  {id:67, name:"별 4", en:"Four of Pentacles", symbol:"🌿", meaning:"안정, 보안, 소유", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Pents04.jpg/200px-Pents04.jpg"},
+  {id:68, name:"별 5", en:"Five of Pentacles", symbol:"🌿", meaning:"어려움, 결핍, 고립", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Pents05.jpg/200px-Pents05.jpg"},
+  {id:69, name:"별 6", en:"Six of Pentacles", symbol:"🌿", meaning:"관대함, 나눔, 균형", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Pents06.jpg/200px-Pents06.jpg"},
+  {id:70, name:"별 7", en:"Seven of Pentacles", symbol:"🌿", meaning:"인내, 수확, 평가", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Pents07.jpg/200px-Pents07.jpg"},
+  {id:71, name:"별 8", en:"Eight of Pentacles", symbol:"🌿", meaning:"숙련, 노력, 집중", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Pents08.jpg/200px-Pents08.jpg"},
+  {id:72, name:"별 9", en:"Nine of Pentacles", symbol:"🌿", meaning:"독립, 풍요, 자기 충족", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Pents09.jpg/200px-Pents09.jpg"},
+  {id:73, name:"별 10", en:"Ten of Pentacles", symbol:"🌿", meaning:"유산, 안정, 완성", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Pents10.jpg/200px-Pents10.jpg"},
+  {id:74, name:"별 시종", en:"Page of Pentacles", symbol:"🌿", meaning:"학습, 기회, 새로운 도전", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Pents11.jpg/200px-Pents11.jpg"},
+  {id:75, name:"별 기사", en:"Knight of Pentacles", symbol:"🌿", meaning:"근면, 책임, 꾸준함", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Pents12.jpg/200px-Pents12.jpg"},
+  {id:76, name:"별 여왕", en:"Queen of Pentacles", symbol:"🌿", meaning:"실용적, 따뜻함, 풍요", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Pents13.jpg/200px-Pents13.jpg"},
+  {id:77, name:"별 왕", en:"King of Pentacles", symbol:"🌿", meaning:"성공, 안정, 물질적 숙달", img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Pents14.jpg/200px-Pents14.jpg"},
+];
+
+
+let spreadCount = 1;
+let selectedCards = [];
+let shuffledDeck = [];
+
+function setSpread(n) {
+  spreadCount = n;
+  selectedCards = [];
+  const btn1 = document.getElementById('spread-1');
+  const btn3 = document.getElementById('spread-3');
+  btn1.style.background = n===1 ? 'var(--gold)' : 'var(--card)';
+  btn1.style.color = n===1 ? 'white' : 'var(--ink)';
+  btn1.style.borderColor = n===1 ? 'var(--gold)' : 'var(--border)';
+  btn3.style.background = n===3 ? 'var(--gold)' : 'var(--card)';
+  btn3.style.color = n===3 ? 'white' : 'var(--ink)';
+  btn3.style.borderColor = n===3 ? 'var(--gold)' : 'var(--border)';
+  updateSelectedDisplay();
+  renderDeck();
+  document.getElementById('tarot-submit').disabled = true;
+  document.getElementById('tarot-result').style.display = 'none';
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderDeck() {
+  shuffledDeck = shuffleArray(TAROT_CARDS);
+  const guide = document.getElementById('pick-guide');
+  guide.textContent = `카드 ${spreadCount}장을 선택해주세요`;
+
+  const grid = document.getElementById('deck-grid');
+  grid.innerHTML = shuffledDeck.map((card, idx) => {
+    const isSelected = selectedCards.find(c => c.id === card.id);
+    const isDisabled = !isSelected && selectedCards.length >= spreadCount;
+    return `<button class="tarot-card-btn ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+      onclick="selectCard(${card.id})" title="${isSelected ? card.name + ' — ' + card.meaning : '클릭하여 선택'}">
+      <svg viewBox="0 0 52 88" xmlns="http://www.w3.org/2000/svg">
+        <!-- 카드 뒷면 -->
+        <rect width="52" height="88" fill="#1a0a02" rx="2"/>
+        <rect x="3" y="3" width="46" height="82" fill="none" stroke="#c9913a" stroke-width="1" rx="1"/>
+        <rect x="6" y="6" width="40" height="76" fill="none" stroke="#c9913a" stroke-width="0.5" rx="1" opacity="0.5"/>
+        <!-- 뒷면 문양 -->
+        <circle cx="26" cy="44" r="14" fill="none" stroke="#c9913a" stroke-width="0.8" opacity="0.6"/>
+        <circle cx="26" cy="44" r="8" fill="none" stroke="#c9913a" stroke-width="0.5" opacity="0.4"/>
+        <line x1="26" y1="30" x2="26" y2="58" stroke="#c9913a" stroke-width="0.5" opacity="0.4"/>
+        <line x1="12" y1="44" x2="40" y2="44" stroke="#c9913a" stroke-width="0.5" opacity="0.4"/>
+        <polygon points="26,32 30,40 38,40 32,46 34,54 26,49 18,54 20,46 14,40 22,40" fill="#c9913a" opacity="0.3"/>
+        ${isSelected ? '<rect x="0" y="0" width="52" height="88" fill="rgba(201,145,58,0.45)" rx="2"/><text x="26" y="40" text-anchor="middle" fill="#ffd700" font-size="22" font-family="serif">★</text><text x="26" y="58" text-anchor="middle" fill="#ffd700" font-size="8" font-family="sans-serif">선택됨</text>' : ''}
+      </svg>
+    </button>`;
+  }).join('');
+}
+
+function selectCard(cardId) {
+  const card = TAROT_CARDS.find(c => c.id === cardId);
+  const alreadyIdx = selectedCards.findIndex(c => c.id === cardId);
+
+  if (alreadyIdx >= 0) {
+    selectedCards.splice(alreadyIdx, 1);
+  } else {
+    if (selectedCards.length >= spreadCount) return;
+    selectedCards.push(card);
+  }
+
+  updateSelectedDisplay();
+  renderDeckButtons();
+
+  const submit = document.getElementById('tarot-submit');
+  submit.disabled = selectedCards.length !== spreadCount;
+  const guide = document.getElementById('pick-guide');
+  guide.textContent = selectedCards.length === spreadCount
+    ? '✅ 선택 완료! 아래 버튼을 눌러주세요'
+    : `카드 ${spreadCount - selectedCards.length}장 더 선택해주세요`;
+}
+
+function renderDeckButtons() {
+  const grid = document.getElementById('deck-grid');
+  const btns = grid.querySelectorAll('.tarot-card-btn');
+  shuffledDeck.forEach((card, idx) => {
+    const btn = btns[idx];
+    if (!btn) return;
+    const isSelected = selectedCards.find(c => c.id === card.id);
+    const isDisabled = !isSelected && selectedCards.length >= spreadCount;
+    btn.className = `tarot-card-btn ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`;
+    const svg = btn.querySelector('svg');
+    if (svg) {
+      const overlay = svg.querySelector('rect[fill]');
+      const star = svg.querySelector('text');
+      if (isSelected) {
+        if (!overlay) {
+          const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+          r.setAttribute('x','0'); r.setAttribute('y','0');
+          r.setAttribute('width','52'); r.setAttribute('height','88');
+          r.setAttribute('fill','rgba(201,145,58,0.3)');
+          svg.appendChild(r);
+          const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+          t.setAttribute('x','26'); t.setAttribute('y','48');
+          t.setAttribute('text-anchor','middle');
+          t.setAttribute('fill','#ffd700'); t.setAttribute('font-size','20');
+          t.textContent = '★'; svg.appendChild(t);
+        }
+      } else {
+        if (overlay) overlay.remove();
+        if (star) star.remove();
+      }
+    }
+  });
+}
+
+function updateSelectedDisplay() {
+  const display = document.getElementById('selected-display');
+  let html = '';
+  for (let i = 0; i < spreadCount; i++) {
+    const card = selectedCards[i];
+    if (card) {
+      const labels = spreadCount === 3 ? ['과거','현재','미래'] : [''];
+      html += `<div class="selected-card-display" style="padding:0;overflow:hidden;position:relative;">
+        <svg viewBox="0 0 70 105" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+          <!-- 뒷면 -->
+          <rect width="70" height="105" fill="#1a0a02" rx="3"/>
+          <rect x="3" y="3" width="64" height="99" fill="none" stroke="#c9913a" stroke-width="1.2" rx="2"/>
+          <rect x="6" y="6" width="58" height="93" fill="none" stroke="#c9913a" stroke-width="0.5" rx="1" opacity="0.5"/>
+          <circle cx="35" cy="52" r="18" fill="none" stroke="#c9913a" stroke-width="1" opacity="0.6"/>
+          <circle cx="35" cy="52" r="10" fill="none" stroke="#c9913a" stroke-width="0.5" opacity="0.4"/>
+          <polygon points="35,36 40,47 52,47 43,55 46,66 35,59 24,66 27,55 18,47 30,47" fill="#c9913a" opacity="0.35"/>
+          <rect x="0" y="78" width="70" height="27" fill="rgba(0,0,0,0.75)" rx="0"/>
+          <text x="35" y="92" text-anchor="middle" fill="#c9913a" font-size="10" font-family="serif">★ 선택됨</text>
+          <text x="35" y="103" text-anchor="middle" fill="rgba(201,145,58,0.6)" font-size="8" font-family="serif">${labels[i]||''}</text>
+        </svg>
+      </div>`;
+    } else {
+      const labels = spreadCount === 3 ? ['과거','현재','미래'] : ['?'];
+      html += `<div class="card-slot" style="color:rgba(201,145,58,0.3);font-size:12px;">${labels[i]||'?'}</div>`;
+    }
+  }
+  display.innerHTML = html;
+}
+
+async function runTarot() {
+  if (selectedCards.length !== spreadCount) return;
+
+  const question = document.getElementById('tarot-question').value.trim();
+  const resultEl = document.getElementById('tarot-result');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `<div class="saju-loading"><div class="big-spinner"></div><p>타로 카드를 해석하고 있습니다...<br>카드의 상징과 의미를 분석 중이에요.</p></div>`;
+  resultEl.scrollIntoView({behavior:'smooth', block:'start'});
+
+  const cardInfo = selectedCards.map((c, i) => {
+    const pos = spreadCount === 3 ? ['과거','현재','미래'][i] : '현재';
+    return `${pos}: ${c.name}(${c.en}) — ${c.meaning}`;
+  }).join('\n');
+
+  const prompt = `타로 전문가. 순수 JSON만 출력.
+카드:${cardInfo}
+질문:${question || '오늘의 전반적인 운세'}
+{"summary":"전체 한줄요약","cards":[{"name":"카드명","position":"위치","interpretation":"이 카드가 의미하는 것 2문장","advice":"조언 1문장"}],"overall":"종합 해석 2문장","action":"지금 당장 할 수 있는 행동 1문장"}`;
+
+  try {
+    const r = await callAPI(prompt);
+
+    const cardColors = {'🔥':'#c0392b','💧':'#1a4a6b','🌬️':'#6c3483','🌿':'#27ae60','🌟':'#c9913a','⭐':'#c9913a'};
+
+    const html = `
+      <!-- 카드 공개 섹션 -->
+      <div style="background:var(--dark);border-radius:12px;padding:24px 16px;margin-bottom:16px;text-align:center;">
+        <div style="color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:16px;">✦ 뽑은 카드 공개 ✦</div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;">
+          ${selectedCards.map((c,i) => {
+            const labels = spreadCount===3 ? ['과거','현재','미래'] : [''];
+            return `<div style="text-align:center;">
+              ${spreadCount===3 ? `<div style="color:rgba(201,145,58,0.7);font-size:11px;margin-bottom:6px;letter-spacing:1px;">${labels[i]}</div>` : ''}
+              <div style="width:100px;height:160px;border-radius:10px;border:2px solid var(--gold);margin:0 auto 8px;overflow:hidden;box-shadow:0 6px 20px rgba(201,145,58,0.5);">
+                <svg viewBox="0 0 100 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+                  <rect width="100" height="160" fill="#1a0a02"/>
+                  <image href="${c.img}" x="0" y="0" width="100" height="160" preserveAspectRatio="xMidYMid meet"
+                    onerror="this.setAttribute('href','');this.parentElement.querySelector('rect').setAttribute('fill','#2d1505');"/>
+                </svg>
+              </div>
+              <div style="color:#ffd700;font-size:13px;font-weight:700;font-family:serif;">${c.name}</div>
+              <div style="color:rgba(201,145,58,0.6);font-size:10px;margin-top:2px;">${c.en}</div>
+              <div style="color:rgba(245,239,228,0.5);font-size:10px;margin-top:2px;">${c.meaning}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="background:rgba(201,145,58,0.1);border-radius:8px;padding:12px 16px;">
+          <p style="color:#f0e6d3;font-size:13px;line-height:1.8;">${r.summary||''}</p>
+        </div>
+      </div>
+
+      ${(r.cards||[]).map(c => `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="background:var(--gold);color:white;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">${c.position||''}</span>
+          <span style="font-size:14px;font-weight:700;">${c.name||''}</span>
+        </div>
+        <p style="font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:8px;">${c.interpretation||''}</p>
+        <div style="background:rgba(201,145,58,0.1);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 6px 6px 0;">
+          <p style="font-size:12px;color:var(--muted);">💡 ${c.advice||''}</p>
+        </div>
+      </div>`).join('')}
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;">
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;">🔮 종합 해석</h4>
+        <p style="font-size:13px;line-height:1.9;">${r.overall||''}</p>
+      </div>
+
+      <div style="background:rgba(201,145,58,0.1);border-left:3px solid var(--gold);padding:14px 18px;border-radius:0 8px 8px 0;">
+        <div style="font-size:11px;color:#c9913a;margin-bottom:6px;">⚡ 지금 당장 할 것</div>
+        <p style="font-size:13px;line-height:1.8;">${r.action||''}</p>
+      </div>
+
+      <button onclick="resetTarot()" style="width:100%;margin-top:16px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:14px;font-family:'Noto Sans KR',sans-serif;">🔄 다시 뽑기</button>`;
+
+    resultEl.innerHTML = html;
+  } catch(e) {
+    resultEl.innerHTML = `<div style="background:#fff3f3;border:1px solid #e74c3c;border-radius:8px;padding:16px;color:#c0392b;"><strong>⚠️ 오류:</strong> ${e.message}</div>`;
+  }
+}
+
+function resetTarot() {
+  selectedCards = [];
+  updateSelectedDisplay();
+  renderDeck();
+  document.getElementById('tarot-submit').disabled = true;
+  document.getElementById('tarot-result').style.display = 'none';
+  document.getElementById('pick-guide').textContent = `카드 ${spreadCount}장을 선택해주세요`;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// 초기화
+setSpread(1);
+</script>
+</body>
+</html>
