@@ -2950,6 +2950,93 @@ function closeHanjaPicker() {
 }
 
 // ─── 메뉴 토글 ───
+// ─── 사주 프로필 자동입력 ───
+function autoFillFromProfile() {
+  // Show/hide "등록 필요" notices
+  const sNotice = document.getElementById('saju-register-notice');
+  const fNotice = document.getElementById('fortune-register-notice');
+  if (!myProfile) {
+    if (sNotice) sNotice.style.display = 'block';
+    if (fNotice) fNotice.style.display = 'block';
+    return;
+  }
+  if (sNotice) sNotice.style.display = 'none';
+  if (fNotice) fNotice.style.display = 'none';
+
+  const { year, month, day, time, gender, calType, isLeap } = myProfile;
+
+  // ── 사주풀이 페이지 ──
+  const sy = document.getElementById('saju-year');
+  const sm = document.getElementById('saju-month');
+  const sd = document.getElementById('saju-day');
+  const st = document.getElementById('saju-time');
+  if (sy) sy.value = year;
+  if (sm) sm.value = month;
+  if (sd) sd.value = day;
+  if (st) st.value = time;
+  // Sync calendar type
+  sajuCalType = calType || '양력';
+  setCalType('saju', sajuCalType);
+  const leapCheck = document.getElementById('saju-leap');
+  if (leapCheck) leapCheck.checked = isLeap || false;
+  sajuGender = gender;
+  const sfBtn = document.getElementById('saju-female');
+  const smBtn = document.getElementById('saju-male');
+  if (sfBtn && smBtn) {
+    sfBtn.classList.toggle('active', gender === '여성');
+    smBtn.classList.toggle('active', gender === '남성');
+  }
+  // Show filled indicator on saju page
+  const sajuFilledNote = document.getElementById('saju-autofill-note');
+  if (sajuFilledNote) {
+    sajuFilledNote.style.display = 'flex';
+    sajuFilledNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 사주 정보가 자동 입력됐어요</span>`;
+  }
+
+  // ── 오늘의 운세 페이지 ──
+  const calLabel = calType === '음력' ? (isLeap ? '음력 윤달' : '음력') : '양력';
+  const fb = document.getElementById('fortune-birth');
+  if (fb) {
+    fb.value = `${year}년 ${month}월 ${day}일 ${time} (${calLabel})`;
+    fb.style.borderColor = 'var(--gold)';
+  }
+  const fortuneFilledNote = document.getElementById('fortune-autofill-note');
+  if (fortuneFilledNote) {
+    fortuneFilledNote.style.display = 'flex';
+    fortuneFilledNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 생년월일이 자동 입력됐어요 (${calLabel})</span>`;
+  }
+
+  // ── 궁합 보기 페이지 ──
+  const cmy = document.getElementById('c-my-year');
+  const cmm = document.getElementById('c-my-month');
+  const cmd = document.getElementById('c-my-day');
+  const cmt = document.getElementById('c-my-time');
+  if (cmy) cmy.value = year;
+  if (cmm) cmm.value = month;
+  if (cmd) cmd.value = day;
+  if (cmt) cmt.value = time;
+  // 성별 동기화
+  const cmMale = document.getElementById('c-my-male');
+  const cmFemale = document.getElementById('c-my-female');
+  if (cmMale && cmFemale) {
+    const isMale = gender === '남성';
+    cmMale.classList.toggle('active', isMale);
+    cmFemale.classList.toggle('active', !isMale);
+    compatMyGender = gender;
+  }
+  const compatNote = document.getElementById('compat-autofill-note');
+  if (compatNote) {
+    compatNote.style.display = 'flex';
+    compatNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 사주가 자동 입력됐어요. 상대방 정보를 입력해 주세요.</span>`;
+  }
+}
+
+
+// 페이지 로드 시 자동입력
+document.addEventListener('DOMContentLoaded', function() {
+  if (myProfile) autoFillFromProfile();
+});
+
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
   menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
@@ -4550,6 +4637,99 @@ function calcSaju(year, month, day, timeName) {
     elements, daymaster: dayMasterDesc };
 }
 
+
+// ─── 사주 프로필 자동입력 ───
+let myProfile = null;
+try {
+  const saved = localStorage.getItem('myProfile');
+  if (saved) myProfile = JSON.parse(saved);
+} catch(e) {}
+
+function autoFillFromProfile() {
+  // Show/hide "등록 필요" notices
+  const sNotice = document.getElementById('saju-register-notice');
+  const fNotice = document.getElementById('fortune-register-notice');
+  if (!myProfile) {
+    if (sNotice) sNotice.style.display = 'block';
+    if (fNotice) fNotice.style.display = 'block';
+    return;
+  }
+  if (sNotice) sNotice.style.display = 'none';
+  if (fNotice) fNotice.style.display = 'none';
+
+  const { year, month, day, time, gender, calType, isLeap } = myProfile;
+
+  // ── 사주풀이 페이지 ──
+  const sy = document.getElementById('saju-year');
+  const sm = document.getElementById('saju-month');
+  const sd = document.getElementById('saju-day');
+  const st = document.getElementById('saju-time');
+  if (sy) sy.value = year;
+  if (sm) sm.value = month;
+  if (sd) sd.value = day;
+  if (st) st.value = time;
+  // Sync calendar type
+  sajuCalType = calType || '양력';
+  setCalType('saju', sajuCalType);
+  const leapCheck = document.getElementById('saju-leap');
+  if (leapCheck) leapCheck.checked = isLeap || false;
+  sajuGender = gender;
+  const sfBtn = document.getElementById('saju-female');
+  const smBtn = document.getElementById('saju-male');
+  if (sfBtn && smBtn) {
+    sfBtn.classList.toggle('active', gender === '여성');
+    smBtn.classList.toggle('active', gender === '남성');
+  }
+  // Show filled indicator on saju page
+  const sajuFilledNote = document.getElementById('saju-autofill-note');
+  if (sajuFilledNote) {
+    sajuFilledNote.style.display = 'flex';
+    sajuFilledNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 사주 정보가 자동 입력됐어요</span>`;
+  }
+
+  // ── 오늘의 운세 페이지 ──
+  const calLabel = calType === '음력' ? (isLeap ? '음력 윤달' : '음력') : '양력';
+  const fb = document.getElementById('fortune-birth');
+  if (fb) {
+    fb.value = `${year}년 ${month}월 ${day}일 ${time} (${calLabel})`;
+    fb.style.borderColor = 'var(--gold)';
+  }
+  const fortuneFilledNote = document.getElementById('fortune-autofill-note');
+  if (fortuneFilledNote) {
+    fortuneFilledNote.style.display = 'flex';
+    fortuneFilledNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 생년월일이 자동 입력됐어요 (${calLabel})</span>`;
+  }
+
+  // ── 궁합 보기 페이지 ──
+  const cmy = document.getElementById('c-my-year');
+  const cmm = document.getElementById('c-my-month');
+  const cmd = document.getElementById('c-my-day');
+  const cmt = document.getElementById('c-my-time');
+  if (cmy) cmy.value = year;
+  if (cmm) cmm.value = month;
+  if (cmd) cmd.value = day;
+  if (cmt) cmt.value = time;
+  // 성별 동기화
+  const cmMale = document.getElementById('c-my-male');
+  const cmFemale = document.getElementById('c-my-female');
+  if (cmMale && cmFemale) {
+    const isMale = gender === '남성';
+    cmMale.classList.toggle('active', isMale);
+    cmFemale.classList.toggle('active', !isMale);
+    compatMyGender = gender;
+  }
+  const compatNote = document.getElementById('compat-autofill-note');
+  if (compatNote) {
+    compatNote.style.display = 'flex';
+    compatNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 사주가 자동 입력됐어요. 상대방 정보를 입력해 주세요.</span>`;
+  }
+}
+
+
+// 페이지 로드 시 자동입력
+document.addEventListener('DOMContentLoaded', function() {
+  if (myProfile) autoFillFromProfile();
+});
 
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
