@@ -78,7 +78,7 @@
   /* ─── NAV ─── */
   nav {
     position: fixed; top: 0; left: 0; right: 0;
-    z-index: 9999;
+    z-index: 100;
     padding: 10px 16px;
     display: flex; align-items: center; justify-content: space-between;
     background: rgba(245,239,228,0.95);
@@ -765,11 +765,11 @@
   }
 </style>
   <style>
-  .menu-item { display:block; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; font-family:'Noto Sans KR',sans-serif; color:var(--ink); cursor:pointer; border-radius:8px; text-decoration:none; }
-  .menu-item:hover { background:var(--card); color:var(--gold); }
-  .page { display:none; }
-  .page.active { display:block; }
-</style>
+    .menu-item { display:block; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; font-family:'Noto Sans KR',sans-serif; color:var(--ink); cursor:pointer; border-radius:8px; text-decoration:none; }
+    .menu-item:hover { background:var(--card); color:var(--gold); }
+    .page { display:none; }
+    .page.active { display:block; }
+  </style>
 </head>
 <body>
 <nav>
@@ -785,9 +785,9 @@
   <a href="https://saju-today.com/compat" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">💑 궁합 보기</a>
   <a href="https://saju-today.com/naming" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">✍️ 작명/이름 감정</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
-  <a href="https://saju-today.com/dream" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🌙 꿈 해몽</a>
-  <a href="https://saju-today.com/tarot" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🃏 타로</a>
-  <a href="https://saju-today.com/face" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">👁️ 관상</a>
+  <a href="https://saju-today.com/dream.html" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🌙 꿈 해몽</a>
+  <a href="https://saju-today.com/tarot.html" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🃏 타로</a>
+  <a href="https://saju-today.com/face.html" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">👁️ 관상</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
   <a href="https://saju-today.com" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--gold);border-radius:8px;font-weight:700;">📋 사주 등록</a>
 </div>
@@ -886,13 +886,8 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2600);
 }
-const WORKER_URL = 'https://saju-proxy.jjinbee614.workers.dev';
 
-// ─── CALENDAR TYPE ───
-let regCalType = '양력';
-let sajuCalType = '양력';
-let compatMyCalType = '양력';
-let compatTheirCalType = '양력';
+const WORKER_URL = 'https://saju-proxy.jjinbee614.workers.dev';
 
 function callAPI(prompt) {
   return fetch(WORKER_URL, {
@@ -915,6 +910,7 @@ function callAPI(prompt) {
     return JSON.parse(raw.slice(s, e+1));
   });
 }
+
 const HEAVENLY_STEMS  = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 const EARTHLY_BRANCHES= ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 const HS_ELEM = ['목','목','화','화','토','토','금','금','수','수'];
@@ -981,6 +977,7 @@ function calcTimePillar(dayHs, timeName) {
 
 
 // ─── 음력→양력 변환 (한국천문연구원 공공API) ───
+
 
 async function lunarToSolar(lunarYear, lunarMonth, lunarDay, isLeap) {
   try {
@@ -1056,11 +1053,69 @@ function calcSaju(year, month, day, timeName) {
     elements, daymaster: dayMasterDesc };
 }
 
+// ─── CALENDAR TYPE (양력/음력) ───
+let regCalType  = '양력';
+let sajuCalType = '양력';
+let compatMyCalType = '양력';
+let compatTheirCalType = '양력';
+
+function setCalType(prefix, type) {
+  if (prefix === 'reg')  regCalType  = type;
+  if (prefix === 'saju') sajuCalType = type;
+
+  const toggle   = document.getElementById(`${prefix}-cal-toggle`);
+  const note     = document.getElementById(`${prefix}-cal-note`);
+  const leapRow  = document.getElementById(`${prefix}-leap-row`);
+
+  if (!toggle) return;
+  toggle.querySelectorAll('button').forEach(b => b.classList.remove('active','lunar-active'));
+  const [solarBtn, lunarBtn] = toggle.querySelectorAll('button');
+
+  if (type === '양력') {
+    solarBtn.classList.add('active');
+    note.className = 'cal-note solar';
+    note.textContent = '양력(그레고리력) 기준 — 주민등록증·여권에 표기된 날짜';
+    if (leapRow) leapRow.style.display = 'none';
+  } else {
+    lunarBtn.classList.add('lunar-active');
+    note.className = 'cal-note';
+    note.textContent = '음력 기준 — 사주명리는 전통적으로 음력을 사용합니다. 입력한 음력 날짜를 자동으로 양력으로 변환해 분석합니다.';
+    if (leapRow) leapRow.style.display = 'block';
+  }
+}
+
+
+
 let myProfile = null;
 try {
   const saved = localStorage.getItem('myProfile');
   if (saved) myProfile = JSON.parse(saved);
 } catch(e) {}
+
+function autoFillPage() {
+  if (!myProfile) return;
+  const { year, month, day, time, gender, calType, isLeap, name } = myProfile;
+  const sy = document.getElementById('saju-year');
+  const sm = document.getElementById('saju-month');
+  const sd = document.getElementById('saju-day');
+  const st = document.getElementById('saju-time');
+  if (sy) sy.value = year;
+  if (sm) sm.value = month;
+  if (sd) sd.value = day;
+  if (st) st.value = time;
+  sajuCalType = calType || '양력';
+  setCalType('saju', sajuCalType);
+  const leapCheck = document.getElementById('saju-leap');
+  if (leapCheck) leapCheck.checked = isLeap || false;
+  setSajuGender(gender || '남성');
+  const note = document.getElementById('saju-autofill-note');
+  if (note && name) {
+    note.style.display = 'flex';
+    note.innerHTML = `✅ ${name}님의 생년월일이 자동 입력됐어요`;
+  }
+}
+document.addEventListener('DOMContentLoaded', autoFillPage);
+
 
 // ════ 사주풀이 페이지 ════
 let sajuGender = '남성';
@@ -1072,27 +1127,6 @@ function setSajuGender(btn, val) {
 }
 
 
-function callAPI(prompt) {
-  return fetch(WORKER_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      model:"claude-sonnet-4-20250514",
-      max_tokens:2000,
-      messages:[{ role:"user", content:prompt }]
-    })
-  }).then(res => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }).then(data => {
-    if (data.error) throw new Error(data.error.message);
-    const raw = data.content.map(i=>i.text||'').join('');
-    const s = raw.indexOf('{');
-    if (s < 0) throw new Error('JSON을 찾을 수 없습니다: ' + raw.slice(0,80));
-    const e = raw.lastIndexOf('}');
-    return JSON.parse(raw.slice(s, e+1));
-  });
-}
 
 function showApiError(msg) {
   const el = document.getElementById('saju-result');
@@ -1437,60 +1471,6 @@ function setFortuneDay(day) {
 }
 
 
-function autoFillPage() {
-  if (!myProfile) return;
-  const { year, month, day, time, gender, calType, isLeap, name } = myProfile;
-  // saju
-  const sy = document.getElementById('saju-year');
-  const sm = document.getElementById('saju-month');
-  const sd = document.getElementById('saju-day');
-  const st = document.getElementById('saju-time');
-  if (sy) sy.value = year;
-  if (sm) sm.value = month;
-  if (sd) sd.value = day;
-  if (st) st.value = time;
-  // compat
-  const cy = document.getElementById('c-my-year');
-  const cm = document.getElementById('c-my-month');
-  const cd = document.getElementById('c-my-day');
-  const ct = document.getElementById('c-my-time');
-  if (cy) cy.value = year;
-  if (cm) cm.value = month;
-  if (cd) cd.value = day;
-  if (ct) ct.value = time;
-  const note = document.getElementById('saju-autofill-note') || document.getElementById('compat-autofill-note');
-  if (note && name) {
-    note.style.display = 'flex';
-    note.innerHTML = `✅ ${name}님의 생년월일이 자동 입력됐어요`;
-  }
-}
-document.addEventListener('DOMContentLoaded', autoFillPage);
-
-
-function setCalType(prefix, type) {
-  if (prefix === 'reg')  regCalType  = type;
-  if (prefix === 'saju') sajuCalType = type;
-
-  const toggle   = document.getElementById(`${prefix}-cal-toggle`);
-  const note     = document.getElementById(`${prefix}-cal-note`);
-  const leapRow  = document.getElementById(`${prefix}-leap-row`);
-
-  if (!toggle) return;
-  toggle.querySelectorAll('button').forEach(b => b.classList.remove('active','lunar-active'));
-  const [solarBtn, lunarBtn] = toggle.querySelectorAll('button');
-
-  if (type === '양력') {
-    solarBtn.classList.add('active');
-    note.className = 'cal-note solar';
-    note.textContent = '양력(그레고리력) 기준 — 주민등록증·여권에 표기된 날짜';
-    if (leapRow) leapRow.style.display = 'none';
-  } else {
-    lunarBtn.classList.add('lunar-active');
-    note.className = 'cal-note';
-    note.textContent = '음력 기준 — 사주명리는 전통적으로 음력을 사용합니다. 입력한 음력 날짜를 자동으로 양력으로 변환해 분석합니다.';
-    if (leapRow) leapRow.style.display = 'block';
-  }
-}
 
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
