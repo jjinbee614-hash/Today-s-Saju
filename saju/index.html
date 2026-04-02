@@ -888,6 +888,12 @@ function showToast(msg) {
 }
 const WORKER_URL = 'https://saju-proxy.jjinbee614.workers.dev';
 
+// ─── CALENDAR TYPE ───
+let regCalType = '양력';
+let sajuCalType = '양력';
+let compatMyCalType = '양력';
+let compatTheirCalType = '양력';
+
 function callAPI(prompt) {
   return fetch(WORKER_URL, {
     method:"POST",
@@ -1460,6 +1466,31 @@ function autoFillPage() {
 }
 document.addEventListener('DOMContentLoaded', autoFillPage);
 
+
+function setCalType(prefix, type) {
+  if (prefix === 'reg')  regCalType  = type;
+  if (prefix === 'saju') sajuCalType = type;
+
+  const toggle   = document.getElementById(`${prefix}-cal-toggle`);
+  const note     = document.getElementById(`${prefix}-cal-note`);
+  const leapRow  = document.getElementById(`${prefix}-leap-row`);
+
+  if (!toggle) return;
+  toggle.querySelectorAll('button').forEach(b => b.classList.remove('active','lunar-active'));
+  const [solarBtn, lunarBtn] = toggle.querySelectorAll('button');
+
+  if (type === '양력') {
+    solarBtn.classList.add('active');
+    note.className = 'cal-note solar';
+    note.textContent = '양력(그레고리력) 기준 — 주민등록증·여권에 표기된 날짜';
+    if (leapRow) leapRow.style.display = 'none';
+  } else {
+    lunarBtn.classList.add('lunar-active');
+    note.className = 'cal-note';
+    note.textContent = '음력 기준 — 사주명리는 전통적으로 음력을 사용합니다. 입력한 음력 날짜를 자동으로 양력으로 변환해 분석합니다.';
+    if (leapRow) leapRow.style.display = 'block';
+  }
+}
 
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
