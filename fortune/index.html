@@ -1529,10 +1529,22 @@ window.addEventListener('load', () => {
   const page = params.get('page');
   if (page) showPage(page);
 });
+
+function toggleMenu() {
+  const menu = document.getElementById('nav-menu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('nav-menu');
+  const btn = document.getElementById('menu-btn');
+  if (menu && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
+});
 </script>
 
 </body>
 </html
+
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
   if (!menu) return;
