@@ -2071,7 +2071,8 @@
   }
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1613270675503511"
-     crossorigin="anonymous"></script>
+     crossorigin="anonymous">
+</script>
   
 
 
@@ -3387,6 +3388,18 @@ document.addEventListener('click', function(e) {
   const btn = document.getElementById('menu-btn');
   if (menu && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
 });
+
+function switchNamingTab(n) {
+  [1,2].forEach(i => {
+    document.getElementById(`naming-panel-${i}`).style.display = i===n ? 'block' : 'none';
+    const btn = document.getElementById(`naming-tab-${i}`);
+    btn.style.borderBottomColor = i===n ? 'var(--gold)' : 'transparent';
+    btn.style.color = i===n ? 'var(--gold)' : 'var(--muted)';
+    btn.style.fontWeight = i===n ? '700' : '400';
+  });
+  document.getElementById('naming-result').style.display = 'none';
+}
+
 </script>
 </body>
 </html>
