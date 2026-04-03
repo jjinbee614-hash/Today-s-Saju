@@ -2071,8 +2071,7 @@
   }
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1613270675503511"
-     crossorigin="anonymous">
-</script>
+     crossorigin="anonymous"></script>
   
 
 
@@ -2097,6 +2096,26 @@
     </div>
   </div>
 </div>
+</div>
+<!-- ─── 한자 선택기 모달 ─── -->
+<div id="hanja-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:flex-start;padding-top:40px;overflow-y:auto;">
+  <div style="background:var(--paper);border-radius:12px;padding:24px;width:92%;max-width:500px;max-height:85vh;overflow-y:auto;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <h3 style="font-size:16px;font-weight:700;">✍️ 한자 선택</h3>
+      <button onclick="closeHanjaPicker()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">성씨부터 각 글자의 한자를 선택하세요. 뜻이나 음으로 검색도 가능해요.</p>
+    <div style="background:rgba(26,74,107,0.08);border:1px solid rgba(26,74,107,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;">
+      <p style="font-size:12px;color:var(--blue);margin:0;line-height:1.7;">
+        📖 목록에 없는 한자는 <strong>네이버 한자 사전</strong>(<a href="https://hanja.dict.naver.com" target="_blank" style="color:var(--blue);text-decoration:underline;">hanja.dict.naver.com</a>)에서 직접 찾아 아래 <strong>직접 입력</strong> 칸에 복사·붙여넣기 하세요.
+      </p>
+    </div>
+    <div id="hanja-picker-content"></div>
+    <div style="display:flex;gap:8px;margin-top:20px;position:sticky;bottom:0;background:var(--paper);padding-top:12px;">
+      <button onclick="confirmHanjaPicker()" style="flex:1;padding:12px;background:var(--ink);color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:'Noto Sans KR',sans-serif;font-weight:600;">✅ 선택 완료</button>
+      <button onclick="closeHanjaPicker()" style="padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:14px;font-family:'Noto Sans KR',sans-serif;">취소</button>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 <script>
@@ -2272,18 +2291,116 @@ function calcSaju(year, month, day, timeName) {
     elements, daymaster: dayMasterDesc };
 }
 
+let regCalType = '양력';
+let sajuCalType = '양력';
+let compatMyCalType = '양력';
+let compatTheirCalType = '양력';
+
 let myProfile = null;
 try {
   const saved = localStorage.getItem('myProfile');
   if (saved) myProfile = JSON.parse(saved);
 } catch(e) {}
-document.addEventListener('DOMContentLoaded', function() {
-  if (!myProfile) return;
-  const { year, month, day } = myProfile;
-  const y = document.getElementById('naming-year') || document.getElementById('judge-year');
-  if (y) y.value = year;
-});
 
+function autoFillSurnameHanja(val) {
+  if (val && SURNAME_HANJA[val]) {
+    document.getElementById('naming-surname-han').value = SURNAME_HANJA[val];
+  }
+}
+
+function onJudgeKoreanInput() {
+  // 한글 입력 시 성씨 자동 한자 변환
+  const korean = document.getElementById('judge-korean').value.trim();
+  if (korean.length >= 1 && SURNAME_HANJA[korean[0]]) {
+    // 한자 필드가 비어있으면 성씨만 자동입력
+    const hanjaField = document.getElementById('judge-hanja');
+    if (!hanjaField.value) {
+      hanjaField.value = SURNAME_HANJA[korean[0]];
+    }
+  }
+}
+
+function toggleJudgeSaju() {
+  const checked = document.getElementById('judge-saju-toggle').checked;
+  document.getElementById('judge-saju-fields').style.display = checked ? 'grid' : 'none';
+}
+
+let namingCalType = '양력';
+let judgeCalType = '양력';
+
+function setNamingCalType(type) {
+  namingCalType = type;
+  const solarBtn = document.getElementById('naming-solar-btn');
+  const lunarBtn = document.getElementById('naming-lunar-btn');
+  const leapRow  = document.getElementById('naming-leap-row');
+  if (solarBtn) {
+    solarBtn.style.background = type==='양력' ? 'var(--ink)' : 'var(--card)';
+    solarBtn.style.color      = type==='양력' ? 'white' : 'var(--ink)';
+  }
+  if (lunarBtn) {
+    lunarBtn.style.background = type==='음력' ? 'var(--ink)' : 'var(--card)';
+    lunarBtn.style.color      = type==='음력' ? 'white' : 'var(--ink)';
+  }
+  if (leapRow) leapRow.style.display = type==='음력' ? 'block' : 'none';
+}
+
+function setJudgeCalType(type) {
+  judgeCalType = type;
+  const solarBtn  = document.getElementById('judge-solar-btn');
+  const lunarBtn  = document.getElementById('judge-lunar-btn');
+  const leapLabel = document.getElementById('judge-leap-label');
+  if (solarBtn) {
+    solarBtn.style.background = type==='양력' ? 'var(--ink)' : 'var(--card)';
+    solarBtn.style.color      = type==='양력' ? 'white' : 'var(--ink)';
+  }
+  if (lunarBtn) {
+    lunarBtn.style.background = type==='음력' ? 'var(--ink)' : 'var(--card)';
+    lunarBtn.style.color      = type==='음력' ? 'white' : 'var(--ink)';
+  }
+  if (leapLabel) leapLabel.style.display = type==='음력' ? 'flex' : 'none';
+}
+
+function setNamingGender(g) {
+  namingGender = g;
+  document.getElementById('naming-male-btn').style.cssText += g==='남아'
+    ? ';background:var(--ink);color:white;' : ';background:var(--card);color:var(--ink);';
+  document.getElementById('naming-female-btn').style.cssText += g==='여아'
+    ? ';background:var(--ink);color:white;' : ';background:var(--card);color:var(--ink);';
+}
+
+function switchNamingTab(n) {
+  [1,2].forEach(i => {
+    document.getElementById(`naming-panel-${i}`).style.display = i===n ? 'block' : 'none';
+    const btn = document.getElementById(`naming-tab-${i}`);
+    btn.style.borderBottomColor = i===n ? 'var(--gold)' : 'transparent';
+    btn.style.color = i===n ? 'var(--gold)' : 'var(--muted)';
+    btn.style.fontWeight = i===n ? '700' : '400';
+  });
+  document.getElementById('naming-result').style.display = 'none';
+}
+
+function showNamingLoading(msg) {
+  const el = document.getElementById('naming-result');
+  el.style.display = 'block';
+  el.innerHTML = `<div class="saju-loading"><div class="big-spinner"></div><p>${msg}</p></div>`;
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// 한자 문자를 자동으로 span.hanja-char로 감싸는 함수
+function wrapHanja(text) {
+  if (!text) return text;
+  return text.replace(/[一-鿿㐀-䶿豈-﫿]/g,
+    ch => '<span class="hanja-char" style="display:inline;font-size:inherit;">' + ch + '</span>');
+}
+
+function renderNamingResult(html) {
+  const el = document.getElementById('naming-result');
+  el.style.display = 'block';
+  el.innerHTML = html;
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ── 아기 작명 ──
 async function runNaming() {
   const surnameKor = document.getElementById('naming-surname-kor').value.trim();
   const surnameHan = document.getElementById('naming-surname-han').value.trim();
@@ -2952,431 +3069,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// ─── 꿈 해몽 ───
-let dreamMood = '좋은꿈';
-
-function setDreamMood(mood) {
-  dreamMood = mood;
-  const moods = { '좋은꿈': 'good', '나쁜꿈': 'bad', '모호한꿈': 'unknown' };
-  ['good','bad','unknown'].forEach(m => {
-    const btn = document.getElementById(`dream-mood-${m}`);
-    if (!btn) return;
-    const isActive = moods[mood] === m;
-    btn.style.background = isActive ? 'var(--gold)' : 'var(--card)';
-    btn.style.color = isActive ? 'white' : 'var(--ink)';
-    btn.style.borderColor = isActive ? 'var(--gold)' : 'var(--border)';
-  });
-}
-
-function toggleDreamSaju() {
-  const checked = document.getElementById('dream-saju-toggle').checked;
-  document.getElementById('dream-saju-fields').style.display = checked ? 'grid' : 'none';
-}
-
-async function runDream() {
-  const dreamText = document.getElementById('dream-content').value.trim();
-  if (!dreamText || dreamText.length < 10) {
-    showToast('꿈 내용을 조금 더 자세히 입력해주세요'); return;
-  }
-
-  const resultEl = document.getElementById('dream-result');
-  resultEl.style.display = 'block';
-  resultEl.innerHTML = `<div class="saju-loading"><div class="big-spinner"></div><p>꿈을 해몽하고 있습니다...<br>길흉을 분석하는 중이에요.</p></div>`;
-  resultEl.scrollIntoView({behavior:'smooth', block:'start'});
-
-  // 사주 연계
-  const withSaju = document.getElementById('dream-saju-toggle').checked;
-  let sajuInfo = '';
-  if (withSaju) {
-    const y = parseInt(document.getElementById('dream-year').value);
-    const m = parseInt(document.getElementById('dream-month').value);
-    const d = parseInt(document.getElementById('dream-day').value);
-    if (y && m && d) {
-      const p = calcSaju(y, m, d, '모름');
-      const strongEl = Object.entries(p.elements).sort((a,b)=>b[1]-a[1])[0][0];
-      sajuInfo = `
-【사주 정보】 연주 ${p.yp.heavenly}${p.yp.earthly} 월주 ${p.mp.heavenly}${p.mp.earthly} 일주 ${p.dp.heavenly}${p.dp.earthly} / 강한 오행: ${strongEl}`;
-    }
-  }
-
-  try {
-    const prompt = `당신은 전통 꿈 해몽 전문가입니다. 아래 꿈을 상세하게 해몽해주세요.
-
-【꿈 내용】 ${dreamText}
-【꿈 분위기】 ${dreamMood}${sajuInfo}
-
-순수 JSON만 출력하세요.
-
-{"gilhung":"대길","gilhungScore":85,"gilhungEmoji":"🟡","summary":"꿈 핵심 한 줄 요약","interpretation":"꿈의 상징과 의미를 전통 해몽 관점에서 3~4문장으로 상세 해석","symbols":[{"symbol":"꿈에 나온 요소1","meaning":"상징 의미"},{"symbol":"요소2","meaning":"의미"}],"fortune":{"wealth":"이 꿈이 재물과 관련된 의미","love":"애정운과의 연관","career":"직업/사업운과의 연관","caution":"주의할 점"},"advice":"꿈을 꾼 후 행동 조언 2문장"}`;
-
-    const r = await callAPI(prompt);
-
-    const gilColors = {
-      '대길': '#27ae60', '길': '#c9913a', '평': '#1a4a6b',
-      '흉': '#c0392b', '대흉': '#922b21'
-    };
-    const color = gilColors[r.gilhung] || '#c9913a';
-    const score = r.gilhungScore || 70;
-
-    const html = `
-      <!-- 길흉 헤더 -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;text-align:center;">
-        <div style="font-size:48px;margin-bottom:8px;">${r.gilhungEmoji || '🌙'}</div>
-        <div style="font-size:32px;font-weight:800;color:${color};margin-bottom:4px;">${r.gilhung}</div>
-        <div style="background:var(--border);border-radius:4px;height:8px;width:200px;margin:10px auto;">
-          <div style="height:8px;border-radius:4px;width:${score}%;background:${color};transition:width 0.8s;"></div>
-        </div>
-        <div style="font-size:13px;color:var(--muted);margin-top:8px;">${r.summary || ''}</div>
-      </div>
-
-      <!-- 해몽 -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px;">
-        <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">📖 해몽</h4>
-        <p style="font-size:13px;line-height:1.9;color:var(--ink);">${r.interpretation || ''}</p>
-      </div>
-
-      <!-- 꿈 상징 -->
-      ${r.symbols && r.symbols.length > 0 ? `
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px;">
-        <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">🔮 꿈 속 상징</h4>
-        ${r.symbols.map(s => `
-          <div style="display:flex;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
-            <span style="font-size:13px;font-weight:700;color:var(--gold);min-width:80px;">${s.symbol}</span>
-            <span style="font-size:13px;color:var(--muted);line-height:1.7;">${s.meaning}</span>
-          </div>`).join('')}
-      </div>` : ''}
-
-      <!-- 운세 연관 -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px;">
-        <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">🍀 운세와의 연관</h4>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div style="background:var(--paper);border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;">💰 재물</div>
-            <p style="font-size:12px;line-height:1.7;margin:0;">${r.fortune?.wealth || ''}</p>
-          </div>
-          <div style="background:var(--paper);border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;">💕 애정</div>
-            <p style="font-size:12px;line-height:1.7;margin:0;">${r.fortune?.love || ''}</p>
-          </div>
-          <div style="background:var(--paper);border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;">💼 직업</div>
-            <p style="font-size:12px;line-height:1.7;margin:0;">${r.fortune?.career || ''}</p>
-          </div>
-          <div style="background:var(--paper);border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:#c0392b;font-weight:700;margin-bottom:4px;">⚠️ 주의</div>
-            <p style="font-size:12px;line-height:1.7;margin:0;">${r.fortune?.caution || ''}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 조언 -->
-      <div style="background:rgba(201,145,58,0.1);border-left:3px solid var(--gold);padding:14px 18px;border-radius:0 8px 8px 0;">
-        <div style="font-size:11px;color:#c9913a;letter-spacing:1px;margin-bottom:6px;">💡 조언</div>
-        <p style="font-size:13px;line-height:1.8;">${r.advice || ''}</p>
-      </div>`;
-
-    resultEl.innerHTML = html;
-  } catch(e) {
-    resultEl.innerHTML = `<div style="background:#fff3f3;border:1px solid #e74c3c;border-radius:8px;padding:16px;color:#c0392b;"><strong>⚠️ 오류:</strong> ${e.message}</div>`;
-  }
-}
-
-// ─── 페이지 전환 ───
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-  const target = document.getElementById('page-' + id);
-  if (target) {
-    target.style.display = 'block';
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }
-  // 네비 활성화
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.querySelector(`.nav-btn[onclick*="${id}"]`);
-  if (activeBtn) activeBtn.classList.add('active');
-}
-
-// data-page 클릭 이벤트 (DOMContentLoaded 후 연결)
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', _initPageNav);
-} else {
-  _initPageNav();
-}
-function _initPageNav() {
-  document.body.addEventListener('click', function(e) {
-    const el = e.target.closest('[data-page]');
-    if (el) { e.preventDefault(); showPage(el.getAttribute('data-page')); }
-  });
-  // 저장된 프로필 있으면 자동 입력
-  if (myProfile) {
-    updateNavProfile();
-    autoFillFromProfile();
-  }
-}
-
-
-// ─── DATA ───
-let currentGender = '남성';
-let activeChat = null;
-
-const DUMMY_PROFILES = [
-  { id:1, name:'단비', age:27, gender:'여성', emoji:'🌸', intro:'조용한 카페 좋아해요', element:'목', year:1997, month:3, day:8, time:'묘시', compat:94, tags:['INFJ','독서','요리'], desc:'책 읽는 걸 좋아하고 따뜻한 사람을 찾아요' },
-  { id:2, name:'하늘', age:29, gender:'남성', emoji:'🌊', intro:'여행과 음악을 사랑해요', element:'수', year:1995, month:11, day:3, time:'자시', compat:88, tags:['ENFP','여행','기타'], desc:'세상을 넓게 보는 사람입니다' },
-  { id:3, name:'솔잎', age:26, gender:'여성', emoji:'🌿', intro:'자연을 좋아하는 사람', element:'목', year:1998, month:5, day:21, time:'진시', compat:82, tags:['ISFJ','등산','그림'], desc:'자연 속에서 행복을 찾아요' },
-  { id:4, name:'별빛', age:31, gender:'남성', emoji:'⭐', intro:'커피 한 잔의 여유', element:'화', year:1993, month:8, day:14, time:'오시', compat:91, tags:['INTJ','커피','영화'], desc:'진지하고 깊은 대화를 좋아합니다' },
-  { id:5, name:'아리', age:25, gender:'여성', emoji:'🌺', intro:'춤추는 게 좋아요!', element:'화', year:1999, month:2, day:7, time:'신시', compat:76, tags:['ESFP','댄스','뮤지컬'], desc:'매일 웃는 삶을 살고 싶어요' },
-  { id:6, name:'우진', age:30, gender:'남성', emoji:'🏔️', intro:'산을 오르며 생각해요', element:'토', year:1994, month:9, day:30, time:'술시', compat:85, tags:['ISTJ','등산','요가'], desc:'묵묵히 한 길을 걷는 사람입니다' },
-];
-
-const ELEMENT_LABELS = { 목:'木 목', 화:'火 화', 토:'土 토', 금:'金 금', 수:'水 수' };
-const ELEMENT_COMPAT = { 목:['화','수'], 화:['토','목'], 토:['금','화'], 금:['수','토'], 수:['목','금'] };
-
-// Chat history per user
-const chatHistories = {};
-DUMMY_PROFILES.forEach(p => { chatHistories[p.id] = [
-  { role:'them', text:`안녕하세요! 반갑습니다 😊`, time:'오후 2:30' }
-]; });
-
-// ─── CALENDAR TYPE (양력/음력) ───
-let regCalType  = '양력';
-let sajuCalType = '양력';
-let compatMyCalType = '양력';
-let compatTheirCalType = '양력';
-
-function setCalType(prefix, type) {
-  if (prefix === 'reg')  regCalType  = type;
-  if (prefix === 'saju') sajuCalType = type;
-
-  const toggle   = document.getElementById(`${prefix}-cal-toggle`);
-  const note     = document.getElementById(`${prefix}-cal-note`);
-  const leapRow  = document.getElementById(`${prefix}-leap-row`);
-
-  if (!toggle) return;
-  toggle.querySelectorAll('button').forEach(b => b.classList.remove('active','lunar-active'));
-  const [solarBtn, lunarBtn] = toggle.querySelectorAll('button');
-
-  if (type === '양력') {
-    solarBtn.classList.add('active');
-    note.className = 'cal-note solar';
-    note.textContent = '양력(그레고리력) 기준 — 주민등록증·여권에 표기된 날짜';
-    if (leapRow) leapRow.style.display = 'none';
-  } else {
-    lunarBtn.classList.add('lunar-active');
-    note.className = 'cal-note';
-    note.textContent = '음력 기준 — 사주명리는 전통적으로 음력을 사용합니다. 입력한 음력 날짜를 자동으로 양력으로 변환해 분석합니다.';
-    if (leapRow) leapRow.style.display = 'block';
-  }
-}
-
-// Lunar → Solar conversion (simplified lookup table approach via AI prompt)
-function getCalendarLabel(prefix) {
-  const type = prefix === 'reg' ? regCalType : sajuCalType;
-  const isLeap = document.getElementById(`${prefix}-leap`)?.checked || false;
-  if (type === '양력') return '양력';
-  return isLeap ? '음력 윤달' : '음력';
-}
-
-// ─── GLOBAL USER PROFILE (in-memory, persists within session) ───
-// localStorage에서 프로필 복원
-let regGender = '남성';
-
-function setRegGender(btn, val) {
-  regGender = val;
-  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-function saveMyProfile() {
-  const name  = document.getElementById('reg-name')?.value.trim();
-  const year  = document.getElementById('reg-year')?.value;
-  const month = document.getElementById('reg-month')?.value;
-  const day   = document.getElementById('reg-day')?.value;
-  const time  = document.getElementById('reg-time')?.value || '모름';
-  if (!name || !year || !month || !day) return null;
-  myProfile = { name, year, month, day, time, gender: regGender, calType: regCalType, isLeap: document.getElementById('reg-leap')?.checked || false };
-  return myProfile;
-}
-
-function autoFillFromProfile() {
-  // Show/hide "등록 필요" notices
-  const sNotice = document.getElementById('saju-register-notice');
-  const fNotice = document.getElementById('fortune-register-notice');
-  if (!myProfile) {
-    if (sNotice) sNotice.style.display = 'block';
-    if (fNotice) fNotice.style.display = 'block';
-    return;
-  }
-  if (sNotice) sNotice.style.display = 'none';
-  if (fNotice) fNotice.style.display = 'none';
-
-  const { year, month, day, time, gender, calType, isLeap } = myProfile;
-
-  // ── 사주풀이 페이지 ──
-  const sy = document.getElementById('saju-year');
-  const sm = document.getElementById('saju-month');
-  const sd = document.getElementById('saju-day');
-  const st = document.getElementById('saju-time');
-  if (sy) sy.value = year;
-  if (sm) sm.value = month;
-  if (sd) sd.value = day;
-  if (st) st.value = time;
-  // Sync calendar type
-  sajuCalType = calType || '양력';
-  setCalType('saju', sajuCalType);
-  const leapCheck = document.getElementById('saju-leap');
-  if (leapCheck) leapCheck.checked = isLeap || false;
-  sajuGender = gender;
-  const sfBtn = document.getElementById('saju-female');
-  const smBtn = document.getElementById('saju-male');
-  if (sfBtn && smBtn) {
-    sfBtn.classList.toggle('active', gender === '여성');
-    smBtn.classList.toggle('active', gender === '남성');
-  }
-  // Show filled indicator on saju page
-  const sajuFilledNote = document.getElementById('saju-autofill-note');
-  if (sajuFilledNote) {
-    sajuFilledNote.style.display = 'flex';
-    sajuFilledNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 사주 정보가 자동 입력됐어요</span>`;
-  }
-
-  // ── 오늘의 운세 페이지 ──
-  const calLabel = calType === '음력' ? (isLeap ? '음력 윤달' : '음력') : '양력';
-  const fb = document.getElementById('fortune-birth');
-  if (fb) {
-    fb.value = `${year}년 ${month}월 ${day}일 ${time} (${calLabel})`;
-    fb.style.borderColor = 'var(--gold)';
-  }
-  const fortuneFilledNote = document.getElementById('fortune-autofill-note');
-  if (fortuneFilledNote) {
-    fortuneFilledNote.style.display = 'flex';
-    fortuneFilledNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 생년월일이 자동 입력됐어요 (${calLabel})</span>`;
-  }
-
-  // ── 궁합 보기 페이지 ──
-  const cmy = document.getElementById('c-my-year');
-  const cmm = document.getElementById('c-my-month');
-  const cmd = document.getElementById('c-my-day');
-  const cmt = document.getElementById('c-my-time');
-  if (cmy) cmy.value = year;
-  if (cmm) cmm.value = month;
-  if (cmd) cmd.value = day;
-  if (cmt) cmt.value = time;
-  // 성별 동기화
-  const cmMale = document.getElementById('c-my-male');
-  const cmFemale = document.getElementById('c-my-female');
-  if (cmMale && cmFemale) {
-    const isMale = gender === '남성';
-    cmMale.classList.toggle('active', isMale);
-    cmFemale.classList.toggle('active', !isMale);
-    compatMyGender = gender;
-  }
-  const compatNote = document.getElementById('compat-autofill-note');
-  if (compatNote) {
-    compatNote.style.display = 'flex';
-    compatNote.innerHTML = `<span style="font-size:13px;color:var(--gold);">✅ ${myProfile.name}님의 사주가 자동 입력됐어요. 상대방 정보를 입력해 주세요.</span>`;
-  }
-}
-
-function updateNavProfile() {
-  const existing = document.getElementById('nav-profile-badge');
-  if (existing) existing.remove();
-  if (!myProfile) return;
-  const badge = document.createElement('span');
-  badge.id = 'nav-profile-badge';
-  badge.style.cssText = 'font-size:12px;color:var(--gold);border:1px solid var(--gold);border-radius:12px;padding:4px 12px;cursor:pointer;white-space:nowrap;';
-  badge.textContent = `✨ ${myProfile.name}님`;
-  badge.onclick = () => showPage('register');
-  document.querySelector('.nav-links').prepend(badge);
-}
-
-// ─── NAVIGATION ───
-// ─── GENDER ───
-function setGender(btn, val) {
-  currentGender = val;
-  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// ─── FILTER ───
-function setFilter(btn, val) {
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  let filtered = DUMMY_PROFILES;
-  if (val === '궁합 90%+') filtered = DUMMY_PROFILES.filter(p => p.compat >= 90);
-  else if (['목','화','토','금','수'].includes(val)) filtered = DUMMY_PROFILES.filter(p => p.element === val);
-  renderCards(filtered);
-}
-
-// ─── CARDS ───
-function renderCards(profiles) {
-  const container = document.getElementById('cards-container');
-  container.innerHTML = profiles.map(p => `
-    <div class="match-card" onclick="openProfileModal(${p.id})">
-      <div class="match-card-top">
-        <div class="compatibility-badge">${p.compat}%</div>
-        <div class="match-avatar">${p.emoji}</div>
-        <div class="match-name">${p.name}</div>
-        <div class="match-age">${p.age}세 · ${ELEMENT_LABELS[p.element]}</div>
-      </div>
-      <div class="match-card-body">
-        <div class="saju-grid">
-          <div class="saju-pill"><span class="label">년주</span><span class="value">${getStemBranch(p.year)}</span></div>
-          <div class="saju-pill"><span class="label">월주</span><span class="value">${getStemBranch(p.month, 'month')}</span></div>
-          <div class="saju-pill"><span class="label">일주</span><span class="value">${getStemBranch(p.day, 'day')}</span></div>
-          <div class="saju-pill"><span class="label">시주</span><span class="value">${p.time}</span></div>
-        </div>
-        <div class="match-tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;">"${p.intro}"</p>
-        <div class="match-actions">
-          <button class="action-btn like" onclick="event.stopPropagation(); likeProfile(${p.id}, '${p.name}')">💌 관심 보내기</button>
-          <button class="action-btn skip" onclick="event.stopPropagation();">다음</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// Simple saju notation helper
-function getStemBranch(val, type) {
-  const stems = ['갑','을','병','정','무','기','경','신','임','계'];
-  const branches = ['자','축','인','묘','진','사','오','미','신','유','술','해'];
-  const s = stems[val % 10];
-  const b = branches[val % 12];
-  return s + b;
-}
-
-// ─── PROFILE SUBMIT ───
-function submitProfile() {
-  const p = saveMyProfile();
-  if (!p) { showToast('이름과 생년월일을 입력해 주세요'); return; }
-
-  // localStorage에 저장 (새로고침해도 유지)
-  localStorage.setItem('myProfile', JSON.stringify(p));
-
-  // 모든 탭에 자동 입력
-  autoFillFromProfile();
-
-  showToast(`✨ ${p.name}님의 사주가 등록됐어요!`);
-  updateNavProfile();
-
-  // Show auto-fill notice banner
-  const banner = document.getElementById('reg-success-banner');
-  if (banner) {
-    banner.style.display = 'block';
-    banner.innerHTML = `
-      <div style="background:rgba(201,145,58,0.1);border:1px solid var(--gold);border-radius:8px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--gold);margin-bottom:4px;">✅ ${p.name}님의 사주가 등록됐습니다!</div>
-          <div style="font-size:13px;color:var(--muted);">${p.year}년 ${p.month}월 ${p.day}일 ${p.time} · ${p.gender} · 이후 모든 페이지에 자동 입력됩니다</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button data-page="saju" style="padding:8px 16px;background:var(--ink);color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;">✨ 사주풀이 보기</button>
-          <button data-page="fortune" style="padding:8px 16px;background:var(--gold);color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;">🌅 오늘의 운세</button>
-          <button data-page="compat" style="padding:8px 16px;background:transparent;color:var(--ink);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;">💑 궁합 보기</button>
-        </div>
-      </div>`;
-  }
-}
-
 
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
@@ -3388,18 +3080,6 @@ document.addEventListener('click', function(e) {
   const btn = document.getElementById('menu-btn');
   if (menu && !menu.contains(e.target) && e.target !== btn) menu.style.display = 'none';
 });
-
-function switchNamingTab(n) {
-  [1,2].forEach(i => {
-    document.getElementById(`naming-panel-${i}`).style.display = i===n ? 'block' : 'none';
-    const btn = document.getElementById(`naming-tab-${i}`);
-    btn.style.borderBottomColor = i===n ? 'var(--gold)' : 'transparent';
-    btn.style.color = i===n ? 'var(--gold)' : 'var(--muted)';
-    btn.style.fontWeight = i===n ? '700' : '400';
-  });
-  document.getElementById('naming-result').style.display = 'none';
-}
-
 </script>
 </body>
 </html>
