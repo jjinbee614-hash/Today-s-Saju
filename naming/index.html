@@ -2676,7 +2676,37 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-
+function openSurnameHanjaPicker() {
+  const kor = (document.getElementById('naming-surname-kor')?.value || '').trim();
+  if (!kor) { showToast('먼저 성(한글)을 입력해주세요'); return; }
+  hanjaPickerTarget = 'naming-surname';
+  hanjaSelections = {};
+  const ch = kor[0];
+  const surnameFirst = Object.values(SURNAME_HANJA);
+  const candidates = (HANJA_DB[ch] || []).sort((a, b) => {
+    const aIs = surnameFirst.some(h => a.startsWith(h)) ? -1 : 0;
+    const bIs = surnameFirst.some(h => b.startsWith(h)) ? -1 : 0;
+    return aIs - bIs;
+  });
+  hanjaSelections[0] = null;
+  const html = `
+    <div style="margin-bottom:24px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--gold);">성씨 "${ch}" 한자 선택</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${candidates.map(h => {
+          const [hChar, hDesc] = h.split('(');
+          return `<button onclick="selectHanja(0, '${h.replace(/'/g,"\\'")}', this)"
+            style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);cursor:pointer;text-align:center;min-width:60px;">
+            <div style="font-size:22px;display:block;">${hChar}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">${hDesc ? hDesc.replace(')','') : ''}</div>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  document.getElementById('hanja-picker-content').innerHTML = html;
+  const modal = document.getElementById('hanja-modal');
+  modal.style.display = 'flex';
+}
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
   if (!menu) return;
