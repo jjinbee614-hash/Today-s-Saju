@@ -789,8 +789,6 @@
   <a href="https://saju-today.com/tarot.html" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🃏 타로</a>
   <a href="https://saju-today.com/face.html" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">👁️ 관상</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
-  <a href="https://saju-today.com/date" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">📅 택일</a>
-  <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
   <a href="https://saju-today.com" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--gold);border-radius:8px;font-weight:700;">📋 사주 등록</a>
 </div>
 <div class="container">
@@ -939,6 +937,22 @@
 </div>
 </div>
 
+<div style="max-width:800px;margin:0 auto;padding:40px 20px 60px;color:var(--ink);">
+  <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;margin-bottom:14px;">작명·이름 감정이란?</h2>
+  <p style="font-size:14px;line-height:2;margin-bottom:16px;color:var(--muted);">작명(作名)은 사주의 오행 균형을 고려해 부족한 기운을 보완하는 이름을 짓는 동양 전통 문화입니다. 한자의 획수, 음양, 오행, 수리를 종합적으로 분석해 좋은 이름을 선정합니다.</p>
+  <h3 style="font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;margin-bottom:10px;">서비스 구성</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div style="background:var(--card);border-radius:8px;padding:14px;">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:6px;">✨ 아기 작명</h4>
+      <p style="font-size:13px;line-height:1.7;color:var(--muted);">사주 오행에 맞는 이름 추천, 한자 선택, 수리·오행 분석</p>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:14px;">
+      <h4 style="font-size:14px;font-weight:700;margin-bottom:6px;">🔍 이름 감정</h4>
+      <p style="font-size:13px;line-height:1.7;color:var(--muted);">기존 이름의 수리·오행·음양 분석 및 사주와의 궁합 평가</p>
+    </div>
+  </div>
+  <p style="font-size:13px;line-height:1.8;color:var(--muted);">※ 이름은 단순한 호칭을 넘어 평생 함께하는 기운입니다. 신중하게 선택하시고 전문 작명가의 상담도 병행하시길 권장합니다.</p>
+</div>
 <div class="toast" id="toast"></div>
 
 
@@ -1696,6 +1710,27 @@
     </div>
   </div>
 </div>
+</div>
+<!-- ─── 한자 선택기 모달 ─── -->
+<div id="hanja-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:flex-start;padding-top:40px;overflow-y:auto;">
+  <div style="background:var(--paper);border-radius:12px;padding:24px;width:92%;max-width:500px;max-height:85vh;overflow-y:auto;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <h3 style="font-size:16px;font-weight:700;">✍️ 한자 선택</h3>
+      <button onclick="closeHanjaPicker()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">성씨부터 각 글자의 한자를 선택하세요. 뜻이나 음으로 검색도 가능해요.</p>
+    <div style="background:rgba(26,74,107,0.08);border:1px solid rgba(26,74,107,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;">
+      <p style="font-size:12px;color:var(--blue);margin:0;line-height:1.7;">
+        📖 목록에 없는 한자는 <strong>네이버 한자 사전</strong>(<a href="https://hanja.dict.naver.com" target="_blank" style="color:var(--blue);text-decoration:underline;">hanja.dict.naver.com</a>)에서 직접 찾아 아래 <strong>직접 입력</strong> 칸에 복사·붙여넣기 하세요.
+      </p>
+    </div>
+    <div id="hanja-picker-content"></div>
+    <div style="display:flex;gap:8px;margin-top:20px;position:sticky;bottom:0;background:var(--paper);padding-top:12px;">
+      <button onclick="confirmHanjaPicker()" style="flex:1;padding:12px;background:var(--ink);color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:'Noto Sans KR',sans-serif;font-weight:600;">✅ 선택 완료</button>
+      <button onclick="closeHanjaPicker()" style="padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:14px;font-family:'Noto Sans KR',sans-serif;">취소</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <script>
 function showToast(msg) {
@@ -2355,7 +2390,7 @@ const HANJA_DB = {
   '장':['章(글 장)','張(펼 장)','將(장수 장)','壯(씩씩할 장)','藏(감출 장)','長(길 장)','莊(씩씩할 장)','璋(옥 장)','掌(손바닥 장)','彰(빛날 장)'],
   '재':['才(재주 재)','在(있을 재)','宰(재상 재)','栽(심을 재)','載(실을 재)','哉(어조사 재)','材(재목 재)','財(재물 재)','齋(집 재)'],
   '전':['全(온전할 전)','典(법전 전)','展(펼 전)','田(밭 전)','戰(싸울 전)','傳(전할 전)','鈿(꽃다이 전)','電(번개 전)','轉(구를 전)','錢(돈 전)'],
-  '정':['鄭(나라 정)','正(바를 정)','貞(곧을 정)','廷(조정 정)','珽(옥홀 정)','禎(상서 정)','晶(맑을 정)','靖(평안할 정)','淨(깨끗할 정)','程(법도 정)','庭(뜰 정)','丁(고무래 정)','定(정할 정)','情(뜻 정)','精(정밀할 정)','政(정사 정)'],
+  '정':['正(바를 정)','貞(곧을 정)','廷(조정 정)','珽(옥홀 정)','禎(상서 정)','晶(맑을 정)','靖(평안할 정)','淨(깨끗할 정)','程(법도 정)','庭(뜰 정)','丁(고무래 정)','定(정할 정)','情(뜻 정)','精(정밀할 정)','政(정사 정)'],
   '제':['帝(임금 제)','齊(가지런할 제)','濟(건널 제)','祭(제사 제)','諸(모든 제)','際(가 제)','製(지을 제)'],
   '조':['朝(아침 조)','造(만들 조)','助(도울 조)','照(비출 조)','祚(복 조)','兆(조짐 조)','調(고를 조)','鳥(새 조)','趙(나라 조)','組(짤 조)'],
   '종':['宗(마루 종)','鐘(쇠북 종)','種(씨 종)','從(좇을 종)','縱(세로 종)','綜(모을 종)'],
@@ -2602,16 +2637,6 @@ function selectHanja(charIdx, hanjaChar, fullEntry) {
 }
 
 function confirmHanjaPicker() {
-  if (hanjaPickerTarget === 'naming-surname') {
-  const sel = hanjaSelections[0];
-  if (sel) {
-    const hChar = sel.split('(')[0];
-    const field = document.getElementById('naming-surname-han');
-    if (field) field.value = hChar;
-  }
-  closeHanjaPicker();
-  return;
-}
   const koreanId = hanjaPickerTarget === 'rename' ? 'rename-korean' : 'judge-korean';
   const hanjaId  = hanjaPickerTarget === 'rename' ? 'rename-hanja'  : 'judge-hanja';
   const korean   = (document.getElementById(koreanId)?.value || '').trim().replace(/\s/g,'');
@@ -2687,47 +2712,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
-const SURNAME_HANJA = {
-  '김':'金','이':'李','박':'朴','최':'崔','정':'鄭','강':'姜','조':'趙','윤':'尹','장':'張','임':'林',
-  '한':'韓','오':'吳','서':'徐','신':'申','권':'權','황':'黃','안':'安','송':'宋','류':'柳','홍':'洪',
-  '전':'全','고':'高','문':'文','양':'梁','손':'孫','배':'裵','백':'白','허':'許','남':'南','심':'沈',
-  '노':'盧','하':'河','곽':'郭','성':'成','차':'車','주':'朱','우':'禹','구':'具','민':'閔','나':'羅',
-  '진':'陳','지':'池','엄':'嚴','채':'蔡','원':'元','천':'千','방':'方','공':'孔','강':'康','현':'玄',
-  '함':'咸','변':'卞','염':'廉','여':'呂','추':'秋','도':'都','소':'蘇','석':'石','선':'宣','설':'薛',
-  '마':'馬','길':'吉','연':'延','위':'魏','표':'表','명':'明','기':'奇','반':'潘','왕':'王','금':'琴',
-  '옥':'玉','육':'陸','인':'印','맹':'孟','제':'諸','모':'牟','장':'蔣','탁':'卓','국':'鞠','여':'余',
-};
-function openSurnameHanjaPicker() {
-  const kor = (document.getElementById('naming-surname-kor')?.value || '').trim();
-  if (!kor) { showToast('먼저 성(한글)을 입력해주세요'); return; }
-  hanjaPickerTarget = 'naming-surname';
-  hanjaSelections = {};
-  const ch = kor[0];
-  const surnameFirst = Object.values(SURNAME_HANJA);
-  const candidates = (HANJA_DB[ch] || []).sort((a, b) => {
-    const aIs = surnameFirst.some(h => a.startsWith(h)) ? -1 : 0;
-    const bIs = surnameFirst.some(h => b.startsWith(h)) ? -1 : 0;
-    return aIs - bIs;
-  });
-  hanjaSelections[0] = null;
-  const html = `
-    <div style="margin-bottom:24px;">
-      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--gold);">성씨 "${ch}" 한자 선택</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;">
-        ${candidates.map(h => {
-          const [hChar, hDesc] = h.split('(');
-          return `<button onclick="selectHanja(0, '${h.replace(/'/g,"\\'")}', this)"
-            style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);cursor:pointer;text-align:center;min-width:60px;">
-            <div style="font-size:22px;display:block;">${hChar}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px;">${hDesc ? hDesc.replace(')','') : ''}</div>
-          </button>`;
-        }).join('')}
-      </div>
-    </div>`;
-  document.getElementById('hanja-picker-content').innerHTML = html;
-  const modal = document.getElementById('hanja-modal');
-  modal.style.display = 'flex';
-}
+
+
 function toggleMenu() {
   const menu = document.getElementById('nav-menu');
   if (!menu) return;
