@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>로그인 처리중... | 오늘의 사주</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family:'Noto Sans KR',sans-serif; background:#f5efe4; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+    .wrap { text-align:center; color:#1a1008; }
+    .spinner { width:40px; height:40px; border:3px solid rgba(26,16,8,0.15); border-top-color:#c9913a; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="spinner"></div>
+  <p>로그인 처리중입니다...</p>
+</div>
+<script>
+const { createClient } = supabase;
+const sb = createClient('https://kuupemfzqkzinrauhpnd.supabase.co', 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    // 사용자 정보 localStorage에 저장
+    const user = session.user;
+    localStorage.setItem('saju_user', JSON.stringify({
+      id: user.id,
+      email: user.email,
+      name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+      avatar: user.user_metadata?.avatar_url || '',
+      provider: user.app_metadata?.provider || '',
+    }));
+    // 이전 페이지 또는 홈으로
+    const redirect = sessionStorage.getItem('login_redirect') || 'https://saju-today.com';
+    sessionStorage.removeItem('login_redirect');
+    window.location.href = redirect;
+  }
+});
+
+// 세션 확인
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    const user = session.user;
+    localStorage.setItem('saju_user', JSON.stringify({
+      id: user.id,
+      email: user.email,
+      name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+      avatar: user.user_metadata?.avatar_url || '',
+      provider: user.app_metadata?.provider || '',
+    }));
+    const redirect = sessionStorage.getItem('login_redirect') || 'https://saju-today.com';
+    sessionStorage.removeItem('login_redirect');
+    window.location.href = redirect;
+  }
+});
+</script>
+</body>
+</html>
