@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔐 관리자 페이지 | 오늘의 사주</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#1a1008; --paper:#f5efe4; --card:#ede5d8; --border:rgba(26,16,8,0.15); --muted:#8a7860; --gold:#c9913a; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Noto Sans KR',sans-serif; background:#1a1008; color:#f5efe4; min-height:100vh; display:flex; flex-direction:column; }
+    .login-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .login-box { background:#2d1f0e; border:1px solid #c9913a; border-radius:16px; padding:40px; width:100%; max-width:400px; text-align:center; }
+    .admin-wrap { display:none; padding:24px; max-width:900px; margin:0 auto; width:100%; }
+    input[type=password], input[type=text] { width:100%; padding:12px 16px; border:1px solid #c9913a; border-radius:8px; font-size:14px; background:#1a1008; color:#f5efe4; font-family:'Noto Sans KR',sans-serif; margin-bottom:12px; }
+    .btn { padding:12px 24px; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
+    .btn-gold { background:#c9913a; color:white; width:100%; }
+    .btn-gold:hover { background:#b07d2e; }
+    .btn-sm { padding:6px 14px; font-size:12px; border-radius:6px; }
+    .btn-green { background:#27ae60; color:white; }
+    .btn-red { background:#c0392b; color:white; }
+    .btn-blue { background:#1a4a6b; color:white; }
+    .section { background:#2d1f0e; border:1px solid rgba(201,145,58,0.3); border-radius:12px; padding:20px; margin-bottom:20px; }
+    .section h3 { font-size:16px; font-weight:700; color:#c9913a; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid rgba(201,145,58,0.2); }
+    .feature-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(201,145,58,0.1); }
+    .feature-row:last-child { border-bottom:none; }
+    .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+    .badge-free { background:rgba(39,174,96,0.2); color:#27ae60; border:1px solid #27ae60; }
+    .badge-paid { background:rgba(201,145,58,0.2); color:#c9913a; border:1px solid #c9913a; }
+    .badge-locked { background:rgba(192,57,43,0.2); color:#c0392b; border:1px solid #c0392b; }
+    .stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+    .stat-box { background:#1a1008; border:1px solid rgba(201,145,58,0.2); border-radius:8px; padding:14px; text-align:center; }
+    .stat-num { font-size:24px; font-weight:700; color:#c9913a; display:block; }
+    .stat-label { font-size:11px; color:#8a7860; margin-top:4px; }
+    .log-area { background:#1a1008; border:1px solid rgba(201,145,58,0.2); border-radius:8px; padding:14px; font-size:12px; color:#8a7860; max-height:200px; overflow-y:auto; font-family:monospace; }
+    .toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%); background:#c9913a; color:white; padding:12px 24px; border-radius:24px; font-size:14px; z-index:9999; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+    .toast.show { opacity:1; }
+    select { padding:8px 12px; border:1px solid rgba(201,145,58,0.3); border-radius:6px; background:#1a1008; color:#f5efe4; font-family:'Noto Sans KR',sans-serif; font-size:13px; }
+  </style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <div style="font-size:48px;margin-bottom:16px;">🔐</div>
+    <h1 style="font-family:'Noto Serif KR',serif;font-size:22px;margin-bottom:8px;">관리자 페이지</h1>
+    <p style="font-size:13px;color:#8a7860;margin-bottom:24px;">오늘의 사주 관리자 전용</p>
+    <input type="password" id="pw-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()"/>
+    <button class="btn btn-gold" onclick="login()">🔓 로그인</button>
+  </div>
+</div>
+
+<!-- 관리자 대시보드 -->
+<div class="admin-wrap" id="admin-wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <h1 style="font-family:'Noto Serif KR',serif;font-size:22px;color:#c9913a;">🔐 관리자 대시보드</h1>
+    <button class="btn btn-sm btn-red" onclick="logout()">로그아웃</button>
+  </div>
+
+  <!-- 통계 -->
+  <div class="section">
+    <h3>📊 현황</h3>
+    <div class="stat-grid">
+      <div class="stat-box"><span class="stat-num" id="stat-users">-</span><span class="stat-label">등록 사용자</span></div>
+      <div class="stat-box"><span class="stat-num" id="stat-members">-</span><span class="stat-label">멤버십 회원</span></div>
+      <div class="stat-box"><span class="stat-num" id="stat-revenue">-</span><span class="stat-label">이번달 매출</span></div>
+    </div>
+    <p style="font-size:12px;color:#8a7860;">* Supabase 연동 후 실시간 데이터 표시</p>
+  </div>
+
+  <!-- 기능 잠금/해제 -->
+  <div class="section">
+    <h3>🔧 기능 잠금 설정</h3>
+    <div id="feature-list"></div>
+  </div>
+
+  <!-- 테스트 모드 -->
+  <div class="section">
+    <h3>🧪 테스트 모드</h3>
+    <p style="font-size:13px;color:#8a7860;margin-bottom:16px;">테스트 모드 활성화 시 이 브라우저에서 모든 유료 기능 무료로 이용 가능</p>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="btn btn-green btn-sm" onclick="setTestMode(true)">✅ 테스트 모드 ON</button>
+      <button class="btn btn-red btn-sm" onclick="setTestMode(false)">❌ 테스트 모드 OFF</button>
+      <span id="test-status" style="font-size:13px;color:#8a7860;"></span>
+    </div>
+  </div>
+
+  <!-- 계정 관리 -->
+  <div class="section">
+    <h3>👤 계정 수동 관리</h3>
+    <p style="font-size:13px;color:#8a7860;margin-bottom:12px;">특정 계정에 멤버십 부여/해제 (Supabase 연동 전 테스트용)</p>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="text" id="account-input" placeholder="이메일 또는 사용자ID" style="flex:1;margin-bottom:0;"/>
+      <select id="account-action">
+        <option value="grant_member">멤버십 부여</option>
+        <option value="revoke_member">멤버십 해제</option>
+        <option value="grant_admin">관리자 권한</option>
+        <option value="ban">차단</option>
+      </select>
+      <button class="btn btn-blue btn-sm" onclick="manageAccount()">적용</button>
+    </div>
+  </div>
+
+  <!-- 가격 설정 -->
+  <div class="section">
+    <h3>💰 가격 설정</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <label style="font-size:12px;color:#8a7860;display:block;margin-bottom:6px;">건당 가격 (원)</label>
+        <input type="text" id="price-single" value="290" style="margin-bottom:8px;"/>
+        <label style="font-size:12px;color:#8a7860;display:block;margin-bottom:6px;">건당 원가 (원)</label>
+        <input type="text" id="price-single-orig" value="990"/>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#8a7860;display:block;margin-bottom:6px;">멤버십 월 가격 (원)</label>
+        <input type="text" id="price-member" value="5990" style="margin-bottom:8px;"/>
+        <label style="font-size:12px;color:#8a7860;display:block;margin-bottom:6px;">멤버십 원가 (원)</label>
+        <input type="text" id="price-member-orig" value="10900"/>
+      </div>
+    </div>
+    <button class="btn btn-gold" style="margin-top:12px;width:auto;padding:10px 24px;" onclick="savePrices()">💾 가격 저장</button>
+  </div>
+
+  <!-- 로그 -->
+  <div class="section">
+    <h3>📋 관리 로그</h3>
+    <div class="log-area" id="log-area">관리자 로그인됨...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MASTER_PW = 'saju2024master!';
+
+const FEATURES = [
+  { id:'saju',    name:'내 사주풀이',     free:true,  icon:'✨' },
+  { id:'fortune', name:'오늘의 운세',     free:true,  icon:'🌅' },
+  { id:'tarot',   name:'타로',           free:true,  icon:'🃏' },
+  { id:'fortune_tomorrow', name:'내일의 운세', free:false, icon:'🌙' },
+  { id:'compat',  name:'궁합 보기',       free:false, icon:'💑' },
+  { id:'naming',  name:'작명/이름 감정',  free:false, icon:'✍️' },
+  { id:'dream',   name:'꿈 해몽',        free:false, icon:'💭' },
+  { id:'face',    name:'관상',           free:false, icon:'👁️' },
+  { id:'date',    name:'택일',           free:false, icon:'📅' },
+];
+
+function login() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === MASTER_PW) {
+    document.getElementById('login-wrap').style.display = 'none';
+    document.getElementById('admin-wrap').style.display = 'block';
+    sessionStorage.setItem('admin_auth', '1');
+    initDashboard();
+    addLog('관리자 로그인');
+  } else {
+    showToast('비밀번호가 틀렸습니다');
+    document.getElementById('pw-input').value = '';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('admin_auth');
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('admin-wrap').style.display = 'none';
+}
+
+function initDashboard() {
+  // 잠금 설정 로드
+  const locks = JSON.parse(localStorage.getItem('feature_locks') || '{}');
+  const prices = JSON.parse(localStorage.getItem('saju_prices') || '{}');
+
+  if (prices.single) document.getElementById('price-single').value = prices.single;
+  if (prices.singleOrig) document.getElementById('price-single-orig').value = prices.singleOrig;
+  if (prices.member) document.getElementById('price-member').value = prices.member;
+  if (prices.memberOrig) document.getElementById('price-member-orig').value = prices.memberOrig;
+
+  // 기능 목록 렌더
+  const list = document.getElementById('feature-list');
+  list.innerHTML = FEATURES.map(f => {
+    const isLocked = locks[f.id] === true;
+    const isFree = f.free;
+    return `<div class="feature-row">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:20px;">${f.icon}</span>
+        <span style="font-size:14px;">${f.name}</span>
+        <span class="badge ${isFree ? 'badge-free' : 'badge-paid'}">${isFree ? '무료' : '유료'}</span>
+        ${isLocked ? '<span class="badge badge-locked">잠금</span>' : ''}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-green btn-sm" onclick="setLock('${f.id}', false)">🔓 해제</button>
+        <button class="btn btn-red btn-sm" onclick="setLock('${f.id}', true)">🔒 잠금</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 테스트 모드 상태
+  updateTestStatus();
+}
+
+function setLock(featureId, lock) {
+  const locks = JSON.parse(localStorage.getItem('feature_locks') || '{}');
+  locks[featureId] = lock;
+  localStorage.setItem('feature_locks', JSON.stringify(locks));
+  addLog(`${featureId} 기능 ${lock ? '잠금' : '해제'}`);
+  showToast(`${lock ? '🔒 잠금' : '🔓 해제'} 완료`);
+  initDashboard();
+}
+
+function setTestMode(on) {
+  localStorage.setItem('test_mode', on ? '1' : '0');
+  updateTestStatus();
+  addLog(`테스트 모드 ${on ? 'ON' : 'OFF'}`);
+  showToast(`테스트 모드 ${on ? 'ON ✅' : 'OFF ❌'}`);
+}
+
+function updateTestStatus() {
+  const on = localStorage.getItem('test_mode') === '1';
+  document.getElementById('test-status').textContent = on ? '현재: ON (모든 유료기능 무료)' : '현재: OFF';
+  document.getElementById('test-status').style.color = on ? '#27ae60' : '#8a7860';
+}
+
+function savePrices() {
+  const prices = {
+    single: document.getElementById('price-single').value,
+    singleOrig: document.getElementById('price-single-orig').value,
+    member: document.getElementById('price-member').value,
+    memberOrig: document.getElementById('price-member-orig').value,
+  };
+  localStorage.setItem('saju_prices', JSON.stringify(prices));
+  addLog(`가격 저장: 건당 ${prices.single}원, 멤버십 ${prices.member}원/월`);
+  showToast('💾 가격이 저장됐어요');
+}
+
+function manageAccount() {
+  const account = document.getElementById('account-input').value.trim();
+  const action = document.getElementById('account-action').value;
+  if (!account) { showToast('계정을 입력해주세요'); return; }
+  const actionNames = {
+    grant_member: '멤버십 부여',
+    revoke_member: '멤버십 해제',
+    grant_admin: '관리자 권한 부여',
+    ban: '차단'
+  };
+  addLog(`[${account}] ${actionNames[action]} 처리 (Supabase 연동 후 실제 적용)`);
+  showToast(`${actionNames[action]} 처리됨 (테스트)`);
+}
+
+function addLog(msg) {
+  const area = document.getElementById('log-area');
+  const time = new Date().toLocaleTimeString('ko-KR');
+  area.innerHTML = `[${time}] ${msg}\n` + area.innerHTML;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// 자동 로그인 (세션 유지)
+if (sessionStorage.getItem('admin_auth') === '1') {
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('admin-wrap').style.display = 'block';
+  initDashboard();
+}
+</script>
+</body>
+</html>
