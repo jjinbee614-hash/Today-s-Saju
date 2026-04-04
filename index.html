@@ -843,7 +843,7 @@
   <a href="/compat" class="menu-item" style="text-decoration:none;">💑 궁합 보기</a>
   <a href="/naming" class="menu-item" style="text-decoration:none;">✍️ 작명/이름 감정</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
-  <a href="https://saju-today.com/dream" class="menu-item" style="text-decoration:none;">🌙 꿈 해몽</a>
+  <a href="https://saju-today.com/dream.html" class="menu-item" style="text-decoration:none;">🌙 꿈 해몽</a>
   <a href="https://saju-today.com/tarot" class="menu-item" style="text-decoration:none;">🃏 타로</a>
   <a href="https://saju-today.com/face" class="menu-item" style="text-decoration:none;">👁️ 관상</a>
 </div>
@@ -1012,6 +1012,8 @@
               style="flex:1;padding:12px 14px;border:2px solid var(--border);border-radius:6px;font-size:18px;font-weight:600;background:var(--card);min-width:80px;"/>
             <input type="text" id="naming-surname-han" placeholder="한자" maxlength="2" class="hanja-input"
               style="width:70px;padding:12px 8px;border:2px solid var(--border);border-radius:6px;font-size:18px;font-weight:600;background:var(--card);text-align:center;"/>
+            <button onclick="openSurnameHanjaPicker()"
+              style="padding:12px 10px;background:var(--gold);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:'Noto Sans KR',sans-serif;white-space:nowrap;">한자<br>선택</button>
           </div>
         </div>
         <div>
@@ -3312,7 +3314,38 @@ function openHanjaPicker(target) {
   allChars.forEach((ch, i) => {
     const isFirst = i === 0;
     const label = isFirst ? `성씨 "${ch}"` : `이름 ${i}번째 글자 "${ch}"`;
-    const candidates = HANJA_DB[ch] || [];
+    const candidates = (HANJA_DB[ch] || []).sort((a, b) => {
+      // 이름에 자주 쓰이는 한자 우선 (획수 적고 좋은 의미)
+      const preferred = [
+  '俊','峻','準','浚','駿','宇','禹','佑','祐','雨','羽',
+  '珉','旼','旻','敏','民','載','宰','才','在','梓','財',
+  '瑞','徐','緖','賢','玄','炫','鉉','弦','顯',
+  '成','聖','誠','盛','星','晟','尹','胤','潤','倫','允',
+  '鎭','眞','珍','振','晉','璡','昊','浩','皓','鎬','豪','虎',
+  '榮','英','泳','永','映','瑛','爀','赫','奕',
+  '熙','熹','曦','僖','羲','勳','焄','薰',
+  '漢','韓','翰','瀚','元','源','園','圓','遠','沅',
+  '奎','圭','珪','揆','贊','璨','燦','粲',
+  '承','勝','昇','丞','道','度','渡','燾',
+  '建','乾','健','楗','龍','勇','鏞','溶','容',
+  '哲','澈','泰','太','台','兌',
+  '東','童','棟','同','洞',
+  '娥','雅','恩','誾','銀','隱',
+  '智','芷','志','枝','知','妍','娟','姸','涓','璉','延',
+  '秀','洙','修','守','壽','樹','粹',
+  '藝','芸','睿','叡','銳','禮','娜','那','奈',
+  '河','夏','荷','何','霞','小','笑','召','昭','素',
+  '美','媚','嵋','有','柔','裕','惟','唯','琉',
+  '彩','菜','採','伊','怡','璘','麟','多','茶',
+  '嘉','佳','仁','義','禮','智','信',
+  '福','禧','祥','吉','慶','光','明','炅','炆','炳','昺','暎',
+  '雄','毅','剛','花','華','蓮','蘭','梅','菊',
+  '昱','燁','煜','旭','彧',
+];
+      const aScore = preferred.some(p => a.includes(p)) ? -1 : 0;
+      const bScore = preferred.some(p => b.includes(p)) ? -1 : 0;
+      return aScore - bScore;
+    });
     hanjaSelections[i] = null;
 
     html += `
@@ -3451,6 +3484,16 @@ function selectHanja(charIdx, hanjaChar, fullEntry) {
 }
 
 function confirmHanjaPicker() {
+  if (hanjaPickerTarget === 'naming-surname') {
+    const sel = hanjaSelections[0];
+    if (sel) {
+      const hChar = sel.split('(')[0];
+      const field = document.getElementById('naming-surname-han');
+      if (field) field.value = hChar;
+    }
+    closeHanjaPicker();
+    return;
+  }
   const koreanId = hanjaPickerTarget === 'rename' ? 'rename-korean' : 'judge-korean';
   const hanjaId  = hanjaPickerTarget === 'rename' ? 'rename-hanja'  : 'judge-hanja';
   const korean   = (document.getElementById(koreanId)?.value || '').trim().replace(/\s/g,'');
@@ -3498,6 +3541,42 @@ function addManualHanja(charIdx) {
   hanjaInput.value = '';
   meaningInput.value = '';
   showToast(`"${hanja}" 추가됨`);
+}
+
+function openSurnameHanjaPicker() {
+  const kor = (document.getElementById('naming-surname-kor')?.value || '').trim();
+  if (!kor) { showToast('먼저 성(한글)을 입력해주세요'); return; }
+
+  hanjaPickerTarget = 'naming-surname';
+  hanjaSelections = {};
+
+  const ch = kor[0];
+  const candidates = (HANJA_DB[ch] || []).sort((a, b) => {
+    const surnameFirst = Object.values(SURNAME_HANJA);
+    const aIs = surnameFirst.some(h => a.startsWith(h)) ? -1 : 0;
+    const bIs = surnameFirst.some(h => b.startsWith(h)) ? -1 : 0;
+    return aIs - bIs;
+  });
+  hanjaSelections[0] = null;
+
+  const html = `
+    <div style="margin-bottom:24px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--gold);">성씨 "${ch}" 한자 선택</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${candidates.map((h, j) => {
+          const [hChar, hDesc] = h.split('(');
+          return `<button onclick="selectHanja(0, '${h.replace(/'/g,"\'")}', this)"
+            style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);cursor:pointer;text-align:center;min-width:60px;">
+            <div class="hanja-btn-char" style="font-size:22px;display:block;">${hChar}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">${hDesc ? hDesc.replace(')','') : ''}</div>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('hanja-picker-content').innerHTML = html;
+  const modal = document.getElementById('hanja-modal');
+  modal.style.display = 'flex';
 }
 
 function closeHanjaPicker() {
