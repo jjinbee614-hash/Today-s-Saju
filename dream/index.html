@@ -49,11 +49,9 @@
   <a href="https://saju-today.com/compat" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">💑 궁합 보기</a>
   <a href="https://saju-today.com/naming" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">✍️ 작명/이름 감정</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
-  <a href="https://saju-today.com/dream" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🌙 꿈 해몽</a>
+  <a href="https://saju-today.com/dream.html" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🌙 꿈 해몽</a>
   <a href="https://saju-today.com/tarot" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🃏 타로</a>
   <a href="https://saju-today.com/face" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">👁️ 관상</a>
-  <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
-  <a href="https://saju-today.com/date" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">📅 택일</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
   <a href="https://saju-today.com" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--gold);border-radius:8px;font-weight:700;">📋 사주 등록</a>
 </div>
@@ -99,6 +97,30 @@
 
   <button class="submit-btn" onclick="runDreamWithCalType()">🌙 꿈 해몽하기 ✦</button>
   <div id="dream-result" style="display:none;margin-top:32px;"></div>
+</div>
+<div style="max-width:800px;margin:0 auto;padding:40px 20px 60px;color:var(--ink);">
+  <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;margin-bottom:14px;">꿈 해몽이란?</h2>
+  <p style="font-size:14px;line-height:2;margin-bottom:16px;color:var(--muted);">꿈 해몽(解夢)은 수면 중 나타나는 꿈의 상징과 이미지를 분석해 길흉을 판단하는 전통 문화입니다. 동양에서는 예로부터 꿈을 무의식과 우주적 기운이 교차하는 메시지로 해석해왔습니다.</p>
+  <h3 style="font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;margin-bottom:10px;">자주 나오는 꿈의 의미</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div style="background:var(--card);border-radius:8px;padding:12px;">
+      <p style="font-size:13px;font-weight:700;margin-bottom:4px;">🐍 뱀 꿈</p>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6;">재물운 상승, 새로운 기회의 암시. 황금 뱀은 대길몽.</p>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:12px;">
+      <p style="font-size:13px;font-weight:700;margin-bottom:4px;">🐷 돼지 꿈</p>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6;">풍요와 재복을 상징. 돼지꿈은 전통적으로 대표적인 길몽.</p>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:12px;">
+      <p style="font-size:13px;font-weight:700;margin-bottom:4px;">🌊 바다·강 꿈</p>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6;">맑은 물은 좋은 기운, 거친 파도는 시련과 도전을 의미.</p>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:12px;">
+      <p style="font-size:13px;font-weight:700;margin-bottom:4px;">🔥 불 꿈</p>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6;">큰 불은 사업 번창, 작은 불은 열정과 에너지의 상징.</p>
+    </div>
+  </div>
+  <p style="font-size:13px;line-height:1.8;color:var(--muted);">꿈 내용을 자세히 입력할수록 더 정확한 해몽이 가능합니다. 사주팔자와 연계하면 개인화된 해몽을 받을 수 있습니다.</p>
 </div>
 <div class="toast" id="toast"></div>
 <script>
