@@ -59,11 +59,9 @@
   <a href="https://saju-today.com/compat" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">💑 궁합 보기</a>
   <a href="https://saju-today.com/naming" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">✍️ 작명/이름 감정</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
-  <a href="https://saju-today.com/dream" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🌙 꿈 해몽</a>
+  <a href="https://saju-today.com/dream.html" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🌙 꿈 해몽</a>
   <a href="https://saju-today.com/tarot" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🃏 타로</a>
   <a href="https://saju-today.com/face" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">👁️ 관상</a>
-  <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
-  <a href="https://saju-today.com/date" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">📅 택일</a>
   <div style="border-top:1px solid var(--border);margin:4px 0;"></div>
   <a href="https://saju-today.com" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--gold);border-radius:8px;font-weight:700;">📋 사주 등록</a>
 </div>
@@ -96,6 +94,29 @@
   <div id="tarot-result" style="display:none;margin-top:32px;"></div>
 </div>
 
+<div style="max-width:800px;margin:0 auto;padding:40px 20px 60px;color:var(--ink);">
+  <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;margin-bottom:14px;">타로 카드란?</h2>
+  <p style="font-size:14px;line-height:2;margin-bottom:16px;color:var(--muted);">타로(Tarot)는 78장의 카드로 구성된 서양 점술 도구입니다. 22장의 메이저 아르카나와 56장의 마이너 아르카나로 이루어져 있으며, 각 카드는 고유한 상징과 의미를 담고 있습니다.</p>
+  <h3 style="font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;margin-bottom:10px;">주요 카드 의미</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div style="background:var(--card);border-radius:8px;padding:12px;text-align:center;">
+      <p style="font-size:18px;margin-bottom:4px;">🌟</p>
+      <p style="font-size:13px;font-weight:700;margin-bottom:4px;">광대 (The Fool)</p>
+      <p style="font-size:11px;color:var(--muted);">새로운 시작, 순수한 가능성</p>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:12px;text-align:center;">
+      <p style="font-size:18px;margin-bottom:4px;">☀️</p>
+      <p style="font-size:13px;font-weight:700;margin-bottom:4px;">태양 (The Sun)</p>
+      <p style="font-size:11px;color:var(--muted);">성공, 기쁨, 긍정적 에너지</p>
+    </div>
+    <div style="background:var(--card);border-radius:8px;padding:12px;text-align:center;">
+      <p style="font-size:18px;margin-bottom:4px;">🌙</p>
+      <p style="font-size:13px;font-weight:700;margin-bottom:4px;">달 (The Moon)</p>
+      <p style="font-size:11px;color:var(--muted);">직관, 무의식, 불확실성</p>
+    </div>
+  </div>
+  <p style="font-size:14px;line-height:2;color:var(--muted);">오늘의 사주 타로는 Rider-Waite 덱을 기반으로 하며, AI가 뽑힌 카드의 상징과 현재 상황을 연결해 실질적인 조언을 제공합니다.</p>
+</div>
 <div class="toast" id="toast"></div>
 <script>
 function showToast(msg) {
