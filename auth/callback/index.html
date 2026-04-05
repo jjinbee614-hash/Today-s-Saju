@@ -33,9 +33,15 @@ sb.auth.onAuthStateChange((event, session) => {
       provider: user.app_metadata?.provider || '',
     }));
     // 이전 페이지 또는 홈으로
-    const redirect = sessionStorage.getItem('login_redirect') || 'https://saju-today.com';
-    sessionStorage.removeItem('login_redirect');
-    window.location.href = redirect;
+    // 기존 회원인지 확인
+const { data: userData } = await sb.from('users').select('terms_agreed').eq('id', user.id).single();
+if (userData?.terms_agreed) {
+  const redirect = sessionStorage.getItem('login_redirect') || 'https://saju-today.com';
+  sessionStorage.removeItem('login_redirect');
+  window.location.href = redirect;
+} else {
+  window.location.href = 'https://saju-today.com/terms';
+}
   }
 });
 
@@ -50,9 +56,15 @@ sb.auth.getSession().then(({ data: { session } }) => {
       avatar: user.user_metadata?.avatar_url || '',
       provider: user.app_metadata?.provider || '',
     }));
-    const redirect = sessionStorage.getItem('login_redirect') || 'https://saju-today.com';
-    sessionStorage.removeItem('login_redirect');
-    window.location.href = redirect;
+    // 기존 회원인지 확인
+const { data: userData } = await sb.from('users').select('terms_agreed').eq('id', user.id).single();
+if (userData?.terms_agreed) {
+  const redirect = sessionStorage.getItem('login_redirect') || 'https://saju-today.com';
+  sessionStorage.removeItem('login_redirect');
+  window.location.href = redirect;
+} else {
+  window.location.href = 'https://saju-today.com/terms';
+}
   }
 });
 </script>
