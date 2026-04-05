@@ -80,7 +80,7 @@
       provider: 'kakao',
       options: {
         redirectTo: 'https://saju-today.com/auth/callback',
-        scopes: 'profile_nickname profile_image'
+        scopes: 'profile_nickname'
       }
     }).then(function(res) {
       if (res.error) showToast('카카오 로그인 오류: ' + res.error.message);
