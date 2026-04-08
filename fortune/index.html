@@ -840,9 +840,9 @@
 </div>
 </div>
 <div id="fortune-share" style="display:none;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-  <button onclick="shareImage('fortune-content')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:linear-gradient(45deg,#f09433,#bc1888);border:none;border-radius:24px;color:white;font-size:14px;font-weight:600;cursor:pointer;">📸 인스타 공유</button>
-  <button onclick="shareLink('fortune-content','오늘의 운세')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:#FEE500;border:none;border-radius:24px;color:#191919;font-size:14px;font-weight:600;cursor:pointer;">💬 카카오 공유</button>
-  <button onclick="copyShareUrl('https://saju-today.com/fortune')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:#f5efe4;border:1px solid rgba(26,16,8,0.2);border-radius:24px;color:#1a1008;font-size:14px;font-weight:600;cursor:pointer;">🔗 링크 복사</button>
+  <button onclick="shareInstagram('fortune-content')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:linear-gradient(45deg,#f09433,#bc1888);border:none;border-radius:24px;color:white;font-size:14px;font-weight:600;cursor:pointer;">📸 인스타 저장</button>
+  <button onclick="shareTwitter('fortune-content','오늘의 운세')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:#000;border:none;border-radius:24px;color:white;font-size:14px;font-weight:600;cursor:pointer;">🐦 X(트위터) 공유</button>
+  <button onclick="shareImage('fortune-content')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:#f5efe4;border:1px solid rgba(26,16,8,0.2);border-radius:24px;color:#1a1008;font-size:14px;font-weight:600;cursor:pointer;">🖼️ 이미지 저장</button>
 </div>
 
 <div style="max-width:800px;margin:0 auto;padding:40px 20px 60px;color:var(--ink);">
@@ -1597,6 +1597,43 @@ function updateNavUser() {
   }
 }
 document.addEventListener('DOMContentLoaded', updateNavUser);
+
+function shareInstagram(resultId) {
+  var el = document.getElementById(resultId);
+  if (!el || el.style.display === 'none') { showToast('먼저 결과를 확인해주세요'); return; }
+  showToast('이미지 생성 중...');
+  function doCapture() {
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:640px;background:#f5efe4;font-family:sans-serif;';
+    wrapper.innerHTML = '<div style="background:linear-gradient(135deg,#1a1008,#3d2010);padding:32px;text-align:center;"><div style="font-size:32px;font-weight:800;color:white;font-family:serif;">오늘의<span style="color:#c9913a;">사주</span></div><div style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:4px;">AI 사주·운세·궁합</div></div><div id="cc" style="padding:24px;background:#f5efe4;"></div><div style="background:linear-gradient(135deg,#1a1008,#3d2010);padding:24px;text-align:center;"><div style="color:#c9913a;font-size:14px;font-weight:700;">🔮 나도 AI 사주 무료로 보기</div><div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:4px;">saju-today.com</div></div>';
+    var clone = el.cloneNode(true);
+    clone.style.cssText = 'display:block !important;color:#1a1008;';
+    wrapper.querySelector('#cc').appendChild(clone);
+    document.body.appendChild(wrapper);
+    html2canvas(wrapper, {scale:2,backgroundColor:'#f5efe4',useCORS:true}).then(function(canvas) {
+      document.body.removeChild(wrapper);
+      canvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a'); a.href=url; a.download='saju-today.png'; a.click();
+        URL.revokeObjectURL(url);
+        showToast('저장 완료! 인스타에 업로드해주세요 📸');
+        setTimeout(function() { window.location.href = 'instagram://camera'; }, 1000);
+      });
+    }).catch(function() { document.body.removeChild(wrapper); showToast('이미지 생성 실패'); });
+  }
+  if (typeof html2canvas === 'undefined') {
+    var s = document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; s.onload=doCapture; document.head.appendChild(s);
+  } else { doCapture(); }
+}
+
+function shareTwitter(resultId, title) {
+  var el = document.getElementById(resultId);
+  if (!el || el.style.display === 'none') { showToast('먼저 결과를 확인해주세요'); return; }
+  var text = (el.innerText||'').trim().slice(0,100);
+  var tweetText = title + ' 결과를 AI로 확인했어요! 🔮\n' + text;
+  var tweetUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText) + '&url=' + encodeURIComponent('https://saju-today.com');
+  window.open(tweetUrl, '_blank');
+}
 
 function shareImage(resultId) {
   var el = document.getElementById(resultId);
