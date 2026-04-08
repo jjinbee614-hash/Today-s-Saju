@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>공유된 결과 | 오늘의 사주</title>
+  <meta name="description" content="AI 사주·운세·궁합 결과를 확인하세요. 나도 무료로 받아보기!"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#1a1008; --paper:#f5efe4; --card:#ede5d8; --border:rgba(26,16,8,0.15); --muted:#8a7860; --gold:#c9913a; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; }
+    .header { background:linear-gradient(135deg,#1a1008,#3d2010); padding:24px; text-align:center; }
+    .logo { font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700; color:white; }
+    .logo span { color:#c9913a; }
+    .header-sub { color:rgba(255,255,255,0.6); font-size:13px; margin-top:6px; }
+    .share-badge { display:inline-block; background:rgba(201,145,58,0.2); border:1px solid rgba(201,145,58,0.5); color:#c9913a; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; margin-top:12px; letter-spacing:0.5px; }
+    .container { max-width:640px; margin:0 auto; padding:24px 20px 120px; }
+    .result-card { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+    .result-title { font-family:'Noto Serif KR',serif; font-size:20px; font-weight:700; color:var(--ink); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+    .result-content { font-size:14px; line-height:2; color:#2c2c2c; white-space:pre-wrap; word-break:break-word; }
+    .cta-section { position:fixed; bottom:0; left:0; right:0; background:linear-gradient(135deg,#1a1008,#3d2010); padding:20px 24px max(20px,env(safe-area-inset-bottom)); text-align:center; }
+    .cta-btn { display:inline-block; background:linear-gradient(45deg,#c9913a,#e8b86d); color:white; font-size:16px; font-weight:700; padding:14px 32px; border-radius:30px; text-decoration:none; font-family:'Noto Serif KR',serif; box-shadow:0 4px 16px rgba(201,145,58,0.4); }
+    .cta-sub { color:rgba(255,255,255,0.6); font-size:12px; margin-top:8px; }
+    .loading { text-align:center; padding:60px 20px; color:var(--muted); }
+    .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .meta-row { display:flex; align-items:center; gap:8px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+    .meta-icon { font-size:28px; }
+    .meta-text { font-size:13px; color:var(--muted); }
+    .meta-text strong { color:var(--ink); display:block; font-size:16px; margin-bottom:2px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">오늘의<span>사주</span></div>
+  <div class="header-sub">AI 사주·운세·궁합</div>
+  <div class="share-badge">🔮 공유된 결과</div>
+</div>
+
+<div class="container">
+  <div id="content-area">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>결과를 불러오는 중...</p>
+    </div>
+  </div>
+</div>
+
+<div class="cta-section">
+  <a href="https://saju-today.com" class="cta-btn">🔮 나도 AI 사주·운세 무료로 보기</a>
+  <div class="cta-sub">사주풀이 · 오늘의 운세 · 타로 · 관상 · 꿈 해몽</div>
+</div>
+
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var d = params.get('d');
+
+  if (!d) {
+    window.location.href = 'https://saju-today.com';
+    return;
+  }
+
+  try {
+    var decoded = JSON.parse(decodeURIComponent(escape(atob(d))));
+    if (!decoded || !decoded.content) throw new Error('no content');
+
+    var title = decoded.title || '결과';
+    var content = decoded.content;
+
+    var iconMap = {
+      '내 사주풀이': '✨',
+      '오늘의 운세': '🌅',
+      '궁합 결과': '💑',
+      '작명·이름감정': '✍️',
+      '꿈 해몽': '🌙',
+      '타로 결과': '🃏',
+      '관상 분석': '👁️',
+      '택일 결과': '📅'
+    };
+    var icon = iconMap[title] || '🔮';
+
+    document.title = title + ' | 오늘의 사주';
+    document.querySelector('meta[name="description"]').setAttribute(
+      'content', title + ' 결과: ' + content.slice(0, 80) + '...'
+    );
+
+    var html = '<div class="result-card">'
+      + '<div class="meta-row">'
+      + '<div class="meta-icon">' + icon + '</div>'
+      + '<div class="meta-text"><strong>' + escHtml(title) + '</strong>AI가 분석한 결과입니다</div>'
+      + '</div>'
+      + '<div class="result-content">' + escHtml(content) + '</div>'
+      + '</div>'
+      + '<p style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px;">친구에게 공유된 결과입니다 · <a href="https://saju-today.com" style="color:var(--gold);text-decoration:none;">나도 받아보기 →</a></p>';
+
+    document.getElementById('content-area').innerHTML = html;
+  } catch(e) {
+    window.location.href = 'https://saju-today.com';
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
+</body>
+</html>
