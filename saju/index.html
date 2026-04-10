@@ -1843,7 +1843,7 @@ document.addEventListener('DOMContentLoaded', updateNavUser);
 
 async function shareResult(resultId, pageTitle) {
   var el = document.getElementById(resultId);
-  if (!el || el.style.display === 'none') {
+  if (!el) {
     showToast('먼저 결과를 확인해주세요');
     return;
   }
