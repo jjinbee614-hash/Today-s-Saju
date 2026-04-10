@@ -4,36 +4,54 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>공유된 결과 | 오늘의 사주</title>
-  <meta name="description" content="AI 사주·운세·궁합 결과를 확인하세요. 나도 무료로 받아보기!"/>
+  <meta name="description" content="AI가 분석한 사주·운세·궁합 결과를 확인하세요."/>
+  <meta property="og:title" content="오늘의 사주 결과 공유"/>
+  <meta property="og:description" content="AI 사주·운세·궁합 결과를 확인해보세요!"/>
+  <meta property="og:image" content="https://saju-today.com/og-image.png"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root { --ink:#1a1008; --paper:#f5efe4; --card:#ede5d8; --border:rgba(26,16,8,0.15); --muted:#8a7860; --gold:#c9913a; }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Noto Sans KR',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; }
-    .header { background:linear-gradient(135deg,#1a1008,#3d2010); padding:24px; text-align:center; }
-    .logo { font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700; color:white; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; padding-bottom:220px; }
+
+    /* 헤더 */
+    .header { background:linear-gradient(135deg,#1a1008,#3d2010); padding:28px 24px; text-align:center; }
+    .logo { font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700; color:white; cursor:pointer; }
     .logo span { color:#c9913a; }
-    .header-sub { color:rgba(255,255,255,0.6); font-size:13px; margin-top:6px; }
-    .share-badge { display:inline-block; background:rgba(201,145,58,0.2); border:1px solid rgba(201,145,58,0.5); color:#c9913a; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; margin-top:12px; letter-spacing:0.5px; }
-    .container { max-width:640px; margin:0 auto; padding:24px 20px 120px; }
-    .result-card { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
-    .result-title { font-family:'Noto Serif KR',serif; font-size:20px; font-weight:700; color:var(--ink); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-    .result-content { font-size:14px; line-height:2; color:#2c2c2c; white-space:pre-wrap; word-break:break-word; }
-    .cta-section { position:fixed; bottom:0; left:0; right:0; background:linear-gradient(135deg,#1a1008,#3d2010); padding:20px 24px max(20px,env(safe-area-inset-bottom)); text-align:center; }
-    .cta-btn { display:inline-block; background:linear-gradient(45deg,#c9913a,#e8b86d); color:white; font-size:16px; font-weight:700; padding:14px 32px; border-radius:30px; text-decoration:none; font-family:'Noto Serif KR',serif; box-shadow:0 4px 16px rgba(201,145,58,0.4); }
-    .cta-sub { color:rgba(255,255,255,0.6); font-size:12px; margin-top:8px; }
-    .loading { text-align:center; padding:60px 20px; color:var(--muted); }
-    .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 16px; }
+    .header-sub { color:rgba(255,255,255,0.55); font-size:13px; margin-top:6px; }
+    .share-badge { display:inline-block; background:rgba(201,145,58,0.25); border:1px solid rgba(201,145,58,0.5); color:#e8b56a; font-size:11px; font-weight:700; padding:4px 14px; border-radius:20px; margin-top:12px; letter-spacing:0.5px; }
+
+    /* 콘텐츠 */
+    .container { max-width:640px; margin:0 auto; padding:24px 16px; }
+    .result-wrapper { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; box-shadow:0 2px 16px rgba(0,0,0,0.07); overflow:hidden; }
+    .result-meta { display:flex; align-items:center; gap:10px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+    .result-icon { font-size:30px; }
+    .result-meta-text strong { display:block; font-size:17px; font-weight:700; color:var(--ink); }
+    .result-meta-text span { font-size:12px; color:var(--muted); }
+
+    /* 로딩 */
+    .loading { text-align:center; padding:64px 20px; color:var(--muted); }
+    .spinner { width:38px; height:38px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 16px; }
     @keyframes spin { to { transform:rotate(360deg); } }
-    .meta-row { display:flex; align-items:center; gap:8px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border); }
-    .meta-icon { font-size:28px; }
-    .meta-text { font-size:13px; color:var(--muted); }
-    .meta-text strong { color:var(--ink); display:block; font-size:16px; margin-bottom:2px; }
+
+    /* 하단 고정 CTA */
+    .cta-fixed { position:fixed; bottom:0; left:0; right:0; background:linear-gradient(135deg,#1a1008,#3d2010); padding:20px 20px max(20px,env(safe-area-inset-bottom)); }
+    .cta-text { color:rgba(255,255,255,0.7); font-size:13px; text-align:center; margin-bottom:12px; }
+    .cta-btn { display:block; text-align:center; background:linear-gradient(45deg,#c9913a,#e8b56a); color:white; font-size:15px; font-weight:700; padding:14px; border-radius:14px; text-decoration:none; font-family:'Noto Serif KR',serif; box-shadow:0 4px 16px rgba(201,145,58,0.35); margin-bottom:14px; }
+
+    /* 공유 버튼 행 */
+    .share-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    .share-row-label { text-align:center; font-size:11px; color:rgba(255,255,255,0.5); margin-bottom:8px; }
+    .share-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 16px; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
+    .btn-kakao { background:#FEE500; color:#191919; }
+    .btn-twitter { background:#000; color:white; }
+    .btn-instagram { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:white; }
   </style>
 </head>
 <body>
 
-<div class="header">
+<div class="header" onclick="location.href='https://saju-today.com'">
   <div class="logo">오늘의<span>사주</span></div>
   <div class="header-sub">AI 사주·운세·궁합</div>
   <div class="share-badge">🔮 공유된 결과</div>
@@ -48,61 +66,134 @@
   </div>
 </div>
 
-<div class="cta-section">
-  <a href="https://saju-today.com" class="cta-btn">🔮 나도 AI 사주·운세 무료로 보기</a>
-  <div class="cta-sub">사주풀이 · 오늘의 운세 · 타로 · 관상 · 꿈 해몽</div>
+<div class="cta-fixed">
+  <div class="cta-text">🔮 나도 AI 사주·운세 무료로 보기</div>
+  <a href="https://saju-today.com" class="cta-btn">✨ 오늘의 사주 무료로 보기</a>
+  <div class="share-row-label">각 플랫폼에서 링크를 공유하세요!</div>
+  <div class="share-row">
+    <button class="share-btn btn-kakao" onclick="shareKakao()">💬 카카오톡</button>
+    <button class="share-btn btn-twitter" onclick="shareTwitter()">🐦 트위터</button>
+    <button class="share-btn btn-instagram" onclick="shareInstagram()">📸 인스타그램</button>
+  </div>
 </div>
 
 <script>
-(function() {
-  var params = new URLSearchParams(window.location.search);
-  var d = params.get('d');
+(async function() {
+  const SUPABASE_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
 
-  if (!d) {
-    window.location.href = 'https://saju-today.com';
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  if (!id) {
+    location.href = 'https://saju-today.com';
     return;
   }
 
-  try {
-    var decoded = JSON.parse(decodeURIComponent(escape(atob(d))));
-    if (!decoded || !decoded.content) throw new Error('no content');
+  const CURRENT_URL = window.location.href;
 
-    var title = decoded.title || '결과';
-    var content = decoded.content;
+  // 공유 함수
+  window.shareKakao = function() {
+    if (window.Kakao && window.Kakao.isInitialized()) {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: document.title,
+          description: 'AI가 분석한 결과를 확인해보세요!',
+          imageUrl: 'https://saju-today.com/og-image.png',
+          link: { mobileWebUrl: CURRENT_URL, webUrl: CURRENT_URL }
+        },
+        buttons: [{ title: '✨ 결과 보기', link: { mobileWebUrl: CURRENT_URL, webUrl: CURRENT_URL } }]
+      });
+    } else {
+      copyToClipboard(CURRENT_URL);
+    }
+  };
 
-    var iconMap = {
-      '내 사주풀이': '✨',
-      '오늘의 운세': '🌅',
-      '궁합 결과': '💑',
-      '작명·이름감정': '✍️',
-      '꿈 해몽': '🌙',
-      '타로 결과': '🃏',
-      '관상 분석': '👁️',
-      '택일 결과': '📅'
-    };
-    var icon = iconMap[title] || '🔮';
-
-    document.title = title + ' | 오늘의 사주';
-    document.querySelector('meta[name="description"]').setAttribute(
-      'content', title + ' 결과: ' + content.slice(0, 80) + '...'
+  window.shareTwitter = function() {
+    const text = 'AI 사주 결과를 확인해보세요! 🔮';
+    window.open(
+      'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(CURRENT_URL),
+      '_blank'
     );
+  };
 
-    var html = '<div class="result-card">'
-      + '<div class="meta-row">'
-      + '<div class="meta-icon">' + icon + '</div>'
-      + '<div class="meta-text"><strong>' + escHtml(title) + '</strong>AI가 분석한 결과입니다</div>'
-      + '</div>'
-      + '<div class="result-content">' + escHtml(content) + '</div>'
-      + '</div>'
-      + '<p style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px;">친구에게 공유된 결과입니다 · <a href="https://saju-today.com" style="color:var(--gold);text-decoration:none;">나도 받아보기 →</a></p>';
+  window.shareInstagram = function() {
+    copyToClipboard(CURRENT_URL);
+    setTimeout(function() { location.href = 'instagram://'; }, 500);
+  };
 
-    document.getElementById('content-area').innerHTML = html;
-  } catch(e) {
-    window.location.href = 'https://saju-today.com';
+  function copyToClipboard(text) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => showToast('링크 복사됨! 🔗'));
+    } else {
+      const t = document.createElement('textarea');
+      t.value = text; document.body.appendChild(t); t.select();
+      document.execCommand('copy'); document.body.removeChild(t);
+      showToast('링크 복사됨! 🔗');
+    }
   }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function showToast(msg) {
+    let t = document.getElementById('toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.style.cssText = 'position:fixed;bottom:220px;left:50%;transform:translateX(-50%);background:#1a1008;color:#f5efe4;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.3s;white-space:nowrap;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg; t.style.opacity = '1';
+    setTimeout(() => { t.style.opacity = '0'; }, 2500);
+  }
+
+  const ICON_MAP = {
+    'AI 사주풀이 결과': '✨',
+    '오늘의 운세 결과': '🌅',
+    'AI 궁합 분석 결과': '💑',
+    'AI 작명·이름감정 결과': '✍️',
+    'AI 꿈 해몽 결과': '🌙',
+    'AI 타로 결과': '🃏',
+    'AI 관상 분석 결과': '👁️',
+    'AI 택일 결과': '📅',
+  };
+
+  // Supabase 조회
+  try {
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data, error } = await sb.from('shares').select('title, content, created_at').eq('id', id).single();
+
+    if (error || !data) {
+      location.href = 'https://saju-today.com';
+      return;
+    }
+
+    const title = data.title || '사주 결과';
+    const html = data.content?.html || '';
+    const icon = ICON_MAP[title] || '🔮';
+
+    // OG 메타 업데이트
+    document.title = title + ' | 오늘의 사주';
+    document.querySelector('meta[property="og:title"]').setAttribute('content', title);
+
+    // 결과 렌더링
+    document.getElementById('content-area').innerHTML =
+      '<div class="result-wrapper">' +
+        '<div class="result-meta">' +
+          '<div class="result-icon">' + icon + '</div>' +
+          '<div class="result-meta-text">' +
+            '<strong>' + escHtml(title) + '</strong>' +
+            '<span>AI가 분석한 결과</span>' +
+          '</div>' +
+        '</div>' +
+        '<div id="result-body">' + html + '</div>' +
+      '</div>';
+
+  } catch(e) {
+    location.href = 'https://saju-today.com';
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 })();
 </script>

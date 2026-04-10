@@ -94,10 +94,10 @@
 
   <button class="submit-btn" id="tarot-submit" onclick="runTarot()" disabled>🃏 타로 해석하기 ✦</button>
   <div id="tarot-result" style="display:none;margin-top:32px;"></div>
-<div id="tarot-share" style="display:none;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-  <button onclick="shareImage('tarot-result')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:linear-gradient(45deg,#f09433,#bc1888);border:none;border-radius:24px;color:white;font-size:14px;font-weight:600;cursor:pointer;">📸 인스타 공유</button>
-  <button onclick="shareLink('tarot-result','타로 결과')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:#FEE500;border:none;border-radius:24px;color:#191919;font-size:14px;font-weight:600;cursor:pointer;">💬 카카오 공유</button>
-  <button onclick="copyShareUrl('https://saju-today.com/tarot')" style="display:flex;align-items:center;gap:6px;padding:12px 20px;background:#f5efe4;border:1px solid rgba(26,16,8,0.2);border-radius:24px;color:#1a1008;font-size:14px;font-weight:600;cursor:pointer;">🔗 링크 복사</button>
+<div id="tarot-share" style="display:none;text-align:center;margin-top:20px;">
+  <button onclick="shareResult('tarot-result', 'AI 타로 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
+    🔗 결과 공유하기
+  </button>
 </div>
 </div>
 
@@ -445,49 +445,46 @@ function updateNavUser() {
 }
 document.addEventListener('DOMContentLoaded', updateNavUser);
 
-function shareImage(resultId) {
+async function shareResult(resultId, pageTitle) {
   var el = document.getElementById(resultId);
-  if (!el || el.style.display === 'none') { showToast('먼저 결과를 확인해주세요'); return; }
-  showToast('이미지 생성 중...');
-  function doCapture() {
-    var wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:640px;background:#f5efe4;font-family:sans-serif;';
-    wrapper.innerHTML = '<div style="background:linear-gradient(135deg,#1a1008,#3d2010);padding:32px;text-align:center;"><div style="font-size:32px;font-weight:800;color:white;font-family:serif;">오늘의<span style="color:#c9913a;">사주</span></div><div style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:4px;">AI 사주·운세·궁합</div></div><div id="cc" style="padding:24px;background:#f5efe4;"></div><div style="background:linear-gradient(135deg,#1a1008,#3d2010);padding:24px;text-align:center;"><div style="color:#c9913a;font-size:14px;font-weight:700;">🔮 나도 AI 사주 무료로 보기</div><div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:4px;">saju-today.com</div></div>';
-    var clone = el.cloneNode(true);
-    clone.style.cssText = 'display:block !important;color:#1a1008;';
-    wrapper.querySelector('#cc').appendChild(clone);
-    document.body.appendChild(wrapper);
-    html2canvas(wrapper, {scale:2,backgroundColor:'#f5efe4',useCORS:true}).then(function(canvas) {
-      document.body.removeChild(wrapper);
-      canvas.toBlob(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a'); a.href=url; a.download='saju-today.png'; a.click();
-        URL.revokeObjectURL(url);
-        showToast('저장 완료! 인스타에 업로드해주세요 📸');
-      });
-    }).catch(function() { document.body.removeChild(wrapper); showToast('이미지 생성 실패'); });
+  if (!el || el.style.display === 'none') {
+    showToast('먼저 결과를 확인해주세요');
+    return;
   }
-  if (typeof html2canvas === 'undefined') {
-    var s = document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; s.onload=doCapture; document.head.appendChild(s);
-  } else { doCapture(); }
-}
 
-function shareLink(resultId, title) {
-  var el = document.getElementById(resultId);
-  if (!el || el.style.display === 'none') { showToast('먼저 결과를 확인해주세요'); return; }
-  var text = (el.innerText||'').trim().slice(0,500);
-  var data = btoa(unescape(encodeURIComponent(JSON.stringify({title:title,content:text}))));
-  var shareUrl = 'https://saju-today.com/share?d=' + data;
-  if (window.Kakao && window.Kakao.isInitialized()) {
-    window.Kakao.Share.sendDefault({objectType:'feed',content:{title:title+' 결과',description:text.slice(0,100),imageUrl:'https://saju-today.com/og-image.png',link:{mobileWebUrl:shareUrl,webUrl:shareUrl}},buttons:[{title:'✨ 나도 사주 보러가기!',link:{mobileWebUrl:'https://saju-today.com',webUrl:'https://saju-today.com'}}]});
-  } else { copyShareUrl(shareUrl); }
-}
+  showToast('공유 링크 생성 중...');
 
-function copyShareUrl(url) {
-  if (navigator.clipboard) { navigator.clipboard.writeText(url).then(function(){ showToast('공유 링크 복사됨! 🔗'); }); }
-  else { var t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);showToast('공유 링크 복사됨! 🔗'); }
-}
+  var htmlContent = el.innerHTML;
+  var textContent = (el.innerText || '').trim().slice(0, 500);
 
+  try {
+    var sb = window.supabase.createClient(
+      'https://kuupemfzqkzinrauhpnd.supabase.co',
+      'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx'
+    );
+
+    var res = await sb.from('shares').insert({
+      page: window.location.pathname,
+      title: pageTitle,
+      content: { html: htmlContent, text: textContent }
+    }).select('id').single();
+
+    if (res.error) throw res.error;
+
+    var shareUrl = 'https://saju-today.com/share?id=' + res.data.id;
+
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(shareUrl);
+    }
+
+    window.open(shareUrl, '_blank');
+
+    showToast('링크가 복사됐어요! 새 창을 확인해주세요 🔗');
+
+  } catch(e) {
+    showToast('공유 링크 생성 실패: ' + e.message);
+  }
+}
 </script>
 <div style="position:fixed;bottom:0;left:0;right:0;z-index:1000;background:#fff;border-top:1px solid rgba(26,16,8,0.1);display:flex;align-items:center;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,0.06);">
   <a href="https://saju-today.com" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#8a7860;flex:1;"><span style="font-size:22px;">🏠</span><span style="font-size:10px;font-weight:600;">홈</span></a>
