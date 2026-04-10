@@ -878,7 +878,11 @@
 
     <!-- Results -->
     <div id="saju-result" style="display:none;"></div>
-<div id="saju-share" style="display:none;flex-direction:row;justify-content:center;align-items:center;width:100%;gap:10px;margin-top:20px;flex-wrap:wrap;padding-bottom:120px;position:relative;z-index:9999;">
+<div id="saju-share" style="display:none;justify-content:center;align-items:center;width:100%;margin-top:20px;padding-bottom:120px;">
+    <button onclick="shareResult('saju-result','AI 사주풀이 결과')" style="padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
+        🔗 결과 공유하기
+    </button>
+</div><div id="saju-share" style="display:none;flex-direction:row;justify-content:center;align-items:center;width:100%;gap:10px;margin-top:20px;flex-wrap:wrap;padding-bottom:120px;position:relative;z-index:9999;">
   <button onclick="shareResult('saju-result', 'AI 사주풀이 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
     🔗 결과 공유하기
   </button>
@@ -1002,7 +1006,26 @@ function calcTimePillar(dayHs, timeName) {
 // ─── 음력→양력 변환 (한국천문연구원 공공API) ───
 
 
-async function lunarToSolar(lunarYear, lunarMonth, lunarDay, isLeap) {
+async function shareResult(resultId, pageTitle) {
+    var el = document.getElementById(resultId);
+    if (!el) return;
+    showToast('공유 링크 생성 중...');
+    try {
+        var sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+        var res = await sb.from('shares').insert({
+            page: window.location.pathname,
+            title: pageTitle,
+            content: {
+                html: el.innerHTML,
+                text: (el.innerText||'').trim().slice(0,500)
+            }
+        }).select('id').single();
+        if (res.error) throw res.error;
+        window.location.href = 'https://saju-today.com/share?id=' + res.data.id;
+    } catch(e) {
+        showToast('오류: ' + e.message);
+    }
+}async function lunarToSolar(lunarYear, lunarMonth, lunarDay, isLeap) {
   try {
     const leapParam = isLeap ? 'Y' : 'N';
     const lunMonth = String(lunarMonth).padStart(2,'0');
@@ -1141,46 +1164,29 @@ function autoFillPage() {
     note.innerHTML = `✅ ${name}님의 생년월일이 자동 입력됐어요`;
   }
 }
-document.addEventListener('DOMContentLoaded', autoFillPage);
-
-
-// ════ 사주풀이 페이지 ════
-let sajuGender = '남성';
-
-function setSajuGender(btn, val) {
-  sajuGender = val;
-  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-
-
-function showApiError(msg) {
-  const el = document.getElementById('saju-result');
-  if (!el) return;
-  el.innerHTML += `<div style="background:#fff3f3;border:1px solid #e74c3c;border-radius:8px;padding:16px;margin:12px 0;font-size:13px;color:#c0392b;"><strong>⚠️ API 오류:</strong> ${msg}</div>`;
-}
-
-async function runSajuReading() {
-  const year  = parseInt(document.getElementById('saju-year').value);
-  const month = parseInt(document.getElementById('saju-month').value);
-  const day   = parseInt(document.getElementById('saju-day').value);
-  const time  = document.getElementById('saju-time').value || '모름';
-  const isLeap = document.getElementById('saju-leap')?.checked || false;
-  const calLabel = sajuCalType === '음력' ? (isLeap ? '음력 윤달' : '음력') : '양력';
-
-  if (!year || !month || !day) { showToast('생년월일을 모두 입력해 주세요'); return; }
-
-  // ── 캐시 확인 ──
-  const sajuCacheKey = `saju_v3_${year}_${month}_${day}_${time}_${sajuGender}`;
-  const sajuCached = localStorage.getItem(sajuCacheKey);
-  if (sajuCached) {
+document.addEventListener('DOMContentLoaded', function() {
     try {
-      const cached = JSON.parse(sajuCached);
-      const resultEl = document.getElementById('saju-result');
-      resultEl.style.display = 'block';
-      resultEl.scrollIntoView({ behavior:'smooth', block:'start' });
-      const currentYear = new Date().getFullYear();
+        var saved = localStorage.getItem('myProfile');
+        if (!saved) return;
+        var p = JSON.parse(saved);
+        var fields = {
+            'saju-year': p.year,
+            'saju-month': p.month,
+            'saju-day': p.day,
+            'saju-time': p.time
+        };
+        Object.keys(fields).forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && fields[id]) el.value = fields[id];
+        });
+        if (p.gender) {
+            var mBtn = document.getElementById('saju-male');
+            var fBtn = document.getElementById('saju-female');
+            if (mBtn) mBtn.classList.toggle('active', p.gender==='남성');
+            if (fBtn) fBtn.classList.toggle('active', p.gender==='여성');
+        }
+    } catch(e) {}
+});      const currentYear = new Date().getFullYear();
       const age = currentYear - year + 1;
       renderSajuResult(cached, year, month, day, time, age, currentYear);
       return;
@@ -1299,41 +1305,75 @@ function renderSajuResult(r, year, month, day, time, age, currentYear) {
     document.getElementById('saju-result').innerHTML =
       `<div style="background:#fff3f3;border:1px solid #e74c3c;border-radius:8px;padding:16px;font-size:14px;color:#c0392b;">⚠️ 사주 계산 중 오류가 발생했습니다. 생년월일을 다시 확인해 주세요.</div>`;
     return;
-  }
+      var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
   const pillarNames  = ['time','day','month','year'];
   const pillarLabels = ['시주(時柱)','일주(日柱)','월주(月柱)','년주(年柱)'];
-  const elemColors = { 목:'e-wood', 화:'e-fire', 토:'e-earth', 금:'e-metal', 수:'e-water' };
-  const trendScore = { '고점':95,'상승':82,'평탄':65,'유지':70,'저점':45,'관리':55 };
+  const elemColors = { 목:'e-wood', 화:'e-fire', 토:'e-earth', 금:'e-metal', 수:'e-water'     var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};
+  const trendScore = { '고점':95,'상승':82,'평탄':65,'유지':70,'저점':45,'관리':55     var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};
 
-  const elemEmojiMap = { 목:'🌿', 화:'🔥', 토:'🏔️', 금:'💎', 수:'🌊' };
-  const elemColorMap = { 목:'#2e7d32', 화:'#c62828', 토:'#f57f17', 금:'#6d4c41', 수:'#1565c0' };
-  const elemBgMap    = { 목:'rgba(46,125,50,0.1)', 화:'rgba(198,40,40,0.1)', 토:'rgba(245,127,23,0.1)', 금:'rgba(109,76,65,0.1)', 수:'rgba(21,101,192,0.1)' };
+  const elemEmojiMap = { 목:'🌿', 화:'🔥', 토:'🏔️', 금:'💎', 수:'🌊'     var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};
+  const elemColorMap = { 목:'#2e7d32', 화:'#c62828', 토:'#f57f17', 금:'#6d4c41', 수:'#1565c0'     var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};
+  const elemBgMap    = { 목:'rgba(46,125,50,0.1)', 화:'rgba(198,40,40,0.1)', 토:'rgba(245,127,23,0.1)', 금:'rgba(109,76,65,0.1)', 수:'rgba(21,101,192,0.1)'     var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};
 
   const pillarsHTML = pillarNames.map((k,i) => {
     const p = r.pillars[k];
     if (!p || p.hs < 0) return '';
     const hsEl = HS_ELEM[p.hs]; const ebEl = EB_ELEM[p.eb];
-    return `<div class="pillar-block" style="background:${elemBgMap[hsEl]||'rgba(0,0,0,0.03)'};border-color:${elemColorMap[hsEl]||'var(--border)'};">
-      <div class="pillar-label">${pillarLabels[i]}</div>
-      <div class="pillar-heavenly" style="color:${elemColorMap[hsEl]||'var(--ink)'};">${p.heavenly}</div>
-      <div class="pillar-earthly" style="color:${elemColorMap[ebEl]||'var(--muted)'};">${p.earthly}</div>
+    return `<div class="pillar-block" style="background:${elemBgMap[hsEl]||'rgba(0,0,0,0.03)'    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};border-color:${elemColorMap[hsEl]||'var(--border)'};">
+      <div class="pillar-label">${pillarLabels[i]    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
+      <div class="pillar-heavenly" style="color:${elemColorMap[hsEl]||'var(--ink)'    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};">${p.heavenly}</div>
+      <div class="pillar-earthly" style="color:${elemColorMap[ebEl]||'var(--muted)'    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};">${p.earthly}</div>
       <div class="pillar-element" style="font-size:11px;margin-top:4px;">
-        <span style="color:${elemColorMap[hsEl]};">${elemEmojiMap[hsEl]}${hsEl}</span>
+        <span style="color:${elemColorMap[hsEl]    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};">${elemEmojiMap[hsEl]}${hsEl}</span>
         <span style="color:var(--muted);"> / </span>
-        <span style="color:${elemColorMap[ebEl]};">${elemEmojiMap[ebEl]}${ebEl}</span>
+        <span style="color:${elemColorMap[ebEl]    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+};">${elemEmojiMap[ebEl]}${ebEl}</span>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px;">${p.description}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;">${p.description    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
     </div>`;
-  }).join('');
+      var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}).join('');
 
   const maxElem = Math.max(...Object.values(r.elements));
   const elemHTML = Object.entries(r.elements).map(([k,v]) => `
     <div class="element-bar-item">
-      <div class="element-bar-label">${elemEmojiMap[k]} ${k}</div>
+      <div class="element-bar-label">${elemEmojiMap[k]    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+} ${k}</div>
       <div class="element-bar-wrap">
-        <div class="element-bar-fill ${elemColors[k]}" style="height:${Math.round(v/maxElem*100)}%"></div>
+        <div class="element-bar-fill ${elemColors[k]    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}" style="height:${Math.round(v/maxElem*100)}%"></div>
       </div>
-      <div class="element-bar-pct">${v}%</div>
+      <div class="element-bar-pct">${v    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}%</div>
     </div>`).join('');
 
   const decadeHTML = (r.decades||[]).map((d,i) => {
@@ -1343,61 +1383,113 @@ function renderSajuResult(r, year, month, day, time, age, currentYear) {
     const scoreColor = score>=85?'#27ae60':score>=65?'#c9913a':'#c0392b';
     return `<div class="decade-item">
       <div class="decade-marker">
-        <div class="decade-dot ${isCurrent?'current':'future'}"></div>
-        ${i<(r.decades.length-1)?'<div class="decade-line"></div>':''}
+        <div class="decade-dot ${isCurrent?'current':'future'    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}"></div>
+        ${i<(r.decades.length-1)?'<div class="decade-line"></div>':''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
       </div>
-      <div class="decade-content ${isCurrent?'current-decade':''}">
+      <div class="decade-content ${isCurrent?'current-decade':''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-size:20px;">${d.emoji||'📅'}</span>
-          <span class="decade-range">${d.range} (${d.ageRange}) ${isCurrent?'<span style="color:var(--gold);font-size:11px;">← 현재</span>':''}</span>
+          <span style="font-size:20px;">${d.emoji||'📅'    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</span>
+          <span class="decade-range">${d.range    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+} (${d.ageRange}) ${isCurrent?'<span style="color:var(--gold);font-size:11px;">← 현재</span>':''}</span>
         </div>
-        <div class="decade-title">${d.title}</div>
-        <div class="decade-score-bar"><div class="decade-score-fill" style="width:${score}%;background:${scoreColor}"></div></div>
-        <div class="decade-desc">${d.description}</div>
+        <div class="decade-title">${d.title    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
+        <div class="decade-score-bar"><div class="decade-score-fill" style="width:${score    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}%;background:${scoreColor}"></div></div>
+        <div class="decade-desc">${d.description    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
       </div>
     </div>`;
-  }).join('');
+      var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}).join('');
 
   const thisYearItems = [
-    {icon:'💼',label:'직업 & 사업운',content:r.thisYearCareer},
-    {icon:'💕',label:'연애 & 인간관계',content:r.thisYearLove},
-    {icon:'💰',label:'금전운',content:r.thisYearMoney},
-    {icon:'⚠️',label:'올해 주의사항',content:r.thisYearCaution},
+    {icon:'💼',label:'직업 & 사업운',content:r.thisYearCareer    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+},
+    {icon:'💕',label:'연애 & 인간관계',content:r.thisYearLove    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+},
+    {icon:'💰',label:'금전운',content:r.thisYearMoney    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+},
+    {icon:'⚠️',label:'올해 주의사항',content:r.thisYearCaution    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+},
   ].filter(x=>x.content);
 
   const thisYearHTML = thisYearItems.map(item=>`
     <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-      <span style="font-size:20px;flex-shrink:0;">${item.icon}</span>
+      <span style="font-size:20px;flex-shrink:0;">${item.icon    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</span>
       <div>
-        <div style="font-size:11px;letter-spacing:1px;opacity:0.6;margin-bottom:4px;">${item.label}</div>
-        <div style="font-size:14px;line-height:1.8;opacity:0.92;">${item.content}</div>
+        <div style="font-size:11px;letter-spacing:1px;opacity:0.6;margin-bottom:4px;">${item.label    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
+        <div style="font-size:14px;line-height:1.8;opacity:0.92;">${item.content    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
       </div>
     </div>`).join('');
 
-  const traitTagsHTML = (r.idealPartner?.traits||[]).map(t=>`<span class="ideal-tag">${t}</span>`).join('');
+  const traitTagsHTML = (r.idealPartner?.traits||[]).map(t=>`<span class="ideal-tag">${t    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</span>`).join('');
 
   document.getElementById('saju-result').innerHTML = `
     <div class="sr-section">
       <div class="sr-section-title"><div class="title-icon">🌟</div>
         <div><div>타고난 캐릭터</div>
-          <div style="font-size:13px;font-weight:400;color:var(--muted);margin-top:2px;">${r.daymaster||''}</div>
+          <div style="font-size:13px;font-weight:400;color:var(--muted);margin-top:2px;">${r.daymaster||''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
         </div>
       </div>
       <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:12px;padding:24px;color:var(--paper);margin-bottom:16px;">
-        <div style="font-size:22px;font-family:'Noto Serif SC','Noto Serif KR',serif;font-weight:700;margin-bottom:12px;">✦ ${r.characterTitle||'나의 사주 캐릭터'}</div>
-        <p style="font-size:14px;line-height:2;opacity:0.88;">${r.characterSummary||''}</p>
-        ${r.lifeType?`<div style="margin-top:14px;display:inline-block;background:rgba(201,145,58,0.25);border-radius:20px;padding:5px 16px;font-size:12px;color:#f5c97a;">🗺️ ${r.lifeType}</div>`:''}
+        <div style="font-size:22px;font-family:'Noto Serif SC','Noto Serif KR',serif;font-weight:700;margin-bottom:12px;">✦ ${r.characterTitle||'나의 사주 캐릭터'    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
+        <p style="font-size:14px;line-height:2;opacity:0.88;">${r.characterSummary||''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p>
+        ${r.lifeType?`<div style="margin-top:14px;display:inline-block;background:rgba(201,145,58,0.25);border-radius:20px;padding:5px 16px;font-size:12px;color:#f5c97a;">🗺️ ${r.lifeType    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>`:''}
       </div>
-      <div style="font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:10px;">사주팔자 (${year}년 ${month}월 ${day}일 ${time} · ${sajuGender})</div>
-      ${buildSajuTable(r.pillars, sajuGender)}
-      <div class="pillars-display">${pillarsHTML}</div>
+      <div style="font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:10px;">사주팔자 (${year    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}년 ${month}월 ${day}일 ${time} · ${sajuGender})</div>
+      ${buildSajuTable(r.pillars, sajuGender)    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
+      <div class="pillars-display">${pillarsHTML    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
       <div style="font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;margin-top:4px;">오행 분포</div>
-      <div class="elements-chart">${elemHTML}</div>
+      <div class="elements-chart">${elemHTML    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
     </div>
 
     <div class="sr-section">
       <div class="sr-section-title"><div class="title-icon">📅</div><span>100세까지의 인생 그래프</span></div>
-      <div class="decade-timeline">${decadeHTML}</div>
+      <div class="decade-timeline">${decadeHTML    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
     </div>
 
     <div class="sr-section">
@@ -1405,44 +1497,82 @@ function renderSajuResult(r, year, month, day, time, age, currentYear) {
       ${r.career?`<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;">
         <div style="background:rgba(201,145,58,0.1);padding:12px 18px;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;">💼 사업 & 직업</div>
         <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px;">
-          <div><span style="font-size:11px;color:#27ae60;font-weight:600;">✅ 잘되는 부분</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.career.good}</p></div>
-          <div><span style="font-size:11px;color:var(--gold);font-weight:600;">🔑 놓치지 말 것</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.career.watchOut}</p></div>
-          <div><span style="font-size:11px;color:#c0392b;font-weight:600;">⚠️ 조심할 점</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.career.caution}</p></div>
-        </div></div>`:''}
+          <div><span style="font-size:11px;color:#27ae60;font-weight:600;">✅ 잘되는 부분</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.career.good    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+          <div><span style="font-size:11px;color:var(--gold);font-weight:600;">🔑 놓치지 말 것</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.career.watchOut    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+          <div><span style="font-size:11px;color:#c0392b;font-weight:600;">⚠️ 조심할 점</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.career.caution    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+        </div></div>`:''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
       ${r.money?`<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;">
         <div style="background:rgba(201,145,58,0.1);padding:12px 18px;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;">💰 금전</div>
         <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px;">
-          <div><span style="font-size:11px;color:#27ae60;font-weight:600;">📈 흐름</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.money.flow}</p></div>
-          <div><span style="font-size:11px;color:#c0392b;font-weight:600;">⚠️ 조심할 점</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.money.caution}</p></div>
-        </div></div>`:''}
+          <div><span style="font-size:11px;color:#27ae60;font-weight:600;">📈 흐름</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.money.flow    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+          <div><span style="font-size:11px;color:#c0392b;font-weight:600;">⚠️ 조심할 점</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.money.caution    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+        </div></div>`:''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
       ${r.health?`<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">
         <div style="background:rgba(201,145,58,0.1);padding:12px 18px;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;">🏥 건강</div>
         <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px;">
-          <div><span style="font-size:11px;color:#c0392b;font-weight:600;">🩺 주의 부위</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.health.weakPoints}</p></div>
-          <div><span style="font-size:11px;color:var(--gold);font-weight:600;">⚠️ 조심할 점</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.health.caution}</p></div>
-          <div><span style="font-size:11px;color:#27ae60;font-weight:600;">💚 추천 습관</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.health.tip}</p></div>
-        </div></div>`:''}
+          <div><span style="font-size:11px;color:#c0392b;font-weight:600;">🩺 주의 부위</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.health.weakPoints    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+          <div><span style="font-size:11px;color:var(--gold);font-weight:600;">⚠️ 조심할 점</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.health.caution    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+          <div><span style="font-size:11px;color:#27ae60;font-weight:600;">💚 추천 습관</span><p style="margin:4px 0 0;font-size:14px;line-height:1.8;">${r.health.tip    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p></div>
+        </div></div>`:''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
     </div>
 
     <div class="sr-section">
-      <div class="sr-section-title"><div class="title-icon">🐉</div><span>${currentYear}년 운세</span></div>
+      <div class="sr-section-title"><div class="title-icon">🐉</div><span>${currentYear    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}년 운세</span></div>
       <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:12px;padding:24px;color:var(--paper);">
-        <div style="font-size:18px;font-family:'Noto Serif SC','Noto Serif KR',serif;font-weight:700;margin-bottom:16px;">${r.thisYearTitle||currentYear+'년 운세'}</div>
-        <p style="font-size:14px;line-height:2;opacity:0.88;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1);">${r.thisYearOverview||''}</p>
-        ${thisYearHTML}
+        <div style="font-size:18px;font-family:'Noto Serif SC','Noto Serif KR',serif;font-weight:700;margin-bottom:16px;">${r.thisYearTitle||currentYear+'년 운세'    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
+        <p style="font-size:14px;line-height:2;opacity:0.88;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1);">${r.thisYearOverview||''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p>
+        ${thisYearHTML    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
       </div>
     </div>
 
     <div class="sr-section">
       <div class="sr-section-title"><div class="title-icon">💕</div><span>나와 잘 맞는 인연</span></div>
       <div class="ideal-partner-card">
-        <h4>잘 맞는 오행 · ${r.idealPartner?.element||''}</h4>
-        <p>${r.idealPartner?.description||''}</p>
+        <h4>잘 맞는 오행 · ${r.idealPartner?.element||''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</h4>
+        <p>${r.idealPartner?.description||''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p>
         <div style="margin-bottom:16px;">
           <div style="font-size:12px;opacity:0.6;margin-bottom:10px;letter-spacing:1px;">이런 사람과 잘 맞아요</div>
-          <div class="ideal-tags">${traitTagsHTML}</div>
+          <div class="ideal-tags">${traitTagsHTML    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
         </div>
-        <div style="border-top:1px solid rgba(255,255,255,0.12);padding-top:14px;font-size:13px;opacity:0.7;">🚫 ${r.idealPartner?.avoid||''}</div>
+        <div style="border-top:1px solid rgba(255,255,255,0.12);padding-top:14px;font-size:13px;opacity:0.7;">🚫 ${r.idealPartner?.avoid||''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</div>
       </div>
       <div style="margin-top:16px;">
         <button class="submit-btn" data-page="compat">💑 궁합 보러 가기 →</button>
@@ -1452,12 +1582,18 @@ function renderSajuResult(r, year, month, day, time, age, currentYear) {
     ${r.closingMessage?`<div class="sr-section">
       <div style="background:linear-gradient(135deg,rgba(201,145,58,0.12),rgba(201,145,58,0.04));border:1px solid rgba(201,145,58,0.3);border-radius:12px;padding:24px;text-align:center;">
         <div style="font-size:24px;margin-bottom:12px;">💌</div>
-        <p style="font-size:15px;line-height:2;color:var(--ink);font-style:italic;">${r.closingMessage}</p>
+        <p style="font-size:15px;line-height:2;color:var(--ink);font-style:italic;">${r.closingMessage    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}</p>
       </div>
-    </div>`:''}
+    </div>`:''    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
+}
   `;
   const shareDivSaju = document.getElementById('saju-share'); if(shareDivSaju) shareDivSaju.style.display='flex';
 
+    var sb = document.getElementById('saju-share');
+    if(sb) sb.style.display='flex';
 }
 
 // ─── TOAST ───
@@ -1500,7 +1636,26 @@ function setFortuneDay(day) {
   if (content) content.style.display = 'none';
 }
 
-async function loadFortune() {
+async function shareResult(resultId, pageTitle) {
+    var el = document.getElementById(resultId);
+    if (!el) return;
+    showToast('공유 링크 생성 중...');
+    try {
+        var sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+        var res = await sb.from('shares').insert({
+            page: window.location.pathname,
+            title: pageTitle,
+            content: {
+                html: el.innerHTML,
+                text: (el.innerText||'').trim().slice(0,500)
+            }
+        }).select('id').single();
+        if (res.error) throw res.error;
+        window.location.href = 'https://saju-today.com/share?id=' + res.data.id;
+    } catch(e) {
+        showToast('오류: ' + e.message);
+    }
+}async function loadFortune() {
   const birth = document.getElementById('fortune-birth').value.trim();
   if (!birth) { showToast('생년월일을 입력해 주세요'); return; }
 
@@ -1824,7 +1979,26 @@ const sbClient = createSBClient('https://kuupemfzqkzinrauhpnd.supabase.co', 'sb_
 function getSajuUser() {
   try { const u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
 }
-async function signOut() {
+async function shareResult(resultId, pageTitle) {
+    var el = document.getElementById(resultId);
+    if (!el) return;
+    showToast('공유 링크 생성 중...');
+    try {
+        var sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+        var res = await sb.from('shares').insert({
+            page: window.location.pathname,
+            title: pageTitle,
+            content: {
+                html: el.innerHTML,
+                text: (el.innerText||'').trim().slice(0,500)
+            }
+        }).select('id').single();
+        if (res.error) throw res.error;
+        window.location.href = 'https://saju-today.com/share?id=' + res.data.id;
+    } catch(e) {
+        showToast('오류: ' + e.message);
+    }
+}async function signOut() {
   await sbClient.auth.signOut();
   localStorage.removeItem('saju_user');
   window.location.href = 'https://saju-today.com';
@@ -1839,80 +2013,26 @@ function updateNavUser() {
     navEl.innerHTML = `<a href="https://saju-today.com/login" style="font-size:12px;padding:6px 14px;background:var(--gold);color:white;border-radius:20px;text-decoration:none;font-weight:600;">로그인</a>`;
   }
 }
-document.addEventListener('DOMContentLoaded', updateNavUser);
-
-async function shareResult(resultId, pageTitle) {
-    var el = document.getElementById(resultId);
-    if (!el) {
-        alert('결과 요소를 찾을 수 없어요');
-        return;
-    }
-    
-    showToast('공유 링크 생성 중...');
-    
-    var htmlContent = el.innerHTML;
-    var textContent = (el.innerText || '').trim().slice(0, 500);
-    
+document.addEventListener('DOMContentLoaded', function() {
     try {
-        var sb = window.supabase.createClient(
-            'https://kuupemfzqkzinrauhpnd.supabase.co',
-            'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx'
-        );
-        
-        var res = await sb.from('shares').insert({
-            page: window.location.pathname,
-            title: pageTitle,
-            content: {
-                html: htmlContent,
-                text: textContent
-            }
-        }).select('id').single();
-        
-        if (res.error) throw res.error;
-        
-        var shareUrl = 'https://saju-today.com/share?id=' + res.data.id;
-        window.location.href = shareUrl;
-    } catch(e) {
-        alert('오류: ' + e.message);
-    }
-}
-  showToast('공유 링크 생성 중...');
-
-  var htmlContent = el.innerHTML;
-  var textContent = (el.innerText || '').trim().slice(0, 500);
-
-  try {
-    var sb = window.supabase.createClient(
-      'https://kuupemfzqkzinrauhpnd.supabase.co',
-      'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx'
-    );
-
-    var res = await sb.from('shares').insert({
-      page: window.location.pathname,
-      title: pageTitle,
-      content: { html: htmlContent, text: textContent }
-    }).select('id').single();
-
-    if (res.error) throw res.error;
-
-    var shareUrl = 'https://saju-today.com/share?id=' + res.data.id;
-
-
-    window.location.href = shareUrl;
-
-    showToast('링크가 복사됐어요! 새 창을 확인해주세요 🔗');
-
-  } catch(e) {
-    alert('오류: ' + e.message);
-  }
-}
-</script>
-<div style="position:fixed;bottom:0;left:0;right:0;z-index:1000;background:#fff;border-top:1px solid rgba(26,16,8,0.1);display:flex;align-items:center;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,0.06);">
-  <a href="https://saju-today.com" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#8a7860;flex:1;"><span style="font-size:22px;">🏠</span><span style="font-size:10px;font-weight:600;">홈</span></a>
-  <a href="https://saju-today.com/saju" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#c9913a;flex:1;"><span style="font-size:22px;">✨</span><span style="font-size:10px;font-weight:600;">사주</span></a>
-  <a href="https://saju-today.com/fortune" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#8a7860;flex:1;"><span style="font-size:22px;">🌅</span><span style="font-size:10px;font-weight:600;">운세</span></a>
-  <a href="https://saju-today.com/tarot" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#8a7860;flex:1;"><span style="font-size:22px;">🃏</span><span style="font-size:10px;font-weight:600;">타로</span></a>
-  <button onclick="var m=document.getElementById('nav-menu');m.style.display=m.style.display==='none'?'block':'none'" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:#8a7860;flex:1;"><span style="font-size:22px;">☰</span><span style="font-size:10px;font-weight:600;">더보기</span></button>
-</div>
-</body>
-</html>
+        var saved = localStorage.getItem('myProfile');
+        if (!saved) return;
+        var p = JSON.parse(saved);
+        var fields = {
+            'saju-year': p.year,
+            'saju-month': p.month,
+            'saju-day': p.day,
+            'saju-time': p.time
+        };
+        Object.keys(fields).forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && fields[id]) el.value = fields[id];
+        });
+        if (p.gender) {
+            var mBtn = document.getElementById('saju-male');
+            var fBtn = document.getElementById('saju-female');
+            if (mBtn) mBtn.classList.toggle('active', p.gender==='남성');
+            if (fBtn) fBtn.classList.toggle('active', p.gender==='여성');
+        }
+    } catch(e) {}
+});
