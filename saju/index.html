@@ -1873,7 +1873,7 @@ async function shareResult(resultId, pageTitle) {
       await navigator.clipboard.writeText(shareUrl);
     }
 
-    window.open(shareUrl, '_blank');
+    window.location.href = shareUrl;
 
     showToast('링크가 복사됐어요! 새 창을 확인해주세요 🔗');
 
