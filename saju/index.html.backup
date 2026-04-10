@@ -878,7 +878,7 @@
 
     <!-- Results -->
     <div id="saju-result" style="display:none;"></div>
-<div id="saju-share" style="display:none;flex-direction:row;justify-content:center;align-items:center;width:100%;gap:10px;margin-top:20px;flex-wrap:wrap;padding-bottom:80px;">
+<div id="saju-share" style="display:none;flex-direction:row;justify-content:center;align-items:center;width:100%;gap:10px;margin-top:20px;flex-wrap:wrap;">
   <button onclick="shareResult('saju-result', 'AI 사주풀이 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
     🔗 결과 공유하기
   </button>
