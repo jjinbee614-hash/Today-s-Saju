@@ -1869,6 +1869,9 @@ async function shareResult(resultId, pageTitle) {
 
     var shareUrl = 'https://saju-today.com/share?id=' + res.data.id;
 
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(shareUrl);
+    }
 
     window.location.href = shareUrl;
 
