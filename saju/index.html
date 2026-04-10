@@ -1842,12 +1842,40 @@ function updateNavUser() {
 document.addEventListener('DOMContentLoaded', updateNavUser);
 
 async function shareResult(resultId, pageTitle) {
-  var el = document.getElementById(resultId);
-  if (!el) {
-    showToast('먼저 결과를 확인해주세요');
-    return;
-  }
-
+    var el = document.getElementById(resultId);
+    if (!el) {
+        alert('결과 요소를 찾을 수 없어요');
+        return;
+    }
+    
+    showToast('공유 링크 생성 중...');
+    
+    var htmlContent = el.innerHTML;
+    var textContent = (el.innerText || '').trim().slice(0, 500);
+    
+    try {
+        var sb = window.supabase.createClient(
+            'https://kuupemfzqkzinrauhpnd.supabase.co',
+            'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx'
+        );
+        
+        var res = await sb.from('shares').insert({
+            page: window.location.pathname,
+            title: pageTitle,
+            content: {
+                html: htmlContent,
+                text: textContent
+            }
+        }).select('id').single();
+        
+        if (res.error) throw res.error;
+        
+        var shareUrl = 'https://saju-today.com/share?id=' + res.data.id;
+        window.location.href = shareUrl;
+    } catch(e) {
+        alert('오류: ' + e.message);
+    }
+}
   showToast('공유 링크 생성 중...');
 
   var htmlContent = el.innerHTML;
