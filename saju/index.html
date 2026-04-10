@@ -1878,7 +1878,7 @@ async function shareResult(resultId, pageTitle) {
     showToast('링크가 복사됐어요! 새 창을 확인해주세요 🔗');
 
   } catch(e) {
-    showToast('공유 링크 생성 실패: ' + e.message);
+    alert('오류: ' + e.message);
   }
 }
 </script>
