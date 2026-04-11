@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>마이페이지 | 오늘의 사주</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#0e0b14;--bg2:#13101c;--bg3:#1a1628;--gold:#c9a84c;--gold-light:#e8c96a;--gold-dim:rgba(201,168,76,0.15);--text:#f0ead6;--text2:#a89c80;--text3:#5c5445;--border:rgba(201,168,76,0.12);--border2:rgba(255,255,255,0.06);--r:14px; }
+    * { box-sizing:border-box;margin:0;padding:0; }
+    body { font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px; }
+    @keyframes twinkle { 0%,100%{opacity:0.2;transform:scale(1)}50%{opacity:0.8;transform:scale(1.3)} }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(14,11,20,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border); }
+    .nav-logo { font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;color:var(--text);text-decoration:none; }
+    .nav-logo span { color:var(--gold); }
+    .nav-back { font-size:12px;padding:6px 14px;background:none;border:1px solid var(--border);border-radius:20px;color:var(--text2);text-decoration:none; }
+    .nav-back:hover { border-color:var(--gold);color:var(--gold); }
+
+    .container { max-width:640px;margin:0 auto;padding:80px 16px 40px;position:relative;z-index:1; }
+
+    /* Section Card */
+    .section-card {
+      background:var(--bg2);border:1px solid var(--border);
+      border-radius:var(--r);padding:22px;margin-bottom:16px;
+    }
+    .section-title {
+      font-size:13px;font-weight:700;color:var(--text3);
+      text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;
+    }
+
+    /* Profile */
+    .profile-row { display:flex;align-items:center;gap:16px; }
+    .avatar {
+      width:60px;height:60px;border-radius:50%;
+      background:linear-gradient(135deg,var(--gold),var(--bg3));
+      display:flex;align-items:center;justify-content:center;
+      font-size:24px;font-weight:700;color:#0e0b14;flex-shrink:0;
+      overflow:hidden;
+    }
+    .avatar img { width:100%;height:100%;object-fit:cover; }
+    .profile-name { font-size:18px;font-weight:700;margin-bottom:4px; }
+    .profile-email { font-size:12px;color:var(--text2); }
+    .badge {
+      display:inline-block;font-size:10px;font-weight:700;
+      padding:3px 10px;border-radius:20px;margin-top:6px;
+    }
+    .badge-free { background:var(--bg3);color:var(--text2);border:1px solid var(--border2); }
+    .badge-paid { background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,76,0.3); }
+
+    /* Saju info */
+    .info-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+    .info-item label { font-size:11px;color:var(--text3);display:block;margin-bottom:3px; }
+    .info-item span { font-size:14px;font-weight:600; }
+
+    /* Buttons */
+    .btn-gold {
+      display:inline-block;padding:11px 22px;
+      background:linear-gradient(135deg,var(--gold),var(--gold-light));
+      color:#0e0b14;font-size:13px;font-weight:700;
+      border:none;border-radius:var(--r);cursor:pointer;
+      text-decoration:none;font-family:'Noto Sans KR',sans-serif;
+      transition:opacity 0.2s;
+    }
+    .btn-gold:hover { opacity:0.88; }
+    .btn-outline {
+      display:inline-block;padding:10px 20px;
+      background:none;border:1px solid var(--border);
+      color:var(--text2);font-size:13px;font-weight:600;
+      border-radius:var(--r);cursor:pointer;text-decoration:none;
+      font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;
+    }
+    .btn-outline:hover { border-color:var(--gold);color:var(--gold); }
+
+    /* Membership */
+    .member-free { padding:16px;background:var(--bg3);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px; }
+    .member-paid { padding:16px;background:var(--gold-dim);border-radius:10px;border:1px solid rgba(201,168,76,0.3); }
+    .member-label { font-size:13px;color:var(--text2); }
+    .member-value { font-size:15px;font-weight:700;color:var(--gold); }
+
+    /* Share history */
+    .share-item { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2); }
+    .share-item:last-child { border-bottom:none; }
+    .share-icon { font-size:22px;flex-shrink:0; }
+    .share-title { font-size:14px;font-weight:600;margin-bottom:2px; }
+    .share-date { font-size:11px;color:var(--text3); }
+    .share-link { margin-left:auto;font-size:11px;color:var(--gold);text-decoration:none;flex-shrink:0; }
+
+    /* Loading */
+    .spinner { width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:32px auto; }
+    .empty-msg { text-align:center;color:var(--text3);font-size:13px;padding:20px 0; }
+  </style>
+</head>
+<body>
+<div id="stars-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;"></div>
+
+<nav>
+  <a class="nav-logo" href="https://saju-today.com">오늘의<span>사주</span></a>
+  <a class="nav-back" href="https://saju-today.com">← 홈</a>
+</nav>
+
+<div class="container">
+  <div id="page-loading" style="text-align:center;padding:80px 0;">
+    <div class="spinner"></div>
+  </div>
+
+  <div id="page-content" style="display:none;">
+
+    <!-- 프로필 -->
+    <div class="section-card">
+      <div class="section-title">내 프로필</div>
+      <div class="profile-row">
+        <div class="avatar" id="user-avatar">?</div>
+        <div>
+          <div class="profile-name" id="user-name">—</div>
+          <div class="profile-email" id="user-email">—</div>
+          <span class="badge badge-free" id="user-badge">무료</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 내 사주 정보 -->
+    <div class="section-card">
+      <div class="section-title">내 사주 정보</div>
+      <div id="saju-info-content">
+        <div class="info-grid" id="saju-info-grid" style="display:none;margin-bottom:16px;"></div>
+        <div id="saju-empty" class="empty-msg">등록된 사주 정보가 없습니다</div>
+        <a href="https://saju-today.com" class="btn-gold" id="saju-edit-btn">
+          📋 사주 정보 수정
+        </a>
+      </div>
+    </div>
+
+    <!-- 멤버십 -->
+    <div class="section-card">
+      <div class="section-title">멤버십</div>
+      <div id="membership-content">
+        <div class="spinner" style="width:24px;height:24px;margin:8px auto;"></div>
+      </div>
+    </div>
+
+    <!-- 이용 내역 -->
+    <div class="section-card">
+      <div class="section-title">최근 공유 내역</div>
+      <div id="shares-content">
+        <div class="spinner" style="width:24px;height:24px;margin:8px auto;"></div>
+      </div>
+    </div>
+
+    <!-- 로그아웃 -->
+    <div style="text-align:center;margin-top:8px;">
+      <button class="btn-outline" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Stars
+(function(){
+  var wrap=document.getElementById('stars-bg');
+  for(var i=0;i<60;i++){
+    var s=document.createElement('div');var sz=Math.random()*2+0.5;
+    s.style.cssText='position:absolute;border-radius:50%;background:white;width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;animation:twinkle '+(2+Math.random()*4)+'s ease-in-out infinite '+(Math.random()*4)+'s;opacity:0.15;';
+    wrap.appendChild(s);
+  }
+})();
+
+const ICON_MAP = { 'AI 사주풀이 결과':'✨', '오늘의 운세 결과':'🌅', 'AI 궁합 분석 결과':'💑', 'AI 작명·이름감정 결과':'✍️', 'AI 꿈 해몽 결과':'🌙', 'AI 타로 결과':'🃏', 'AI 관상 분석 결과':'👁️', 'AI 택일 결과':'📅' };
+
+function doLogout() {
+  sb.auth.signOut();
+  localStorage.removeItem('saju_user');
+  sessionStorage.removeItem('saju_user');
+  location.href = 'https://saju-today.com';
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  var dt = new Date(d);
+  return dt.getFullYear() + '.' + String(dt.getMonth()+1).padStart(2,'0') + '.' + String(dt.getDate()).padStart(2,'0');
+}
+
+// Load profile avatar
+function loadAvatar(user) {
+  var avatarEl = document.getElementById('user-avatar');
+  var pic = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+  if (pic) {
+    avatarEl.innerHTML = '<img src="' + pic + '" alt="프로필"/>';
+  } else {
+    var name = user.user_metadata?.full_name || user.email || '?';
+    avatarEl.textContent = name.charAt(0).toUpperCase();
+  }
+}
+
+// Load saju profile from localStorage
+function loadSajuInfo() {
+  try {
+    var raw = localStorage.getItem('myProfile');
+    if (!raw) throw new Error('no profile');
+    var p = JSON.parse(raw);
+    var grid = document.getElementById('saju-info-grid');
+    var fields = [
+      { label:'이름', value: p.name || '—' },
+      { label:'성별', value: p.gender || '—' },
+      { label:'생년월일', value: (p.year && p.month && p.day) ? p.year+'년 '+p.month+'월 '+p.day+'일' : '—' },
+      { label:'출생 시간', value: p.hour !== undefined ? p.hour+'시' : '미입력' },
+    ];
+    grid.innerHTML = fields.map(function(f){
+      return '<div class="info-item"><label>'+f.label+'</label><span>'+f.value+'</span></div>';
+    }).join('');
+    grid.style.display = 'grid';
+    document.getElementById('saju-empty').style.display = 'none';
+    document.getElementById('saju-edit-btn').textContent = '✏️ 사주 정보 수정';
+  } catch(e) {
+    document.getElementById('saju-info-grid').style.display = 'none';
+    document.getElementById('saju-empty').style.display = 'block';
+    document.getElementById('saju-edit-btn').textContent = '📋 사주 등록하러 가기';
+  }
+}
+
+// Load membership
+async function loadMembership(userId) {
+  var el = document.getElementById('membership-content');
+  try {
+    var { data, error } = await sb.from('users').select('membership, membership_expires_at').eq('id', userId).single();
+    if (error || !data || !data.membership || data.membership === 'free') {
+      el.innerHTML = '<div class="member-free"><div><div class="member-label">현재 이용 중</div><div class="member-value">무료 플랜</div></div><a href="https://saju-today.com/pricing" class="btn-gold" style="font-size:12px;padding:8px 16px;">이용권 구매하기</a></div>';
+    } else {
+      var exp = data.membership_expires_at ? ' (만료: ' + formatDate(data.membership_expires_at) + ')' : '';
+      el.innerHTML = '<div class="member-paid"><div class="member-label">현재 이용 중</div><div class="member-value">💎 ' + data.membership + exp + '</div></div>';
+    }
+  } catch(e) {
+    el.innerHTML = '<div class="member-free"><div><div class="member-label">현재 이용 중</div><div class="member-value">무료 플랜</div></div><a href="https://saju-today.com/pricing" class="btn-gold" style="font-size:12px;padding:8px 16px;">이용권 구매하기</a></div>';
+  }
+}
+
+// Load share history
+async function loadShares(userId) {
+  var el = document.getElementById('shares-content');
+  try {
+    var { data, error } = await sb.from('shares').select('id,title,created_at').eq('user_id', userId).order('created_at', {ascending:false}).limit(5);
+    if (error || !data || data.length === 0) {
+      el.innerHTML = '<div class="empty-msg">공유한 내역이 없습니다</div>';
+      return;
+    }
+    el.innerHTML = data.map(function(item){
+      var icon = ICON_MAP[item.title] || '🔮';
+      var url = 'https://saju-today.com/share?id=' + item.id;
+      return '<div class="share-item"><span class="share-icon">'+icon+'</span><div><div class="share-title">'+escHtml(item.title||'결과')+'</div><div class="share-date">'+formatDate(item.created_at)+'</div></div><a href="'+url+'" target="_blank" class="share-link">보기 →</a></div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty-msg">내역을 불러올 수 없습니다</div>';
+  }
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Main init
+(async function() {
+  var { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.user) {
+    location.href = 'https://saju-today.com/login?redirect=/my';
+    return;
+  }
+  var user = session.user;
+
+  // Show content
+  document.getElementById('page-loading').style.display = 'none';
+  document.getElementById('page-content').style.display = 'block';
+
+  // Profile
+  loadAvatar(user);
+  document.getElementById('user-name').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
+  document.getElementById('user-email').textContent = user.email;
+
+  // Saju info
+  loadSajuInfo();
+
+  // Membership & shares (async)
+  loadMembership(user.id);
+  loadShares(user.id);
+})();
+</script>
+</body>
+</html>

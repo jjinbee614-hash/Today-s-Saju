@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>이용약관 | 오늘의 사주</title>
+  <meta name="description" content="오늘의 사주 서비스 이용약관 및 개인정보처리방침"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#0e0b14; --bg2:#13101c; --bg3:#1a1628; --gold:#c9a84c; --gold-light:#e8c96a; --text:#f0ead6; --text2:#a89c80; --text3:#5c5445; --border:rgba(201,168,76,0.12); --border2:rgba(255,255,255,0.06); --r:12px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:60px; }
+    @keyframes twinkle { 0%,100%{opacity:0.2;transform:scale(1)}50%{opacity:0.8;transform:scale(1.3)} }
+
+    nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(14,11,20,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border); }
+    .nav-logo { font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;color:var(--text);text-decoration:none; }
+    .nav-logo span { color:var(--gold); }
+    .nav-back { font-size:12px;padding:6px 14px;background:none;border:1px solid var(--border);border-radius:20px;color:var(--text2);text-decoration:none;cursor:pointer; }
+    .nav-back:hover { border-color:var(--gold);color:var(--gold); }
+
+    .container { max-width:720px;margin:0 auto;padding:80px 20px 40px;position:relative;z-index:1; }
+
+    /* Tabs */
+    .tab-bar { display:flex;gap:8px;margin-bottom:28px; }
+    .tab-btn {
+      flex:1; padding:12px 0; text-align:center;
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:var(--r); font-size:14px; font-weight:600;
+      color:var(--text2); cursor:pointer; transition:all 0.2s;
+      font-family:'Noto Sans KR',sans-serif;
+    }
+    .tab-btn.active { background:var(--gold-dim,rgba(201,168,76,0.15));border-color:var(--gold);color:var(--gold); }
+    .tab-btn:hover:not(.active) { border-color:var(--border2);color:var(--text); }
+
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* Content area */
+    .terms-box {
+      background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+      padding:28px 24px; line-height:1.85;
+    }
+    .terms-box h1 { font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;margin-bottom:20px;color:var(--gold); }
+    .terms-box h2 { font-size:15px;font-weight:700;margin:24px 0 10px;color:var(--text);border-left:3px solid var(--gold);padding-left:10px; }
+    .terms-box p { font-size:13px;color:var(--text2);margin-bottom:10px; }
+    .terms-box ul { font-size:13px;color:var(--text2);padding-left:20px;margin-bottom:10px; }
+    .terms-box ul li { margin-bottom:5px; }
+    .terms-box .updated { font-size:12px;color:var(--text3);margin-bottom:20px; }
+    .terms-box table { width:100%;border-collapse:collapse;font-size:12px;margin:10px 0; }
+    .terms-box th { background:var(--bg3);color:var(--text);padding:8px;border:1px solid var(--border);text-align:left; }
+    .terms-box td { padding:8px;border:1px solid var(--border);color:var(--text2); }
+  </style>
+</head>
+<body>
+<div id="stars-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;"></div>
+
+<nav>
+  <a class="nav-logo" href="https://saju-today.com">오늘의<span>사주</span></a>
+  <a class="nav-back" href="https://saju-today.com">← 홈으로</a>
+</nav>
+
+<div class="container">
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('terms')">서비스 이용약관</button>
+    <button class="tab-btn" onclick="showTab('privacy')">개인정보처리방침</button>
+  </div>
+
+  <!-- 서비스 이용약관 -->
+  <div id="tab-terms" class="tab-content active">
+    <div class="terms-box">
+      <h1>서비스 이용약관</h1>
+      <p class="updated">최종 업데이트: 2025년 4월 1일</p>
+
+      <h2>제1조 (목적)</h2>
+      <p>이 약관은 오늘의 사주(이하 "회사")가 운영하는 saju-today.com(이하 "서비스")의 이용과 관련하여 회사와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+
+      <h2>제2조 (이용약관의 효력 및 변경)</h2>
+      <ul>
+        <li>이 약관은 서비스를 이용하는 모든 이용자에게 적용됩니다.</li>
+        <li>회사는 필요한 경우 이 약관을 변경할 수 있으며, 변경된 약관은 서비스 내 공지를 통해 효력이 발생합니다.</li>
+        <li>이용자는 변경된 약관에 동의하지 않을 경우 서비스 이용을 중단하고 탈퇴할 수 있습니다.</li>
+      </ul>
+
+      <h2>제3조 (서비스 내용)</h2>
+      <p>회사는 다음과 같은 서비스를 제공합니다.</p>
+      <ul>
+        <li>AI 사주팔자 분석 서비스</li>
+        <li>오늘/내일의 운세 서비스</li>
+        <li>AI 궁합 분석 서비스</li>
+        <li>작명/이름감정 서비스</li>
+        <li>꿈 해몽 서비스</li>
+        <li>타로카드 서비스</li>
+        <li>관상 분석 서비스</li>
+        <li>택일 서비스</li>
+        <li>기타 회사가 추가 개발하거나 다른 회사와의 제휴를 통해 이용자에게 제공하는 서비스</li>
+      </ul>
+
+      <h2>제4조 (무료 및 유료 서비스)</h2>
+      <ul>
+        <li>일부 서비스는 무료로 제공되며, 일부 서비스는 유료 구독 또는 이용권 구매가 필요합니다.</li>
+        <li>무료 서비스의 범위는 회사의 정책에 따라 변경될 수 있습니다.</li>
+        <li>유료 서비스 이용 시 결제는 회사가 지정한 결제 수단을 이용해야 합니다.</li>
+      </ul>
+
+      <h2>제5조 (이용자의 의무)</h2>
+      <ul>
+        <li>이용자는 타인의 정보를 무단으로 이용하거나 허위 정보를 입력해서는 안 됩니다.</li>
+        <li>서비스 내 제공되는 분석 결과는 오락 및 참고 목적으로만 활용해야 하며, 중요한 의사결정의 근거로 삼아서는 안 됩니다.</li>
+        <li>이용자는 서비스를 이용하여 법령 또는 이 약관이 금지하는 행위를 해서는 안 됩니다.</li>
+      </ul>
+
+      <h2>제6조 (서비스 결과의 한계)</h2>
+      <p>본 서비스에서 제공하는 사주, 운세, 타로, 관상 등의 분석 결과는 인공지능에 의해 생성된 오락 목적의 콘텐츠입니다. 분석 결과의 정확성을 보장하지 않으며, 이를 근거로 한 의사결정에 대해 회사는 책임을 지지 않습니다.</p>
+
+      <h2>제7조 (환불 정책)</h2>
+      <ul>
+        <li>정기 구독: 결제일로부터 7일 이내 미사용 시 전액 환불 가능</li>
+        <li>이용권: 구매 후 미사용 이용권에 한해 결제일로부터 7일 이내 환불 가능</li>
+        <li>환불 문의: contact@saju-today.com</li>
+      </ul>
+
+      <h2>제8조 (서비스 중단)</h2>
+      <p>회사는 컴퓨터 등 정보통신설비의 보수점검, 교체 및 고장, 통신의 두절 등의 사유가 발생한 경우 서비스의 제공을 일시적으로 중단할 수 있습니다.</p>
+
+      <h2>제9조 (준거법 및 관할법원)</h2>
+      <p>이 약관에서 발생하는 분쟁에 대해서는 대한민국 법률을 적용하며, 관할 법원은 회사 소재지를 관할하는 법원으로 합니다.</p>
+    </div>
+  </div>
+
+  <!-- 개인정보처리방침 -->
+  <div id="tab-privacy" class="tab-content">
+    <div class="terms-box">
+      <h1>개인정보처리방침</h1>
+      <p class="updated">최종 업데이트: 2025년 4월 1일</p>
+
+      <h2>1. 개인정보의 수집 항목</h2>
+      <table>
+        <thead><tr><th>구분</th><th>수집 항목</th><th>목적</th></tr></thead>
+        <tbody>
+          <tr><td>회원가입 시</td><td>이메일, 이름(선택)</td><td>서비스 이용, 본인 확인</td></tr>
+          <tr><td>서비스 이용 시</td><td>생년월일, 성별, 출생시간</td><td>사주/운세 분석</td></tr>
+          <tr><td>결제 시</td><td>결제 수단 정보</td><td>유료 서비스 결제</td></tr>
+        </tbody>
+      </table>
+
+      <h2>2. 개인정보의 수집 방법</h2>
+      <ul>
+        <li>서비스 가입 시 이용자가 직접 입력</li>
+        <li>Google/Apple 소셜 로그인 연동 시 해당 플랫폼으로부터 제공</li>
+      </ul>
+
+      <h2>3. 개인정보의 보유 및 이용 기간</h2>
+      <ul>
+        <li>회원 탈퇴 시까지 보유 (탈퇴 후 즉시 삭제)</li>
+        <li>관계 법령에 따라 보존이 필요한 경우 해당 기간까지 보유</li>
+      </ul>
+
+      <h2>4. 개인정보의 제3자 제공</h2>
+      <p>회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다. 다만, 이용자가 사전에 동의한 경우 또는 법령에 의해 요구되는 경우에는 예외로 합니다.</p>
+
+      <h2>5. 개인정보의 처리 위탁</h2>
+      <ul>
+        <li>Supabase (데이터베이스 및 인증 서비스)</li>
+        <li>Anthropic Claude API (AI 분석 서비스)</li>
+        <li>Google Firebase (소셜 로그인)</li>
+      </ul>
+
+      <h2>6. 이용자의 권리</h2>
+      <ul>
+        <li>개인정보 열람, 정정, 삭제 요청: contact@saju-today.com</li>
+        <li>회원 탈퇴 시 모든 개인정보 즉시 삭제</li>
+      </ul>
+
+      <h2>7. 개인정보 보호책임자</h2>
+      <p>이름: 오늘의 사주 운영팀<br>이메일: contact@saju-today.com</p>
+
+      <h2>8. 쿠키 사용</h2>
+      <p>서비스는 로그인 상태 유지 및 서비스 개선을 위해 쿠키를 사용합니다. 브라우저 설정에서 쿠키 사용을 거부할 수 있으나, 일부 서비스 이용이 제한될 수 있습니다.</p>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:24px;border-top:1px solid var(--border);color:var(--text2);font-size:12px;position:relative;z-index:1;">
+  &copy; 2025 오늘의 사주. All rights reserved.
+</footer>
+
+<script>
+// Stars
+(function(){
+  var wrap=document.getElementById('stars-bg');
+  for(var i=0;i<60;i++){
+    var s=document.createElement('div');
+    var sz=Math.random()*2+0.5;
+    s.style.cssText='position:absolute;border-radius:50%;background:white;width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;animation:twinkle '+(2+Math.random()*4)+'s ease-in-out infinite '+(Math.random()*4)+'s;opacity:0.15;';
+    wrap.appendChild(s);
+  }
+})();
+
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){
+    b.classList.toggle('active', (i===0 && name==='terms') || (i===1 && name==='privacy'));
+  });
+  document.getElementById('tab-terms').classList.toggle('active', name==='terms');
+  document.getElementById('tab-privacy').classList.toggle('active', name==='privacy');
+}
+</script>
+</body>
+</html>
