@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>사주 등록 | 오늘의 사주</title>
+  <meta name="description" content="생년월일시를 한번 등록하면 모든 서비스에 자동 입력됩니다."/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0e0b14; --bg2:#13101c; --bg3:#1a1628;
+      --gold:#c9a84c; --gold-light:#e8c96a; --gold-dim:rgba(201,168,76,0.15);
+      --text:#f0ead6; --text2:#a89c80; --text3:#5c5445;
+      --border:rgba(201,168,76,0.12); --border2:rgba(255,255,255,0.06);
+      --r:12px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:60px; }
+    @keyframes twinkle { 0%,100%{opacity:0.2;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.3)} }
+
+    /* NAV */
+    nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(14,11,20,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border); }
+    .nav-logo { font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;color:var(--text);text-decoration:none; }
+    .nav-logo span { color:var(--gold); }
+    .nav-back { font-size:12px;padding:6px 14px;background:none;border:1px solid var(--border);border-radius:20px;color:var(--text2);text-decoration:none;transition:all 0.2s; }
+    .nav-back:hover { border-color:var(--gold);color:var(--gold); }
+
+    /* CONTAINER */
+    .container { max-width:520px;margin:0 auto;padding:80px 16px 40px;position:relative;z-index:1; }
+
+    /* FORM CARD */
+    .form-card { background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px 24px;margin:20px 0; }
+    .form-title { font-family:'Noto Serif KR',serif;font-size:22px;font-weight:700;color:var(--gold);margin-bottom:6px; }
+    .form-sub { font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6; }
+
+    /* FIELD */
+    .field { margin-bottom:20px; }
+    .field-label { font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;display:block; }
+    .field-label span { font-weight:400;color:var(--text3);letter-spacing:0;text-transform:none; }
+    input[type=text], input[type=number], select {
+      width:100%;padding:12px 14px;
+      background:var(--bg3);border:1px solid var(--border2);
+      color:var(--text);border-radius:8px;
+      font-size:14px;font-family:'Noto Sans KR',sans-serif;
+      outline:none;transition:border-color 0.2s;
+      -webkit-appearance:none; appearance:none;
+    }
+    input:focus, select:focus { border-color:rgba(201,168,76,0.4); }
+    input::placeholder { color:var(--text3); }
+    select option { background:var(--bg2);color:var(--text); }
+
+    /* TOGGLE BUTTONS (성별 / 양력음력) */
+    .toggle-group { display:flex;gap:8px; }
+    .toggle-btn {
+      flex:1;padding:11px 0;text-align:center;
+      background:var(--bg3);border:1px solid var(--border2);
+      border-radius:8px;font-size:13px;font-weight:600;
+      color:var(--text2);cursor:pointer;transition:all 0.2s;
+      font-family:'Noto Sans KR',sans-serif;
+    }
+    .toggle-btn.active {
+      background:var(--gold-dim);
+      border-color:rgba(201,168,76,0.4);
+      color:var(--gold-light);
+    }
+    .toggle-btn:hover:not(.active) { border-color:var(--border);color:var(--text); }
+
+    /* DATE GRID */
+    .date-grid { display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px; }
+
+    /* SUBMIT */
+    .submit-btn {
+      width:100%;padding:16px;
+      background:linear-gradient(135deg,var(--gold),#8b6914);
+      color:#1a1000;font-size:16px;font-weight:700;
+      border:none;border-radius:12px;cursor:pointer;
+      font-family:'Noto Serif KR',serif;
+      transition:opacity 0.2s;margin-top:8px;
+    }
+    .submit-btn:hover { opacity:0.88; }
+    .submit-btn:disabled { opacity:0.45;cursor:not-allowed; }
+
+    /* TOAST */
+    .toast { position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap; }
+    .toast.show { opacity:1; }
+
+    /* EXISTING BADGE */
+    .existing-badge { display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,168,76,0.25);border-radius:20px;padding:4px 12px;margin-bottom:20px; }
+  </style>
+</head>
+<body>
+<div id="stars-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;"></div>
+<div class="toast" id="toast"></div>
+
+<nav>
+  <a class="nav-logo" href="https://saju-today.com">오늘의<span>사주</span></a>
+  <a class="nav-back" href="https://saju-today.com">← 홈</a>
+</nav>
+
+<div class="container">
+  <div class="form-card">
+    <div class="form-title">📋 내 사주 등록하기</div>
+    <div class="form-sub">한번 등록하면 모든 서비스에 자동 입력돼요</div>
+
+    <div id="existing-notice" style="display:none;" class="existing-badge">✅ 기존 정보가 불러와졌어요</div>
+
+    <!-- 이름 -->
+    <div class="field">
+      <label class="field-label">이름</label>
+      <input id="reg-name" type="text" placeholder="홍길동" maxlength="20"/>
+    </div>
+
+    <!-- 성별 -->
+    <div class="field">
+      <label class="field-label">성별</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="reg-male" onclick="setGender('남성')">남성</button>
+        <button class="toggle-btn" id="reg-female" onclick="setGender('여성')">여성</button>
+      </div>
+    </div>
+
+    <!-- 양력/음력 -->
+    <div class="field">
+      <label class="field-label">생일 기준</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="reg-solar" onclick="setCalType('양력')">☀️ 양력</button>
+        <button class="toggle-btn" id="reg-lunar" onclick="setCalType('음력')">🌙 음력</button>
+      </div>
+    </div>
+
+    <!-- 생년월일 -->
+    <div class="field">
+      <label class="field-label">생년월일</label>
+      <div class="date-grid">
+        <input id="reg-year" type="number" placeholder="1990" min="1920" max="2010"/>
+        <input id="reg-month" type="number" placeholder="월" min="1" max="12"/>
+        <input id="reg-day" type="number" placeholder="일" min="1" max="31"/>
+      </div>
+    </div>
+
+    <!-- 태어난 시간 -->
+    <div class="field">
+      <label class="field-label">태어난 시간 <span>(모르면 "모름" 선택)</span></label>
+      <select id="reg-time">
+        <option value="모름">모름</option>
+        <option value="자시">자시 (23:00~01:00)</option>
+        <option value="축시">축시 (01:00~03:00)</option>
+        <option value="인시">인시 (03:00~05:00)</option>
+        <option value="묘시">묘시 (05:00~07:00)</option>
+        <option value="진시">진시 (07:00~09:00)</option>
+        <option value="사시">사시 (09:00~11:00)</option>
+        <option value="오시">오시 (11:00~13:00)</option>
+        <option value="미시">미시 (13:00~15:00)</option>
+        <option value="신시">신시 (15:00~17:00)</option>
+        <option value="유시">유시 (17:00~19:00)</option>
+        <option value="술시">술시 (19:00~21:00)</option>
+        <option value="해시">해시 (21:00~23:00)</option>
+      </select>
+    </div>
+
+    <button class="submit-btn" id="reg-submit" onclick="submitRegister()">사주 등록 완료 ✨</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Stars
+(function(){
+  var wrap=document.getElementById('stars-bg');
+  for(var i=0;i<60;i++){
+    var s=document.createElement('div');var sz=Math.random()*2+0.5;
+    s.style.cssText='position:absolute;border-radius:50%;background:white;width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;animation:twinkle '+(2+Math.random()*4)+'s ease-in-out infinite '+(Math.random()*4)+'s;opacity:0.15;';
+    wrap.appendChild(s);
+  }
+})();
+
+// State
+var selectedGender = '남성';
+var selectedCalType = '양력';
+
+function setGender(val) {
+  selectedGender = val;
+  document.getElementById('reg-male').classList.toggle('active', val === '남성');
+  document.getElementById('reg-female').classList.toggle('active', val === '여성');
+}
+
+function setCalType(val) {
+  selectedCalType = val;
+  document.getElementById('reg-solar').classList.toggle('active', val === '양력');
+  document.getElementById('reg-lunar').classList.toggle('active', val === '음력');
+}
+
+// Toast
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+// Load existing profile
+(function loadExisting() {
+  try {
+    var raw = localStorage.getItem('myProfile');
+    if (!raw) return;
+    var p = JSON.parse(raw);
+    if (p.name)   document.getElementById('reg-name').value = p.name;
+    if (p.year)   document.getElementById('reg-year').value = p.year;
+    if (p.month)  document.getElementById('reg-month').value = p.month;
+    if (p.day)    document.getElementById('reg-day').value = p.day;
+    if (p.time)   document.getElementById('reg-time').value = p.time;
+    if (p.gender)  setGender(p.gender);
+    if (p.calType) setCalType(p.calType);
+    document.getElementById('existing-notice').style.display = 'inline-flex';
+  } catch(e) {}
+})();
+
+// Submit
+async function submitRegister() {
+  var name    = document.getElementById('reg-name').value.trim();
+  var year    = parseInt(document.getElementById('reg-year').value);
+  var month   = parseInt(document.getElementById('reg-month').value);
+  var day     = parseInt(document.getElementById('reg-day').value);
+  var time    = document.getElementById('reg-time').value;
+
+  // Validation
+  if (!name) { showToast('이름을 입력해주세요'); document.getElementById('reg-name').focus(); return; }
+  if (!year || year < 1920 || year > 2010) { showToast('생년을 올바르게 입력해주세요 (1920~2010)'); return; }
+  if (!month || month < 1 || month > 12)  { showToast('월을 1~12 사이로 입력해주세요'); return; }
+  if (!day   || day < 1   || day > 31)    { showToast('일을 1~31 사이로 입력해주세요'); return; }
+
+  var profile = { name, gender: selectedGender, calType: selectedCalType, year, month, day, time };
+
+  // Save to localStorage
+  localStorage.setItem('myProfile', JSON.stringify(profile));
+
+  // Save to Supabase if logged in
+  try {
+    var { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) {
+      await sb.from('users').upsert({
+        id: session.user.id,
+        saju_name: name,
+        saju_gender: selectedGender,
+        saju_cal_type: selectedCalType,
+        saju_year: year,
+        saju_month: month,
+        saju_day: day,
+        saju_time: time,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+    }
+  } catch(e) { /* Supabase 저장 실패해도 localStorage는 OK */ }
+
+  // Disable button to prevent double-click
+  var btn = document.getElementById('reg-submit');
+  btn.disabled = true;
+  btn.textContent = '저장 중...';
+
+  showToast('사주가 등록됐어요! 사주풀이로 이동합니다 ✨');
+  setTimeout(function(){
+    window.location.href = 'https://saju-today.com/saju';
+  }, 1500);
+}
+</script>
+</body>
+</html>
