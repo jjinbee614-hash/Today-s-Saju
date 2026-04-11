@@ -1243,7 +1243,7 @@ function updateNavUser() {
   const navEl = document.getElementById('nav-user-area');
   if (!navEl) return;
   if (user) {
-    navEl.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-weight:600;">${user.name || '회원'}</span><button onclick="signOut()" style="font-size:11px;padding:4px 10px;background:none;border:1px solid var(--border);border-radius:12px;cursor:pointer;color:var(--muted);">로그아웃</button></div>`;
+    navEl.innerHTML = `<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;font-weight:600;color:var(--text,#1a1008);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${user.name || '회원'}</span><a href="https://saju-today.com/my" style="font-size:11px;padding:4px 10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:12px;text-decoration:none;color:#c9a84c;font-weight:600;">MY</a><button onclick="signOut()" style="font-size:11px;padding:4px 10px;background:none;border:1px solid rgba(26,16,8,0.15);border-radius:12px;cursor:pointer;color:var(--text2,#8a7860);">로그아웃</button></div>`;
   } else {
     navEl.innerHTML = `<a href="https://saju-today.com/login" style="font-size:12px;padding:6px 14px;background:var(--gold);color:white;border-radius:20px;text-decoration:none;font-weight:600;">로그인</a>`;
   }

@@ -209,7 +209,7 @@
     </div>
 
     <!-- 사주등록 CTA -->
-    <a href="https://saju-today.com" class="cta-register">
+    <a href="https://saju-today.com/saju" class="cta-register">
         <div class="cta-register-hint">✨ 처음이라면 여기서 시작!</div>
         <div class="cta-register-title">📋 내 사주 등록하기</div>
         <div class="cta-register-sub">생년월일시 등록 → 모든 서비스 자동 입력</div>
@@ -318,7 +318,8 @@ function updateNavAuth() {
     var user = getSajuUser();
     if (user) {
         navActions.innerHTML =
-            '<a href="https://saju-today.com/my" class="nav-user-name">' + (user.name || '회원') + '</a>' +
+            '<span style="font-size:12px;font-weight:600;color:var(--text);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (user.name || '회원') + '</span>' +
+            '<a href="https://saju-today.com/my" style="font-size:11px;padding:4px 10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:12px;text-decoration:none;color:#c9a84c;font-weight:600;">MY</a>' +
             '<button class="nav-logout-btn" onclick="doLogout()">로그아웃</button>';
     } else {
         navActions.innerHTML = '<a href="https://saju-today.com/login" class="nav-login-btn">로그인</a>';
