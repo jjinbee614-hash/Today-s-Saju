@@ -11,33 +11,34 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root { --ink:#1a1008; --paper:#f5efe4; --card:#ede5d8; --border:rgba(26,16,8,0.15); --muted:#8a7860; --gold:#c9913a; }
+    :root { --bg:#0e0b14; --bg2:#13101c; --bg3:#1a1628; --gold:#c9a84c; --gold-light:#e8c96a; --text:#f0ead6; --text2:#a89c80; --border:rgba(201,168,76,0.12); --border2:rgba(255,255,255,0.06); }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Noto Sans KR',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; padding-bottom:220px; }
+    body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:220px; }
+    @keyframes twinkle { 0%,100%{opacity:0.25;transform:scale(1)} 50%{opacity:0.9;transform:scale(1.4)} }
 
     /* 헤더 */
-    .header { background:linear-gradient(135deg,#1a1008,#3d2010); padding:28px 24px; text-align:center; }
-    .logo { font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700; color:white; cursor:pointer; }
-    .logo span { color:#c9913a; }
-    .header-sub { color:rgba(255,255,255,0.55); font-size:13px; margin-top:6px; }
-    .share-badge { display:inline-block; background:rgba(201,145,58,0.25); border:1px solid rgba(201,145,58,0.5); color:#e8b56a; font-size:11px; font-weight:700; padding:4px 14px; border-radius:20px; margin-top:12px; letter-spacing:0.5px; }
+    .header { background:linear-gradient(135deg,#0e0b14,#1a1628); border-bottom:1px solid var(--border); padding:28px 24px; text-align:center; }
+    .logo { font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700; color:var(--text); cursor:pointer; }
+    .logo span { color:var(--gold); }
+    .header-sub { color:var(--text2); font-size:13px; margin-top:6px; }
+    .share-badge { display:inline-block; background:var(--gold-dim,rgba(201,168,76,0.15)); border:1px solid rgba(201,168,76,0.4); color:var(--gold-light); font-size:11px; font-weight:700; padding:4px 14px; border-radius:20px; margin-top:12px; letter-spacing:0.5px; }
 
     /* 콘텐츠 */
     .container { max-width:640px; margin:0 auto; padding:24px 16px; }
-    .result-wrapper { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; box-shadow:0 2px 16px rgba(0,0,0,0.07); overflow:hidden; }
+    .result-wrapper { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:24px; box-shadow:0 2px 24px rgba(0,0,0,0.3); overflow:hidden; }
     .result-meta { display:flex; align-items:center; gap:10px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); }
     .result-icon { font-size:30px; }
-    .result-meta-text strong { display:block; font-size:17px; font-weight:700; color:var(--ink); }
-    .result-meta-text span { font-size:12px; color:var(--muted); }
+    .result-meta-text strong { display:block; font-size:17px; font-weight:700; color:var(--text); }
+    .result-meta-text span { font-size:12px; color:var(--text2); }
 
     /* 로딩 */
-    .loading { text-align:center; padding:64px 20px; color:var(--muted); }
+    .loading { text-align:center; padding:64px 20px; color:var(--text2); }
     .spinner { width:38px; height:38px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 16px; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
     /* 하단 고정 CTA */
-    .cta-fixed { position:fixed; bottom:0; left:0; right:0; background:linear-gradient(135deg,#1a1008,#3d2010); padding:20px 20px max(20px,env(safe-area-inset-bottom)); }
-    .cta-text { color:rgba(255,255,255,0.7); font-size:13px; text-align:center; margin-bottom:12px; }
+    .cta-fixed { position:fixed; bottom:0; left:0; right:0; background:rgba(14,11,20,0.97); backdrop-filter:blur(20px); border-top:1px solid var(--border); padding:20px 20px max(20px,env(safe-area-inset-bottom)); }
+    .cta-text { color:var(--text2); font-size:13px; text-align:center; margin-bottom:12px; }
     .cta-btn { display:block; text-align:center; background:linear-gradient(45deg,#c9913a,#e8b56a); color:white; font-size:15px; font-weight:700; padding:14px; border-radius:14px; text-decoration:none; font-family:'Noto Serif KR',serif; box-shadow:0 4px 16px rgba(201,145,58,0.35); margin-bottom:14px; }
 
     /* 공유 버튼 행 */
