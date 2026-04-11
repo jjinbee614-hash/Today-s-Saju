@@ -238,6 +238,7 @@ async function submitRegister() {
   var profile = { name, gender: selectedGender, calType: selectedCalType, year, month, day, time };
 
   // Save to localStorage
+  console.log('저장된 myProfile:', JSON.stringify({name, gender: selectedGender, calType: selectedCalType, year, month, day, time}));
   localStorage.setItem('myProfile', JSON.stringify(profile));
 
   // Save to Supabase if logged in
