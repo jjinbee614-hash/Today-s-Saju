@@ -840,7 +840,7 @@
 </div>
 </div>
 <div id="fortune-share" style="display:none;flex-direction:row;justify-content:center;align-items:center;width:100%;gap:10px;margin-top:20px;flex-wrap:wrap;">
-  <button onclick="shareResult('fortune-result','오늘의 운세 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
+  <button onclick="shareResult('fortune-content', '오늘의 운세 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
     🔗 결과 공유하기
   </button>
 </div>
@@ -1598,7 +1598,7 @@ function updateNavUser() {
 }
 document.addEventListener('DOMContentLoaded', updateNavUser);
 
-async function shareResult('fortune-result','오늘의 운세 결과') {
+async function shareResult(resultId, pageTitle) {
   var el = document.getElementById(resultId);
   if (!el || el.style.display === 'none') {
     showToast('먼저 결과를 확인해주세요');
