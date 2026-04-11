@@ -209,7 +209,7 @@ function loadSajuInfo() {
       { label:'이름', value: p.name || '—' },
       { label:'성별', value: p.gender || '—' },
       { label:'생년월일', value: (p.year && p.month && p.day) ? p.year+'년 '+p.month+'월 '+p.day+'일' : '—' },
-      { label:'출생 시간', value: p.hour !== undefined ? p.hour+'시' : '미입력' },
+      { label:'출생 시간', value: (p.time && p.time !== '모름') ? p.time : '모름' },
     ];
     grid.innerHTML = fields.map(function(f){
       return '<div class="info-item"><label>'+f.label+'</label><span>'+f.value+'</span></div>';
