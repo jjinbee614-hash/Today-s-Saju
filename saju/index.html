@@ -759,7 +759,7 @@
   .test-option.selected { border-color:var(--text); background:var(--text); color:white; }
   .test-result {
     background:linear-gradient(135deg,#1a1008,#2d1f0e);
-    color:var(--bg); border-radius:12px; padding:36px 32px;
+    color:#f0ead6; border-radius:12px; padding:36px 32px;
     text-align:center;
   }
   .test-result-type {
@@ -777,7 +777,7 @@
   /* Profile Modal */
   .profile-modal-top {
     background:linear-gradient(135deg,#1a1008,#2d1f0e);
-    padding:32px 28px; text-align:center; color:var(--bg);
+    padding:32px 28px; text-align:center; color:#f0ead6;
     border-radius:12px 12px 0 0;
   }
   .profile-modal-avatar {
@@ -1414,7 +1414,7 @@ function renderSajuResult(r, year, month, day, time, age, currentYear) {
           <div style="font-size:13px;font-weight:400;color:var(--text2);margin-top:2px;">${r.daymaster||''}</div>
         </div>
       </div>
-      <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:12px;padding:24px;color:var(--bg);margin-bottom:16px;">
+      <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:12px;padding:24px;color:#f0ead6;margin-bottom:16px;">
         <div style="font-size:22px;font-family:'Noto Serif SC','Noto Serif KR',serif;font-weight:700;margin-bottom:12px;">✦ ${r.characterTitle||'나의 사주 캐릭터'}</div>
         <p style="font-size:14px;line-height:2;opacity:0.88;">${r.characterSummary||''}</p>
         ${r.lifeType?`<div style="margin-top:14px;display:inline-block;background:rgba(201,145,58,0.25);border-radius:20px;padding:5px 16px;font-size:12px;color:#f5c97a;">🗺️ ${r.lifeType}</div>`:''}
@@ -1457,7 +1457,7 @@ function renderSajuResult(r, year, month, day, time, age, currentYear) {
 
     <div class="sr-section">
       <div class="sr-section-title"><div class="title-icon">🐉</div><span>${currentYear}년 운세</span></div>
-      <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:12px;padding:24px;color:var(--bg);">
+      <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:12px;padding:24px;color:#f0ead6;">
         <div style="font-size:18px;font-family:'Noto Serif SC','Noto Serif KR',serif;font-weight:700;margin-bottom:16px;">${r.thisYearTitle||currentYear+'년 운세'}</div>
         <p style="font-size:14px;line-height:2;opacity:0.88;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1);">${r.thisYearOverview||''}</p>
         ${thisYearHTML}
@@ -1811,7 +1811,7 @@ function buildSajuTable(pillars, gender) {
   const relations = analyzeRelations(pillars);
 
   return `
-    <div style="background:var(--text);color:var(--bg);border-radius:12px;padding:20px;margin-bottom:8px;font-family:'Noto Serif SC','Noto Serif KR',serif;overflow-x:auto;">
+    <div style="background:var(--bg3);color:#f0ead6;border-radius:12px;padding:20px;margin-bottom:8px;font-family:'Noto Serif SC','Noto Serif KR',serif;overflow-x:auto;">
       <div style="font-size:13px;letter-spacing:2px;opacity:0.6;margin-bottom:12px;text-align:center;">四柱八字 (${gender})</div>
       <div style="display:grid;grid-template-columns:repeat(${rows.length},1fr);gap:8px;min-width:${rows.length*70}px;">
         ${rows.map(r=>`<div style="text-align:center;font-size:11px;opacity:0.5;letter-spacing:1px;">${r.label}</div>`).join('')}
