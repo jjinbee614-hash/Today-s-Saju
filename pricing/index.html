@@ -301,7 +301,10 @@ function buyProduct(productName, amount, credits, isSubscription) {
 
   var merchantUid = 'saju_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
 
-  IMP.request_pay({
+  // 결제 수단 선택
+  var pgType = confirm('카카오페이로 결제하시겠어요?\n(취소 시 토스페이먼츠로 결제)');
+
+  var paymentData = pgType ? {
     pg: 'kakaopay',
     channel_key: KAKAOPAY_CHANNEL_KEY,
     pay_method: 'card',
@@ -309,8 +312,19 @@ function buyProduct(productName, amount, credits, isSubscription) {
     name: productName,
     amount: amount,
     buyer_email: user.email || '',
-    buyer_name: user.user_metadata && user.user_metadata.full_name || ''
-  }, async function(rsp) {
+    buyer_name: user.user_metadata && user.user_metadata.full_name || '구매자'
+  } : {
+    pg: 'tosspayments',
+    channel_key: 'channel-key-558c51e2-64c7-450c-a9e2-eea5aaf2365c',
+    pay_method: 'card',
+    merchant_uid: merchantUid,
+    name: productName,
+    amount: amount,
+    buyer_email: user.email || '',
+    buyer_name: user.user_metadata && user.user_metadata.full_name || '구매자'
+  };
+
+  IMP.request_pay(paymentData, async function(rsp) {
     if (rsp.success) {
       showToast('결제 처리 중입니다...');
       try {
