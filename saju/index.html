@@ -908,6 +908,38 @@
 
     <!-- Results -->
     <div id="saju-result" style="display:none;"></div>
+
+<div id="saju-ask-section" style="display:none;margin-top:24px;">
+  <div style="background:var(--bg2,#13101c);border:1px solid var(--border);border-radius:16px;padding:24px;">
+    <h3 style="font-family:'Noto Serif KR',serif;font-size:18px;font-weight:700;margin-bottom:8px;color:var(--gold,#c9a84c);">🔮 AI에게 더 물어보기</h3>
+    <p style="font-size:13px;color:var(--text2,#a89c80);margin-bottom:16px;line-height:1.7;">사주를 바탕으로 궁금한 점을 질문하면 AI가 개인화된 답변을 드려요.<br>예: "올해 사업 시작해도 될까요?", "언제 결혼하면 좋을까요?"</p>
+
+    <div id="saju-ask-login-notice" style="display:none;text-align:center;padding:20px;">
+      <p style="font-size:14px;color:var(--text2,#a89c80);margin-bottom:12px;">로그인 후 이용할 수 있어요</p>
+      <a href="https://saju-today.com/login" style="display:inline-block;padding:12px 24px;background:var(--gold,#c9a84c);color:#1a1000;border-radius:24px;text-decoration:none;font-weight:700;">로그인하기</a>
+    </div>
+
+    <div id="saju-ask-credits" style="display:none;text-align:center;padding:16px;background:rgba(201,168,76,0.08);border-radius:10px;margin-bottom:16px;">
+      <span style="font-size:13px;color:var(--text2,#a89c80);">보유 이용권: </span>
+      <span id="saju-credit-count" style="font-size:16px;font-weight:700;color:var(--gold,#c9a84c);">0</span>
+      <span style="font-size:13px;color:var(--text2,#a89c80);">회</span>
+      <a href="https://saju-today.com/pricing" style="margin-left:12px;font-size:12px;color:var(--gold,#c9a84c);text-decoration:underline;">이용권 구매</a>
+    </div>
+
+    <div id="saju-ask-form">
+      <textarea id="saju-question-input" placeholder="궁금한 점을 입력해주세요..." style="width:100%;padding:14px;background:var(--bg3,#1a1628);border:1px solid var(--border);border-radius:10px;color:var(--text,#f0ead6);font-size:14px;font-family:'Noto Sans KR',sans-serif;resize:none;height:100px;margin-bottom:12px;outline:none;"></textarea>
+      <button id="saju-ask-btn" onclick="askSajuQuestion()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--gold,#c9a84c),#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Serif KR',serif;">
+        🔮 AI에게 질문하기 (이용권 1회 차감)
+      </button>
+    </div>
+
+    <div id="saju-ask-result" style="display:none;margin-top:20px;background:var(--bg3,#1a1628);border:1px solid var(--border);border-radius:12px;padding:24px;">
+      <h4 style="color:var(--gold,#c9a84c);font-size:15px;font-weight:700;margin-bottom:12px;">🔮 AI 답변</h4>
+      <div id="saju-ask-answer" style="font-size:14px;line-height:2;color:var(--text,#f0ead6);"></div>
+    </div>
+  </div>
+</div>
+
 <div id="saju-share" style="display:none;flex-direction:row;justify-content:center;align-items:center;width:100%;gap:10px;margin-top:20px;flex-wrap:wrap;">
   <button onclick="shareResult('saju-result', 'AI 사주풀이 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
     🔗 결과 공유하기
@@ -1324,6 +1356,7 @@ ${baseInfo}
 }
 
 function renderSajuResult(r, year, month, day, time, age, currentYear) {
+  currentSajuData = { r: r, year: year, month: month, day: day, time: time, age: age, currentYear: currentYear };
   // pillars 안전 보장
   if (!r.pillars || !r.pillars.day) {
     document.getElementById('saju-result').innerHTML =
@@ -1487,7 +1520,7 @@ function renderSajuResult(r, year, month, day, time, age, currentYear) {
     </div>`:''}
   `;
   const shareDivSaju = document.getElementById('saju-share'); if(shareDivSaju) shareDivSaju.style.display='flex';
-
+  initSajuAskSection();
 }
 
 // ─── TOAST ───
@@ -1850,6 +1883,120 @@ document.addEventListener('click', function(e) {
 // ─── Supabase Auth ───
 const { createClient: createSBClient } = supabase;
 const sbClient = createSBClient('https://kuupemfzqkzinrauhpnd.supabase.co', 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+
+// ─── AI 추가질문 ───
+
+var currentSajuData = null;
+
+async function initSajuAskSection() {
+  const section = document.getElementById('saju-ask-section');
+  if (!section) return;
+  section.style.display = 'block';
+
+  const user = getSajuUser();
+  if (!user) {
+    document.getElementById('saju-ask-login-notice').style.display = 'block';
+    document.getElementById('saju-ask-form').style.display = 'none';
+    return;
+  }
+
+  const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+  const { data } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+  const credits = data?.credits || 0;
+
+  document.getElementById('saju-ask-credits').style.display = 'block';
+  document.getElementById('saju-credit-count').textContent = credits;
+
+  if (credits <= 0) {
+    document.getElementById('saju-ask-btn').textContent = '이용권이 없어요 — 구매하기';
+    document.getElementById('saju-ask-btn').onclick = function() {
+      window.location.href = 'https://saju-today.com/pricing';
+    };
+  }
+}
+
+async function askSajuQuestion() {
+  const user = getSajuUser();
+  if (!user) { showToast('로그인이 필요해요'); return; }
+
+  const question = document.getElementById('saju-question-input').value.trim();
+  if (!question) { showToast('질문을 입력해주세요'); return; }
+
+  const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+
+  const { data: creditData } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+  const credits = creditData?.credits || 0;
+
+  if (credits <= 0) {
+    showToast('이용권이 없어요. 구매 페이지로 이동합니다');
+    setTimeout(() => window.location.href = 'https://saju-today.com/pricing', 1500);
+    return;
+  }
+
+  const btn = document.getElementById('saju-ask-btn');
+  btn.disabled = true;
+  btn.textContent = 'AI가 분석 중...';
+  showToast('AI가 분석 중입니다...');
+
+  try {
+    await sb.from('user_credits').update({ credits: credits - 1, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+    document.getElementById('saju-credit-count').textContent = credits - 1;
+
+    const sajuContext = currentSajuData ? `
+【사주 정보】
+- 생년월일: ${currentSajuData.year}년 ${currentSajuData.month}월 ${currentSajuData.day}일
+- 연주: ${currentSajuData.r.yp?.heavenly}${currentSajuData.r.yp?.earthly}
+- 월주: ${currentSajuData.r.mp?.heavenly}${currentSajuData.r.mp?.earthly}
+- 일주: ${currentSajuData.r.dp?.heavenly}${currentSajuData.r.dp?.earthly}
+- 일간: ${currentSajuData.r.daymaster}
+- 오행분포: ${JSON.stringify(currentSajuData.r.elements)}
+` : '';
+
+    const prompt = `당신은 전통 명리학 전문가입니다. 아래 사주 정보를 바탕으로 질문에 답해주세요.
+
+${sajuContext}
+
+【질문】${question}
+
+사주 오행과 천간지지를 근거로 구체적이고 실용적인 답변을 해주세요.
+긍정적인 면과 주의할 점을 균형있게 설명하고, 조언을 포함해주세요.
+답변은 500자 내외로 작성해주세요.`;
+
+    const response = await fetch('https://saju-proxy.jjinbee614.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const answer = data.content?.[0]?.text || '답변을 생성하지 못했어요';
+
+    document.getElementById('saju-ask-result').style.display = 'block';
+    document.getElementById('saju-ask-answer').innerHTML = answer.replace(/\n/g, '<br>');
+
+    await sb.from('ai_questions').insert({
+      user_id: user.id,
+      saju_data: currentSajuData,
+      question: question,
+      answer: answer
+    });
+
+    showToast('답변이 완료됐어요 🔮');
+
+  } catch(e) {
+    showToast('오류: ' + e.message);
+    await sb.from('user_credits').update({ credits: credits }).eq('user_id', user.id);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔮 AI에게 질문하기 (이용권 1회 차감)';
+  }
+}
+
+// ─── AUTH ───
 
 function getSajuUser() {
   try { const u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
