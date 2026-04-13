@@ -274,7 +274,7 @@
 var SUPABASE_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
 var IMP_CODE = 'imp15413732';
-var PG_KAKAOPAY = 'kakaopay.channel-key-a74262a2-6328-47cb-9b45-0677ac291959';
+var KAKAOPAY_CHANNEL_KEY = 'channel-key-a74262a2-6328-47cb-9b45-0677ac291959';
 
 var toastTimer;
 function showToast(msg) {
@@ -302,7 +302,8 @@ function buyProduct(productName, amount, credits, isSubscription) {
   var merchantUid = 'saju_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
 
   IMP.request_pay({
-    pg: PG_KAKAOPAY,
+    pg: 'kakaopay',
+    channel_key: KAKAOPAY_CHANNEL_KEY,
     pay_method: 'card',
     merchant_uid: merchantUid,
     name: productName,
