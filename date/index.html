@@ -44,21 +44,30 @@
   }
 
   :root {
-    --ink: #1a1008;
-    --paper: #f5efe4;
-    --gold: #c9913a;
+    --bg: #0e0b14;
+    --bg2: #13101c;
+    --bg3: #1a1628;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --text: #f0ead6;
+    --text2: #a89c80;
+    --text3: #5c5445;
+    --border: rgba(201,168,76,0.12);
+    --border2: rgba(255,255,255,0.06);
+    --ink: #f0ead6;
+    --paper: #0e0b14;
+    --card: #13101c;
+    --muted: #a89c80;
     --red: #c0392b;
     --blue: #1a4a6b;
-    --muted: #8a7860;
-    --card: #fdf8f0;
-    --border: #d9c9aa;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Noto Sans KR', sans-serif;
-    background:var(--paper);
+    background:var(--bg);
     color: var(--ink);
     min-height: 100vh;
     overflow-x: hidden;
@@ -82,7 +91,7 @@
     z-index: 100;
     padding: 10px 16px;
     display: flex; align-items: center; justify-content: space-between;
-    background: rgba(245,239,228,0.95);
+    background: rgba(14,11,20,0.92);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     flex-wrap: nowrap;
@@ -170,7 +179,7 @@
   }
   .btn-primary:hover { background: var(--gold); transform: translateY(-2px); }
   .btn-secondary {
-    background: var(--paper); color: var(--ink);
+    background: var(--bg); color: var(--ink);
     border: 1px solid var(--ink); padding: 16px 40px; border-radius: 4px;
     font-size: 15px; cursor: pointer; letter-spacing: 1px;
     font-family: 'Noto Sans KR', sans-serif;
@@ -192,7 +201,7 @@
     gap: 24px; max-width: 1000px; margin: 60px auto; padding: 0 24px;
   }
   .feat-card {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     border-radius: 8px; padding: 32px 28px; text-align: center;
   }
   .feat-icon { font-size: 36px; margin-bottom: 16px; display: block; }
@@ -208,7 +217,7 @@
   .form-sub { color: var(--muted); font-size: 14px; margin-bottom: 40px; line-height: 1.6; }
 
   .form-section {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     border-radius: 8px; padding: 28px; margin-bottom: 20px;
   }
   .form-section h3 {
@@ -222,7 +231,7 @@
   label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; }
   input, select, textarea {
     width: 100%; padding: 12px 14px;
-    background: var(--paper); border: 1px solid var(--border);
+    background: var(--bg); border: 1px solid var(--border);
     border-radius: 4px; font-size: 14px; color: var(--ink);
     font-family: 'Noto Sans KR', sans-serif;
     transition: border-color 0.2s;
@@ -235,7 +244,7 @@
   /* Gender toggle */
   .gender-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
   .gender-toggle button {
-    flex: 1; padding: 12px; background: var(--paper);
+    flex: 1; padding: 12px; background: var(--bg);
     border: none; cursor: pointer; font-size: 14px;
     font-family: 'Noto Sans KR', sans-serif;
     transition: all 0.2s; color: var(--muted);
@@ -262,14 +271,14 @@
   .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
   .filter-chip {
     padding: 7px 18px; border-radius: 20px;
-    border: 1px solid var(--border); background: var(--paper);
+    border: 1px solid var(--border); background: var(--bg);
     font-size: 13px; cursor: pointer; transition: all 0.2s;
   }
   .filter-chip.active { background: var(--ink); color: white; border-color: var(--ink); }
 
   .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
   .match-card {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     border-radius: 8px; overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
@@ -315,14 +324,14 @@
   }
   .action-btn.like { background: var(--ink); color: white; }
   .action-btn.like:hover { background: var(--gold); }
-  .action-btn.skip { background: var(--paper); color: var(--muted); border: 1px solid var(--border); }
+  .action-btn.skip { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
 
   /* ─── CHAT ─── */
   .chat-page { max-width: 800px; margin: 0 auto; padding: 48px 24px; }
   .chat-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
   .chat-item {
     display: flex; align-items: center; gap: 16px;
-    padding: 16px 20px; background: var(--card);
+    padding: 16px 20px; background: var(--bg2);
     border: 1px solid var(--border); border-radius: 8px;
     cursor: pointer; transition: all 0.2s;
   }
@@ -338,7 +347,7 @@
   .chat-item-time { font-size: 12px; color: var(--muted); }
 
   .chat-window {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     border-radius: 8px; overflow: hidden;
   }
   .chat-header {
@@ -356,7 +365,7 @@
     padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.6;
   }
   .msg.me .msg-bubble { background: var(--ink); color: white; border-radius: 16px 16px 4px 16px; }
-  .msg.them .msg-bubble { background: var(--paper); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; }
+  .msg.them .msg-bubble { background: var(--bg); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; }
   .msg-time { font-size: 11px; color: var(--muted); margin-top: 4px; }
   .msg.me .msg-time { text-align: right; }
   .chat-input-row {
@@ -365,7 +374,7 @@
   }
   .chat-input {
     flex: 1; padding: 12px 16px; border: 1px solid var(--border);
-    border-radius: 24px; background: var(--paper); font-size: 14px;
+    border-radius: 24px; background: var(--bg); font-size: 14px;
     font-family: 'Noto Sans KR', sans-serif;
   }
   .send-btn {
@@ -416,7 +425,7 @@
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--paper); border-radius: 12px;
+    background: var(--bg); border-radius: 12px;
     width: 100%; max-width: 640px; max-height: 90vh;
     overflow-y: auto; position: relative;
   }
@@ -443,7 +452,7 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .menu-item { display:block; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; font-family:'Noto Sans KR',sans-serif; color:var(--ink); cursor:pointer; border-radius:8px; }
-  .menu-item:hover { background:var(--card); color:var(--gold); }
+  .menu-item:hover { background:var(--bg2); color:var(--gold); }
 
   /* Divider */
   .divider {
@@ -472,7 +481,7 @@
   /* ─── SAJU READING ─── */
   .saju-reading-page { max-width: 780px; margin: 0 auto; padding: 48px 24px; }
   .saju-input-card {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     border-radius: 12px; padding: 36px 32px; margin-bottom: 32px;
   }
   .saju-input-card h2 { font-family:'Noto Serif SC','Noto Serif KR',serif; font-size:26px; margin-bottom:6px; }
@@ -483,7 +492,7 @@
 
   /* Result sections */
   .sr-section {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     border-radius: 10px; padding: 28px 30px; margin-bottom: 20px;
   }
   .sr-section-title {
@@ -558,10 +567,10 @@
     flex-shrink: 0; margin-top: 4px;
   }
   .decade-dot.current { background: var(--gold); border-color: var(--gold); }
-  .decade-dot.future { background: var(--paper); border-color: var(--border); }
+  .decade-dot.future { background: var(--bg); border-color: var(--border); }
   .decade-line { width: 2px; flex: 1; background: var(--border); margin-top: 4px; min-height: 20px; }
   .decade-content {
-    flex: 1; background: var(--paper); border: 1px solid var(--border);
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; padding: 16px 20px; margin-bottom: 4px;
     transition: all 0.2s;
   }
@@ -623,7 +632,7 @@
   /* Calendar type toggle */
   .cal-toggle { display:flex; gap:0; border:1px solid var(--border); border-radius:4px; overflow:hidden; width:fit-content; }
   .cal-toggle button {
-    padding:9px 20px; background:var(--paper); border:none; cursor:pointer;
+    padding:9px 20px; background:var(--bg); border:none; cursor:pointer;
     font-size:13px; font-family:'Noto Sans KR',sans-serif; color:var(--muted);
     transition:all 0.2s; white-space:nowrap;
   }
@@ -640,7 +649,7 @@
   .fortune-page { max-width: 700px; margin: 0 auto; padding: 48px 24px; }
   .fortune-date-bar {
     display: flex; align-items: center; justify-content: space-between;
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     border-radius: 8px; padding: 16px 24px; margin-bottom: 28px;
   }
   .fortune-date-bar h3 { font-family:'Noto Serif SC','Noto Serif KR',serif; font-size:18px; }
@@ -648,9 +657,9 @@
   .birth-input-row { display:flex; gap:12px; margin-bottom:24px; align-items:flex-end; }
   .birth-input-row input { flex:1; }
   .fortune-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
-  .fortune-score-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; }
+  .fortune-score-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; }
   .fortune-card {
-    background:var(--card); border:1px solid var(--border);
+    background:var(--bg2); border:1px solid var(--border);
     border-radius:8px; padding:20px; text-align:center;
   }
   .fortune-card .f-icon { font-size:28px; margin-bottom:10px; display:block; }
@@ -674,7 +683,7 @@
   .rank-list { display:flex; flex-direction:column; gap:12px; }
   .rank-item {
     display:flex; align-items:center; gap:16px;
-    background:var(--card); border:1px solid var(--border);
+    background:var(--bg2); border:1px solid var(--border);
     border-radius:8px; padding:16px 20px; cursor:pointer;
     transition:all 0.2s;
   }
@@ -710,7 +719,7 @@
   }
   .test-progress-dot.done { background:var(--gold); }
   .test-question-card {
-    background:var(--card); border:1px solid var(--border);
+    background:var(--bg2); border:1px solid var(--border);
     border-radius:12px; padding:36px 32px; margin-bottom:20px;
     text-align:center;
   }
@@ -719,7 +728,7 @@
   .test-q-text { font-family:'Noto Serif SC','Noto Serif KR',serif; font-size:20px; line-height:1.5; margin-bottom:28px; }
   .test-options { display:flex; flex-direction:column; gap:12px; }
   .test-option {
-    padding:16px 20px; background:var(--paper);
+    padding:16px 20px; background:var(--bg);
     border:1px solid var(--border); border-radius:8px;
     cursor:pointer; font-size:14px; text-align:left;
     transition:all 0.2s; font-family:'Noto Sans KR',sans-serif;
@@ -775,11 +784,11 @@ label { color:var(--ink) !important; }
   </style>
   <style>
     .menu-item { display:block; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; font-family:'Noto Sans KR',sans-serif; color:var(--ink); cursor:pointer; border-radius:8px; text-decoration:none; }
-    .menu-item:hover { background:var(--card); color:var(--gold); }
+    .menu-item:hover { background:var(--bg2); color:var(--gold); }
     .purpose-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px; }
     .purpose-btn {
       padding:14px 8px; border:2px solid var(--border); border-radius:10px;
-      background:var(--card); cursor:pointer; text-align:center;
+      background:var(--bg2); cursor:pointer; text-align:center;
       font-family:'Noto Sans KR',sans-serif; transition:all 0.2s;
     }
     .purpose-btn:hover { border-color:var(--gold); }
@@ -787,7 +796,7 @@ label { color:var(--ink) !important; }
     .purpose-icon { font-size:24px; display:block; margin-bottom:4px; }
     .purpose-label { font-size:12px; font-weight:700; color:var(--ink); }
     .date-card {
-      background:var(--card); border:1px solid var(--border);
+      background:var(--bg2); border:1px solid var(--border);
       border-radius:12px; padding:18px; margin-bottom:12px;
     }
     .date-card.best { border-color:var(--gold); background:rgba(201,145,58,0.06); }
@@ -800,7 +809,7 @@ label { color:var(--ink) !important; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--paper); padding:12px 24px; border-radius:24px; font-size:14px; z-index:9999; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
     .toast.show { opacity:1; }
-    select, input[type=number] { width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--card); font-family:'Noto Sans KR',sans-serif; }
+    select, input[type=number] { width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--bg2); font-family:'Noto Sans KR',sans-serif; }
     label { font-size:13px; font-weight:600; display:block; margin-bottom:6px; }
     .submit-btn { width:100%; padding:15px; background:var(--ink); color:var(--paper); border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Noto Serif KR',serif; margin-top:8px; }
     .submit-btn:hover { background:#2d1f0e; }
@@ -815,7 +824,7 @@ label { color:var(--ink) !important; }
     <button class="nav-btn" id="menu-btn" onclick="toggleMenu()">☰ 메뉴</button>
   </div>
 </nav>
-<div id="nav-menu" style="display:none;position:fixed;top:52px;right:16px;z-index:9999;background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.15);min-width:180px;">
+<div id="nav-menu" style="display:none;position:fixed;top:52px;right:16px;z-index:9999;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.15);min-width:180px;">
   <a href="https://saju-today.com/saju" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">✨ 내 사주풀이</a>
   <a href="https://saju-today.com/fortune" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">🌅 오늘/내일의 운세</a>
   <a href="https://saju-today.com/compat" class="menu-item" style="text-decoration:none;display:block;padding:10px 16px;font-size:14px;color:var(--ink);border-radius:8px;">💑 궁합 보기</a>
@@ -932,19 +941,19 @@ label { color:var(--ink) !important; }
   <p style="font-size:14px;line-height:2;margin-bottom:16px;color:var(--muted);">택일은 중요한 일을 시작하기 전에 가장 길한 날을 선택하는 동양 전통 문화입니다. 일진(日辰)의 천간지지와 음양오행을 분석해 행사 목적에 맞는 최적의 날짜를 찾습니다.</p>
   <h3 style="font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;margin-bottom:10px;">택일 활용 분야</h3>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-    <div style="background:var(--card);border-radius:8px;padding:14px;">
+    <div style="background:var(--bg2);border-radius:8px;padding:14px;">
       <p style="font-size:14px;font-weight:700;margin-bottom:6px;">💍 결혼·약혼</p>
       <p style="font-size:12px;color:var(--muted);line-height:1.7;">부부 인연을 맺는 날은 두 사람의 사주와 일진의 조화가 중요합니다.</p>
     </div>
-    <div style="background:var(--card);border-radius:8px;padding:14px;">
+    <div style="background:var(--bg2);border-radius:8px;padding:14px;">
       <p style="font-size:14px;font-weight:700;margin-bottom:6px;">🏠 이사</p>
       <p style="font-size:12px;color:var(--muted);line-height:1.7;">새 보금자리로 이동하는 날. 손 없는 날을 활용하면 더욱 좋습니다.</p>
     </div>
-    <div style="background:var(--card);border-radius:8px;padding:14px;">
+    <div style="background:var(--bg2);border-radius:8px;padding:14px;">
       <p style="font-size:14px;font-weight:700;margin-bottom:6px;">🏪 개업·창업</p>
       <p style="font-size:12px;color:var(--muted);line-height:1.7;">사업의 첫 날은 재물운과 관련된 일진을 선택하는 것이 유리합니다.</p>
     </div>
-    <div style="background:var(--card);border-radius:8px;padding:14px;">
+    <div style="background:var(--bg2);border-radius:8px;padding:14px;">
       <p style="font-size:14px;font-weight:700;margin-bottom:6px;">🏥 수술·치료</p>
       <p style="font-size:12px;color:var(--muted);line-height:1.7;">건강 회복에 유리한 날을 택해 수술이나 치료의 효과를 높입니다.</p>
     </div>
@@ -1199,7 +1208,7 @@ ${selectedPurpose}의 특성에 맞는 오행과 천간지지를 고려하고, �
     let html = '';
 
     // 헤더
-    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
+    html += `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
       <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">${r.yearMonth} · ${r.purpose}</div>
       <p style="font-size:14px;line-height:1.8;">${r.summary||''}</p>
     </div>`;
