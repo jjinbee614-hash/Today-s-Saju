@@ -364,12 +364,34 @@ function doLogout() {
   <div>통신판매업신고번호: 신고 준비 중</div>
   <div style="margin-top:8px;">© 2025 비즈글로벌 All rights reserved.</div>
 </div>
-<div style="position:fixed;bottom:0;left:0;right:0;z-index:9000;background:rgba(14,11,20,0.96);backdrop-filter:blur(20px);border-top:1px solid rgba(201,168,76,0.12);display:flex;align-items:center;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom));box-shadow:0 -4px 24px rgba(201,168,76,0.08);">
-  <a href="https://saju-today.com" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#a89c80;flex:1;"><span style="font-size:22px;">🏠</span><span style="font-size:10px;font-weight:600;">홈</span></a>
-  <a href="https://saju-today.com/saju" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#a89c80;flex:1;"><span style="font-size:22px;">✨</span><span style="font-size:10px;font-weight:600;">사주</span></a>
-  <a href="https://saju-today.com/fortune" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#a89c80;flex:1;"><span style="font-size:22px;">🌅</span><span style="font-size:10px;font-weight:600;">운세</span></a>
-  <a href="https://saju-today.com/pricing" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#c9a84c;flex:1;"><span style="font-size:22px;">💎</span><span style="font-size:10px;font-weight:600;">이용권</span></a>
-  <button onclick="var m=document.getElementById('nav-menu');if(m){m.style.display=m.style.display==='none'?'block':'none';m.style.zIndex='99999';}" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:#a89c80;flex:1;padding:0;"><span style="font-size:22px;">☰</span><span style="font-size:10px;font-weight:600;">더보기</span></button>
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(14,11,20,0.96);backdrop-filter:blur(20px);border-top:1px solid rgba(201,168,76,0.12);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);">
+  <a href="https://saju-today.com" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">🏠</span><span style="font-size:10px;font-weight:600;">홈</span>
+  </a>
+  <a href="https://saju-today.com/saju" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">✨</span><span style="font-size:10px;font-weight:600;">사주</span>
+  </a>
+  <a href="https://saju-today.com/fortune" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">🌅</span><span style="font-size:10px;font-weight:600;">운세</span>
+  </a>
+  <a href="https://saju-today.com/pricing" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#c9a84c;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">💎</span><span style="font-size:10px;font-weight:600;">이용권</span>
+  </a>
+  <button id="more-btn" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:#a89c80;padding:8px 4px;-webkit-tap-highlight-color:transparent;">
+    <span style="font-size:22px;line-height:1;">☰</span><span style="font-size:10px;font-weight:600;">더보기</span>
+  </button>
 </div>
+<script>
+(function(){
+  var btn = document.getElementById('more-btn');
+  if(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var m = document.getElementById('nav-menu');
+      if(m){ m.style.display = m.style.display==='block'?'none':'block'; m.style.zIndex='99999'; }
+    });
+  }
+})();
+</script>
 </body>
 </html>
