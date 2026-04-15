@@ -322,7 +322,9 @@ async function showCryptoModal(productName, krwAmount, credits) {
   // 5% 할인 적용
   const discountedKrw = Math.floor(krwAmount * 0.95);
   const rate = await getUsdtKrwRate();
-  const usdtAmount = (discountedKrw / rate).toFixed(2);
+  // 고유 금액 부여 (소수점 랜덤으로 사용자 구분)
+  const uniqueSuffix = (Math.floor(Math.random() * 90) + 10) / 10000;
+  const usdtAmount = ((discountedKrw / rate) + uniqueSuffix).toFixed(4);
 
   const existing = document.getElementById('crypto-modal');
   if (existing) existing.remove();
