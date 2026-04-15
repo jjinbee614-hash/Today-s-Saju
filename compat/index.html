@@ -1153,6 +1153,8 @@ function autoFillPage() {
 document.addEventListener('DOMContentLoaded', autoFillPage); document.addEventListener('DOMContentLoaded', updateNavUser);
 
 async function runCompat() {
+  const ok = await checkAndUseCredit('궁합 분석');
+  if (!ok) return;
   const myY = parseInt(document.getElementById('c-my-year').value);
   const myM = parseInt(document.getElementById('c-my-month').value);
   const myD = parseInt(document.getElementById('c-my-day').value);
@@ -1349,5 +1351,52 @@ async function shareResult(resultId, pageTitle) {
   <div>통신판매업신고번호: 신고 준비 중</div>
   <div style="margin-top:8px;">© 2025 비즈글로벌 All rights reserved.</div>
 </div>
+<script>
+async function checkAndUseCredit(serviceName) {
+  const user = getSajuUser ? getSajuUser() : null;
+  if (!user) {
+    showToast('로그인 후 이용할 수 있어요');
+    setTimeout(() => window.location.href = 'https://saju-today.com/login', 1500);
+    return false;
+  }
+  const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+  const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+  const credits = cd?.credits || 0;
+  if (credits <= 0) {
+    showCreditModal(serviceName);
+    return false;
+  }
+  await sb.from('user_credits').update({ credits: credits - 1, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+  return true;
+}
+
+function showCreditModal(serviceName) {
+  const existing = document.getElementById('credit-modal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'credit-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:36px;margin-bottom:12px;">🔮</div>
+        <h3 style="font-size:17px;font-weight:700;color:#f0ead6;margin-bottom:8px;">${serviceName} 유료 서비스</h3>
+        <p style="font-size:14px;color:#a89c80;line-height:1.7;">이용권 1회가 필요해요.<br>이용권을 구매하고 계속 이용해보세요!</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <button onclick="window.location.href='https://saju-today.com/pricing'"
+          style="padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">
+          💎 이용권 구매하기
+        </button>
+        <button onclick="document.getElementById('credit-modal').remove()"
+          style="padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">
+          취소
+        </button>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+</script>
 </body>
 </html>
