@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🔐 관리자 페이지 | 오늘의 사주</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
-    :root { --ink:#1a1008; --paper:#f5efe4; --card:#ede5d8; --border:rgba(26,16,8,0.15); --muted:#8a7860; --gold:#c9913a; }
+    :root { --ink:#1a1008; --paper:#f5efe4; --card:#2d1f0e; --bg:#1a1008; --bg2:#1a1008; --bg3:#2d1f0e; --text:#f5efe4; --border:rgba(201,145,58,0.3); --muted:#8a7860; --gold:#c9913a; }
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:'Noto Sans KR',sans-serif; background:#1a1008; color:#f5efe4; min-height:100vh; display:flex; flex-direction:column; }
     .login-wrap { flex:1; display:flex; align-items:center; justify-content:center; padding:20px; }
@@ -122,6 +123,53 @@
     <button class="btn btn-gold" style="margin-top:12px;width:auto;padding:10px 24px;" onclick="savePrices()">💾 가격 저장</button>
   </div>
 
+  <!-- 어드민 이용권 지급 섹션 -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;">
+    <h3 style="font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px;">🎁 이용권 수동 지급</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">이메일</label>
+        <input type="email" id="admin-target-email" placeholder="user@example.com"
+          style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:0;"/>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">지급 이용권 수</label>
+        <input type="number" id="admin-credit-amount" placeholder="10" min="1"
+          style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:0;"/>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">지급 사유</label>
+      <input type="text" id="admin-credit-reason" placeholder="예: 이벤트 당첨, 오류 보상 등"
+        style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:0;"/>
+    </div>
+    <button onclick="adminGrantCredit()"
+      style="padding:12px 24px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:8px;color:#1a1000;font-size:14px;font-weight:700;cursor:pointer;">
+      ✅ 이용권 지급
+    </button>
+    <div id="admin-credit-result" style="margin-top:12px;font-size:13px;"></div>
+  </div>
+
+  <!-- 어드민 유저 검색 -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;">
+    <h3 style="font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px;">🔍 유저 검색 및 이용권 확인</h3>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <input type="email" id="admin-search-email" placeholder="이메일로 검색"
+        style="flex:1;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:0;"/>
+      <button onclick="adminSearchUser()"
+        style="padding:10px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;cursor:pointer;">
+        검색
+      </button>
+    </div>
+    <div id="admin-search-result"></div>
+  </div>
+
+  <!-- 최근 수동 지급 내역 -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;">
+    <h3 style="font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px;">📋 최근 수동 지급 내역</h3>
+    <div id="admin-grant-history">로딩 중...</div>
+  </div>
+
   <!-- 로그 -->
   <div class="section">
     <h3>📋 관리 로그</h3>
@@ -153,6 +201,7 @@ function login() {
     document.getElementById('admin-wrap').style.display = 'block';
     sessionStorage.setItem('admin_auth', '1');
     initDashboard();
+    loadGrantHistory();
     addLog('관리자 로그인');
   } else {
     showToast('비밀번호가 틀렸습니다');
@@ -260,11 +309,118 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+function getSajuUser() {
+  try { var u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
+}
+
+const ADMIN_SB_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
+const ADMIN_SB_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
+
+async function adminGrantCredit() {
+  const email = document.getElementById('admin-target-email').value.trim();
+  const credits = parseInt(document.getElementById('admin-credit-amount').value);
+  const reason = document.getElementById('admin-credit-reason').value.trim();
+  const resultEl = document.getElementById('admin-credit-result');
+
+  if (!email || !credits || credits < 1) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">이메일과 이용권 수를 입력해주세요</span>';
+    return;
+  }
+
+  resultEl.innerHTML = '처리 중...';
+  const sb = window.supabase.createClient(ADMIN_SB_URL, ADMIN_SB_KEY);
+
+  try {
+    const { data: user } = await sb.from('users').select('id,email,name').eq('email', email).single();
+    if (!user) {
+      resultEl.innerHTML = '<span style="color:#e74c3c;">유저를 찾을 수 없어요</span>';
+      return;
+    }
+
+    const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+    const current = cd?.credits || 0;
+    if (cd) {
+      await sb.from('user_credits').update({ credits: current + credits, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+    } else {
+      await sb.from('user_credits').insert({ user_id: user.id, credits });
+    }
+
+    const me = getSajuUser();
+    await sb.from('admin_credits').insert({
+      admin_id: me?.id || null,
+      target_email: email,
+      target_user_id: user.id,
+      credits,
+      reason: reason || '수동 지급'
+    });
+
+    resultEl.innerHTML = `<span style="color:#27ae60;">✅ ${user.name || email}님께 ${credits}회 이용권 지급 완료! (보유: ${current + credits}회)</span>`;
+    addLog(`이용권 지급: ${email} +${credits}회 (${reason || '수동 지급'})`);
+    loadGrantHistory();
+  } catch(e) {
+    resultEl.innerHTML = `<span style="color:#e74c3c;">오류: ${e.message}</span>`;
+  }
+}
+
+async function adminSearchUser() {
+  const email = document.getElementById('admin-search-email').value.trim();
+  const resultEl = document.getElementById('admin-search-result');
+  if (!email) return;
+
+  resultEl.innerHTML = '검색 중...';
+  const sb = window.supabase.createClient(ADMIN_SB_URL, ADMIN_SB_KEY);
+
+  try {
+    const { data: user } = await sb.from('users').select('id,email,name,created_at').eq('email', email).single();
+    if (!user) { resultEl.innerHTML = '<p style="color:#e74c3c;">유저 없음</p>'; return; }
+
+    const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+    const { data: pays } = await sb.from('payments').select('*').eq('user_id', user.id).order('created_at', {ascending:false}).limit(5);
+
+    resultEl.innerHTML = `
+      <div style="background:var(--bg2);border-radius:8px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">${user.name || '이름없음'} (${user.email})</div>
+        <div style="font-size:13px;color:var(--muted);">보유 이용권: <b style="color:var(--gold);">${cd?.credits || 0}회</b></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">가입일: ${new Date(user.created_at).toLocaleDateString('ko-KR')}</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">최근 결제 내역</div>
+      ${(pays||[]).map(p => `
+        <div style="background:var(--bg2);border-radius:6px;padding:10px 12px;margin-bottom:6px;font-size:12px;">
+          <span style="color:var(--gold);">${p.product_name}</span>
+          <span style="float:right;color:var(--muted);">${(p.amount||0).toLocaleString()}원 · ${new Date(p.created_at).toLocaleDateString('ko-KR')}</span>
+        </div>`).join('') || '<p style="color:var(--muted);font-size:13px;">결제 내역 없음</p>'}`;
+  } catch(e) {
+    resultEl.innerHTML = `<span style="color:#e74c3c;">오류: ${e.message}</span>`;
+  }
+}
+
+async function loadGrantHistory() {
+  const sb = window.supabase.createClient(ADMIN_SB_URL, ADMIN_SB_KEY);
+  const histEl = document.getElementById('admin-grant-history');
+  if (!histEl) return;
+  try {
+    const { data } = await sb.from('admin_credits').select('*').order('created_at', {ascending:false}).limit(20);
+    if (!data || data.length === 0) { histEl.innerHTML = '<p style="color:var(--muted);font-size:13px;">내역 없음</p>'; return; }
+    histEl.innerHTML = data.map(d => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
+        <div>
+          <span style="color:var(--text);">${d.target_email}</span>
+          <span style="color:var(--muted);font-size:11px;margin-left:8px;">${d.reason || ''}</span>
+        </div>
+        <div style="text-align:right;">
+          <span style="color:var(--gold);font-weight:700;">+${d.credits}회</span>
+          <div style="color:var(--muted);font-size:11px;">${new Date(d.created_at).toLocaleDateString('ko-KR')}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) { histEl.innerHTML = '<p style="color:#e74c3c;">로딩 실패</p>'; }
+}
+
 // 자동 로그인 (세션 유지)
 if (sessionStorage.getItem('admin_auth') === '1') {
   document.getElementById('login-wrap').style.display = 'none';
   document.getElementById('admin-wrap').style.display = 'block';
   initDashboard();
+  loadGrantHistory();
 }
 </script>
 </body>
