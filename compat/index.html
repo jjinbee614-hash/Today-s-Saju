@@ -1213,6 +1213,57 @@ async function runCompat() {
   btn.disabled = false; btn.textContent = '💑 다시 분석하기';
 }
 
+function renderCompatResult(r, myY, myM, myD, thY, thM, thD, mySaju, theirSaju) {
+  const el = document.getElementById('compat-result');
+  const score = r.totalScore || 0;
+  const scoreColor = score >= 80 ? '#27ae60' : score >= 60 ? '#c9a84c' : '#e74c3c';
+  const areas = r.areas || {};
+  const areaLabels = { love:'💕 애정', work:'💼 재물·일', communication:'💬 소통', future:'🌱 미래·발전' };
+
+  const barHtml = (label, val) => `
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#a89c80;margin-bottom:4px;">
+        <span>${label}</span><span style="color:#c9a84c;font-weight:700;">${val}점</span>
+      </div>
+      <div style="background:#1a1628;border-radius:4px;height:6px;overflow:hidden;">
+        <div style="width:${val}%;height:100%;background:linear-gradient(90deg,#c9a84c,#e8c96a);border-radius:4px;transition:width 0.8s;"></div>
+      </div>
+    </div>`;
+
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,#1a1628,#13101c);border:1px solid rgba(201,168,76,0.2);border-radius:16px;padding:24px;margin-top:16px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:48px;font-weight:900;color:${scoreColor};line-height:1;">${score}</div>
+        <div style="font-size:12px;color:#a89c80;margin-top:2px;">/ 100점</div>
+        <div style="font-size:16px;font-weight:700;color:#f0ead6;margin-top:12px;">${r.summary || ''}</div>
+      </div>
+
+      <div style="background:rgba(201,168,76,0.06);border-radius:10px;padding:16px;margin-bottom:16px;font-size:14px;color:#c8bfa8;line-height:1.8;">
+        ${r.overview || ''}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div style="background:#1a1628;border-radius:10px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:#27ae60;margin-bottom:8px;">✅ 잘 맞는 점</div>
+          ${(r.strengths||[]).map(s=>`<div style="font-size:12px;color:#c8bfa8;margin-bottom:4px;line-height:1.5;">• ${s}</div>`).join('')}
+        </div>
+        <div style="background:#1a1628;border-radius:10px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:#e74c3c;margin-bottom:8px;">⚠️ 주의할 점</div>
+          ${(r.cautions||[]).map(s=>`<div style="font-size:12px;color:#c8bfa8;margin-bottom:4px;line-height:1.5;">• ${s}</div>`).join('')}
+        </div>
+      </div>
+
+      <div style="background:#1a1628;border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:#f0ead6;margin-bottom:12px;">📊 영역별 궁합</div>
+        ${Object.entries(areaLabels).map(([k,label]) => areas[k] ? barHtml(label + ' ' + (areas[k].comment||''), areas[k].score||0) : '').join('')}
+      </div>
+
+      ${r.tip ? `<div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:14px;font-size:13px;color:#e8c96a;line-height:1.7;text-align:center;">
+        💡 ${r.tip}
+      </div>` : ''}
+    </div>`;
+}
+
 function setCompatGender(who, btn, val) {
   if (who === 'my')    compatMyGender    = val;
   if (who === 'their') compatTheirGender = val;
