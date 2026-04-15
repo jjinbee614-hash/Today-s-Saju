@@ -1197,9 +1197,15 @@ function autoFillPage() {
   if (leapCheck) leapCheck.checked = isLeap || false;
   const g = gender || '남성';
   sajuGender = g;
-  document.querySelectorAll('#page-saju .gender-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.gender === g);
-  });
+  function applyGenderBtn() {
+    const btns = document.querySelectorAll('#page-saju .gender-btn');
+    if (btns.length > 0) {
+      btns.forEach(b => b.classList.toggle('active', b.dataset.gender === g));
+    } else {
+      setTimeout(applyGenderBtn, 100);
+    }
+  }
+  applyGenderBtn();
   const note = document.getElementById('saju-autofill-note');
   if (note && name) {
     note.style.display = 'flex';
