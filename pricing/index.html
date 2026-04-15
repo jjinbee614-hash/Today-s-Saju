@@ -441,7 +441,33 @@ function selectToken(token) {
 
 function copyWalletAddr() {
   const addr = document.getElementById('wallet-addr').textContent;
-  navigator.clipboard.writeText(addr).then(() => showToast('주소 복사됐어요!'));
+  const btn = document.querySelector('#crypto-modal button[onclick="copyWalletAddr()"]');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(addr).then(() => {
+      showToast('주소가 복사됐어요! 📋');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✅ 복사됐어요!';
+        btn.style.background = 'rgba(39,174,96,0.2)';
+        btn.style.borderColor = 'rgba(39,174,96,0.4)';
+        btn.style.color = '#27ae60';
+        setTimeout(() => {
+          btn.innerHTML = orig;
+          btn.style.background = 'rgba(201,168,76,0.15)';
+          btn.style.borderColor = 'rgba(201,168,76,0.3)';
+          btn.style.color = '#c9a84c';
+        }, 2000);
+      }
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = addr;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('주소가 복사됐어요! 📋');
+  }
 }
 
 async function startCryptoCheck() {
