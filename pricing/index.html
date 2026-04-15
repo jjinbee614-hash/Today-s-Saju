@@ -202,7 +202,6 @@
       <div class="onetime-right">
         <div class="onetime-price"><s style='color:#888;font-size:12px;'>990원</s> → 500원 🎉</div>
         <button class="onetime-buy">구매하기</button>
-<button onclick="showCryptoModal('이용권', 0, 0)" style="display:block;width:100%;padding:6px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:6px;color:#c9a84c;font-size:11px;cursor:pointer;margin-top:4px;">💎 크립토</button>
       </div>
     </div>
 
@@ -216,7 +215,6 @@
         <div class="onetime-price"><s style='color:#888;font-size:12px;'>4,900원</s> → 2,390원 🎉</div>
         <div class="onetime-discount">↓ 21% 할인</div>
         <button class="onetime-buy">구매하기</button>
-<button onclick="showCryptoModal('이용권', 0, 0)" style="display:block;width:100%;padding:6px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:6px;color:#c9a84c;font-size:11px;cursor:pointer;margin-top:4px;">💎 크립토</button>
       </div>
     </div>
 
@@ -271,13 +269,13 @@ const CRYPTO_WALLETS = {
 };
 
 const NETWORKS = [
-  { id:'eth',      name:'Ethereum',  icon:'🔷', wallet:'evm',  tokens:['USDT','USDC'], api:'etherscan', decimals:6 },
-  { id:'bnb',      name:'BNB Chain', icon:'🟡', wallet:'evm',  tokens:['USDT','USDC'], api:'bscscan',   decimals:18 },
-  { id:'arbitrum', name:'Arbitrum',  icon:'🔵', wallet:'evm',  tokens:['USDT','USDC'], api:'arbiscan',  decimals:6 },
-  { id:'optimism', name:'Optimism',  icon:'🔴', wallet:'evm',  tokens:['USDT','USDC'], api:'optimism',  decimals:6 },
-  { id:'base',     name:'Base',      icon:'🔵', wallet:'evm',  tokens:['USDT','USDC'], api:'basescan',  decimals:6 },
-  { id:'sol',      name:'Solana',    icon:'🟣', wallet:'sol',  tokens:['USDT','USDC'], api:'solana',    decimals:6 },
-  { id:'tron',     name:'Tron',      icon:'🔴', wallet:'tron', tokens:['USDT','USDC'], api:'tron',      decimals:6 },
+  { id:'eth',      name:'Ethereum',  img:'https://cryptologos.cc/logos/ethereum-eth-logo.png',      wallet:'evm',  tokens:['USDT','USDC'], api:'etherscan', decimals:6 },
+  { id:'bnb',      name:'BNB Chain', img:'https://cryptologos.cc/logos/bnb-bnb-logo.png',           wallet:'evm',  tokens:['USDT','USDC'], api:'bscscan',   decimals:18 },
+  { id:'arbitrum', name:'Arbitrum',  img:'https://cryptologos.cc/logos/arbitrum-arb-logo.png',      wallet:'evm',  tokens:['USDT','USDC'], api:'arbiscan',  decimals:6 },
+  { id:'optimism', name:'Optimism',  img:'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png', wallet:'evm',  tokens:['USDT','USDC'], api:'optimism',  decimals:6 },
+  { id:'base',     name:'Base',      img:'https://cryptologos.cc/logos/base-logo.png',              wallet:'evm',  tokens:['USDT','USDC'], api:'basescan',  decimals:6 },
+  { id:'sol',      name:'Solana',    img:'https://cryptologos.cc/logos/solana-sol-logo.png',        wallet:'sol',  tokens:['USDT','USDC'], api:'solana',    decimals:6 },
+  { id:'tron',     name:'Tron',      img:'https://cryptologos.cc/logos/tron-trx-logo.png',         wallet:'tron', tokens:['USDT','USDC'], api:'tron',      decimals:6 },
 ];
 
 const TOKEN_CONTRACTS = {
@@ -300,11 +298,20 @@ async function getUsdtKrwRate() {
   try {
     const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=krw');
     const data = await res.json();
-    return data.tether.krw || 1380;
+    if (data.tether && data.tether.krw) return data.tether.krw;
+  } catch(e) {}
+  try {
+    const res2 = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data2 = await res2.json();
+    return data2.rates?.KRW || 1380;
   } catch(e) { return 1380; }
 }
 
 async function showCryptoModal(productName, krwAmount, credits) {
+  if (!krwAmount || krwAmount === 0) {
+    showToast('금액 정보가 없어요. 다시 시도해주세요');
+    return;
+  }
   const user = getSajuUser ? getSajuUser() : null;
   if (!user) {
     showToast('로그인이 필요해요');
@@ -344,9 +351,9 @@ async function showCryptoModal(productName, krwAmount, credits) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="network-grid">
           ${NETWORKS.map(n => `
             <button onclick="selectNetwork('${n.id}')" id="net-btn-${n.id}"
-              style="padding:10px;border:1px solid rgba(201,168,76,0.2);border-radius:10px;background:#1a1628;cursor:pointer;text-align:left;">
-              <span style="font-size:16px;">${n.icon}</span>
-              <span style="font-size:12px;color:#f0ead6;margin-left:6px;font-weight:600;">${n.name}</span>
+              style="padding:10px;border:1px solid rgba(201,168,76,0.2);border-radius:10px;background:#1a1628;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <img src="${n.img}" onerror="this.style.display='none'" style="width:28px;height:28px;object-fit:contain;border-radius:50%;" />
+              <span style="font-size:11px;color:#f0ead6;font-weight:600;">${n.name}</span>
             </button>`).join('')}
         </div>
       </div>
@@ -614,7 +621,7 @@ function showPaymentModal(productName, amount, credits, isSubscription, merchant
     '<p style="font-size:13px;color:#a89c80;text-align:center;margin-bottom:20px;">결제 수단을 선택해주세요</p>' +
     '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">' +
     '<button id="pay-kakao-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#FEE500;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#191919;cursor:pointer;"><span style="font-size:22px;">💬</span> 카카오페이</button>' +
-    '<button id="pay-toss-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#333;cursor:pointer;"><span style="font-size:22px;">💳</span> 토스페이먼츠</button>' +
+    '<button id="pay-crypto-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:linear-gradient(135deg,#1a1628,#2d1f4e);border:1px solid rgba(201,168,76,0.3);border-radius:12px;font-size:15px;font-weight:700;color:#f0ead6;cursor:pointer;"><span style="font-size:22px;">💎</span> 크립토 결제 <span style="font-size:12px;color:#c9a84c;margin-left:4px;">(5% 할인)</span></button>' +
     '</div>' +
     '<button id="pay-cancel-btn" style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
     '</div>';
@@ -626,9 +633,9 @@ function showPaymentModal(productName, amount, credits, isSubscription, merchant
     modal.remove();
     proceedPayment('kakao', productName, amount, credits, isSubscription, merchantUid, user);
   });
-  document.getElementById('pay-toss-btn').addEventListener('click', function() {
+  document.getElementById('pay-crypto-btn').addEventListener('click', function() {
     modal.remove();
-    proceedPayment('toss', productName, amount, credits, isSubscription, merchantUid, user);
+    showCryptoModal(productName, amount, credits);
   });
   document.getElementById('pay-cancel-btn').addEventListener('click', function() { modal.remove(); });
 }
