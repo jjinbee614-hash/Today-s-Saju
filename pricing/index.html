@@ -422,7 +422,7 @@ function selectNetwork(netId) {
   document.getElementById('wallet-section').style.display = 'none';
 }
 
-function selectToken(token) {
+async function selectToken(token) {
   document.querySelectorAll('[id^="tok-btn-"]').forEach(b => {
     b.style.borderColor = 'rgba(201,168,76,0.2)';
     b.style.background = '#1a1628';
@@ -439,6 +439,23 @@ function selectToken(token) {
   document.getElementById('crypto-amount-display').textContent = cryptoPaymentData.usdtAmount + ' ' + token;
   document.getElementById('wallet-section').style.display = 'block';
   cryptoPaymentData.walletAddr = walletAddr;
+
+  // Supabase에 세션 저장
+  try {
+    const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+    const { data: session } = await sb.from('crypto_sessions').insert({
+      user_id: cryptoPaymentData.userId,
+      product_name: cryptoPaymentData.productName,
+      krw_amount: cryptoPaymentData.krwAmount,
+      usdt_amount: parseFloat(cryptoPaymentData.usdtAmount),
+      network: cryptoPaymentData.network,
+      token: token,
+      wallet_addr: walletAddr,
+      credits: cryptoPaymentData.credits,
+      status: 'pending'
+    }).select('id').single();
+    if (session) cryptoPaymentData.sessionId = session.id;
+  } catch(e) { console.warn('세션 저장 실패:', e); }
 }
 
 function copyWalletAddr() {
