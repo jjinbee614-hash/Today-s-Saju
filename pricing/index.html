@@ -586,6 +586,17 @@ async function checkCryptoPayment() {
 async function grantCryptoCredits(credits, userId, productName, krwAmount, network, token) {
   const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
 
+  // 중복 지급 방지: 세션 상태 확인
+  if (cryptoPaymentData && cryptoPaymentData.sessionId) {
+    const { data: existingSession } = await sb.from('crypto_sessions').select('status').eq('id', cryptoPaymentData.sessionId).single();
+    if (existingSession && existingSession.status === 'completed') {
+      showToast('이미 처리된 결제입니다.');
+      return;
+    }
+    await sb.from('crypto_sessions').update({ status: 'completed' }).eq('id', cryptoPaymentData.sessionId);
+  }
+
+  // 이용권 지급
   const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', userId).single();
   const current = cd?.credits || 0;
   if (cd) {
@@ -594,15 +605,37 @@ async function grantCryptoCredits(credits, userId, productName, krwAmount, netwo
     await sb.from('user_credits').insert({ user_id: userId, credits });
   }
 
+  // 결제 기록
+  const ts = Date.now();
   await sb.from('payments').insert({
     user_id: userId,
-    imp_uid: 'crypto_' + Date.now(),
-    merchant_uid: 'crypto_' + Date.now(),
+    imp_uid: 'crypto_' + ts,
+    merchant_uid: 'crypto_' + ts,
     amount: krwAmount,
-    product_name: productName + ' (크립토)',
+    product_name: productName + ' (크립토 ' + network.toUpperCase() + ')',
     credits_added: credits,
     status: 'paid'
   });
+
+  // 추천인 보상
+  try {
+    const refCode = localStorage.getItem('referral_code');
+    if (refCode) {
+      const { data: refData } = await sb.from('referrals').select('id, user_id').eq('code', refCode).single();
+      if (refData) {
+        const refReward = credits >= 180 ? 3 : credits >= 90 ? 2 : 1;
+        const { data: refCd } = await sb.from('user_credits').select('credits').eq('user_id', refData.user_id).single();
+        const refCurrent = refCd?.credits || 0;
+        if (refCd) {
+          await sb.from('user_credits').update({ credits: refCurrent + refReward, updated_at: new Date().toISOString() }).eq('user_id', refData.user_id);
+        } else {
+          await sb.from('user_credits').insert({ user_id: refData.user_id, credits: refReward });
+        }
+        await sb.from('referral_uses').insert({ referral_id: refData.id, used_by: userId, reward_credits: refReward });
+        localStorage.removeItem('referral_code');
+      }
+    }
+  } catch(e) { console.warn('추천인 보상 오류:', e); }
 
   document.getElementById('crypto-status').innerHTML = `
     <div style="font-size:20px;margin-bottom:8px;">🎉</div>
