@@ -149,6 +149,61 @@
       </div>
     </div>
 
+    <!-- 레퍼럴 코드 섹션 -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">🎁 친구 초대</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;">친구가 내 링크로 가입 후 이용권을 구매하면 나도 이용권을 받아요!</p>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">내 레퍼럴 코드</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div id="my-referral-code" style="font-size:20px;font-weight:800;color:var(--gold);letter-spacing:3px;">로딩중...</div>
+          <button onclick="copyReferralCode()" style="padding:6px 14px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:6px;color:var(--gold);font-size:12px;cursor:pointer;">복사</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button onclick="copyReferralLink()" style="flex:1;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">🔗 링크 복사</button>
+        <button onclick="shareReferral()" style="flex:1;padding:12px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:8px;color:#1a1000;font-size:13px;font-weight:700;cursor:pointer;">📤 초대하기</button>
+      </div>
+      <div style="background:rgba(201,168,76,0.06);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:1.8;">
+        <div style="font-weight:700;color:var(--gold);margin-bottom:4px;">🎁 보상 안내</div>
+        친구가 1회권 구매 → 나에게 1회 지급<br>
+        친구가 5회·1개월 구매 → 나에게 2회 지급<br>
+        친구가 3개월 이상 구매 → 나에게 3회 지급
+      </div>
+      <div style="margin-top:12px;">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">초대 현황</div>
+        <div id="referral-stats" style="font-size:13px;color:var(--text);">-</div>
+      </div>
+    </div>
+
+    <!-- 이용권 선물하기 섹션 -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">🎀 이용권 선물하기</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;">보유한 이용권을 친구에게 선물할 수 있어요.</p>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">받는 분 이메일</label>
+        <input type="email" id="gift-email" placeholder="friend@example.com"
+          style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box;"/>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">선물할 이용권 수</label>
+        <input type="number" id="gift-amount" placeholder="1" min="1"
+          style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box;"/>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">메시지 (선택)</label>
+        <input type="text" id="gift-message" placeholder="생일 축하해! 🎂"
+          style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box;"/>
+      </div>
+      <div style="background:rgba(201,168,76,0.06);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:16px;">
+        현재 보유 이용권: <b id="my-credits-display" style="color:var(--gold);">-</b>회
+      </div>
+      <button onclick="sendGift()" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:8px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">
+        🎀 선물하기
+      </button>
+      <div id="gift-result" style="margin-top:12px;font-size:13px;text-align:center;"></div>
+    </div>
+
     <!-- 로그아웃 -->
     <div style="text-align:center;margin-top:8px;">
       <button class="btn-outline" onclick="doLogout()">로그아웃</button>
@@ -261,6 +316,129 @@ async function loadShares(userId) {
 
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--gold);color:#1a1000;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(function(){ t.style.opacity = '0'; }, 2500);
+}
+
+function generateCode() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = '';
+  for (var i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+async function loadReferralData(userId, userEmail) {
+  try {
+    var { data: ref } = await sb.from('referrals').select('*').eq('user_id', userId).single();
+    if (!ref) {
+      var code = generateCode();
+      var { data: newRef } = await sb.from('referrals').insert({
+        user_id: userId, code,
+        total_referrals: 0, total_credits_earned: 0
+      }).select().single();
+      ref = newRef;
+    }
+    if (ref) {
+      document.getElementById('my-referral-code').textContent = ref.code;
+      document.getElementById('referral-stats').innerHTML =
+        '총 초대: <b style="color:var(--gold);">' + (ref.total_referrals||0) + '명</b> &nbsp;|&nbsp; 획득 이용권: <b style="color:var(--gold);">' + (ref.total_credits_earned||0) + '회</b>';
+    }
+    var { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', userId).single();
+    var el = document.getElementById('my-credits-display');
+    if (el) el.textContent = cd?.credits || 0;
+  } catch(e) { console.warn('referral load error:', e); }
+}
+
+function copyReferralCode() {
+  var code = document.getElementById('my-referral-code').textContent;
+  navigator.clipboard.writeText(code).then(function(){ showToast('코드 복사됐어요! 📋'); });
+}
+
+function copyReferralLink() {
+  var code = document.getElementById('my-referral-code').textContent;
+  navigator.clipboard.writeText('https://saju-today.com?ref=' + code).then(function(){ showToast('초대 링크 복사됐어요! 🔗'); });
+}
+
+function shareReferral() {
+  var code = document.getElementById('my-referral-code').textContent;
+  var link = 'https://saju-today.com?ref=' + code;
+  var text = '🔮 AI 사주풀이 서비스 오늘의 사주! 내 초대 코드로 가입하면 특별 혜택이 있어요.';
+  if (navigator.share) {
+    navigator.share({ title: '오늘의 사주', text: text, url: link });
+  } else {
+    navigator.clipboard.writeText(text + '\n' + link).then(function(){ showToast('초대 메시지 복사됐어요!'); });
+  }
+}
+
+async function sendGift() {
+  var { data: { session } } = await sb.auth.getSession();
+  if (!session) { showToast('로그인이 필요해요'); return; }
+  var user = session.user;
+  var email = document.getElementById('gift-email').value.trim();
+  var amount = parseInt(document.getElementById('gift-amount').value);
+  var message = document.getElementById('gift-message').value.trim();
+  var resultEl = document.getElementById('gift-result');
+
+  if (!email || !amount || amount < 1) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">이메일과 이용권 수를 입력해주세요</span>'; return;
+  }
+  if (email === user.email) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">자신에게는 선물할 수 없어요</span>'; return;
+  }
+
+  var { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+  var myCredits = cd?.credits || 0;
+  if (myCredits < amount) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">이용권이 부족해요 (보유: ' + myCredits + '회)</span>'; return;
+  }
+
+  resultEl.innerHTML = '처리 중...';
+  try {
+    var { data: receiver } = await sb.from('users').select('id,email,name').eq('email', email).single();
+
+    await sb.from('user_credits').update({ credits: myCredits - amount }).eq('user_id', user.id);
+
+    if (receiver) {
+      var { data: rcd } = await sb.from('user_credits').select('credits').eq('user_id', receiver.id).single();
+      var rc = rcd?.credits || 0;
+      if (rcd) {
+        await sb.from('user_credits').update({ credits: rc + amount }).eq('user_id', receiver.id);
+      } else {
+        await sb.from('user_credits').insert({ user_id: receiver.id, credits: amount });
+      }
+    }
+
+    await sb.from('credit_gifts').insert({
+      sender_id: user.id,
+      receiver_email: email,
+      receiver_id: receiver?.id || null,
+      credits: amount,
+      message: message || null,
+      status: receiver ? 'delivered' : 'pending'
+    });
+
+    var el = document.getElementById('my-credits-display');
+    if (el) el.textContent = myCredits - amount;
+    resultEl.innerHTML = '<span style="color:#27ae60;">✅ ' + email + '님께 ' + amount + '회 이용권을 선물했어요! 🎀</span>';
+    document.getElementById('gift-email').value = '';
+    document.getElementById('gift-amount').value = '';
+    document.getElementById('gift-message').value = '';
+  } catch(e) {
+    await sb.from('user_credits').update({ credits: myCredits }).eq('user_id', user.id);
+    resultEl.innerHTML = '<span style="color:#e74c3c;">오류: ' + e.message + '</span>';
+  }
+}
+
+// 레퍼럴 코드 URL 파라미터 저장
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  if (ref) localStorage.setItem('referral_code', ref);
+})();
+
 // Main init
 (async function() {
   var { data: { session } } = await sb.auth.getSession();
@@ -282,9 +460,10 @@ function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'
   // Saju info
   loadSajuInfo();
 
-  // Membership & shares (async)
+  // Membership, shares & referral (async)
   loadMembership(user.id);
   loadShares(user.id);
+  loadReferralData(user.id, user.email);
 })();
 </script>
 
