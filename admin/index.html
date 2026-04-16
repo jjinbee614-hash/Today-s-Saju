@@ -123,9 +123,23 @@
     <button class="btn btn-gold" style="margin-top:12px;width:auto;padding:10px 24px;" onclick="savePrices()">💾 가격 저장</button>
   </div>
 
-  <!-- 어드민 이용권 지급 섹션 -->
+  <!-- 어드민 캐시·이용권·구독 지급 섹션 -->
   <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;">
-    <h3 style="font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px;">🎁 이용권 수동 지급</h3>
+    <h3 style="font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px;">🎁 캐시 · 이용권 · 구독 수동 지급</h3>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button id="grant-type-cash" onclick="setGrantType('cash')"
+        style="flex:1;padding:10px;background:var(--gold);border:none;border-radius:8px;color:#1a1000;font-size:13px;font-weight:700;cursor:pointer;">
+        💰 캐시
+      </button>
+      <button id="grant-type-credits" onclick="setGrantType('credits')"
+        style="flex:1;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;">
+        🎟 이용권
+      </button>
+      <button id="grant-type-subscription" onclick="setGrantType('subscription')"
+        style="flex:1;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;">
+        👑 구독
+      </button>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
       <div>
         <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">이메일</label>
@@ -133,19 +147,28 @@
           style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:0;"/>
       </div>
       <div>
-        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">지급 이용권 수</label>
-        <input type="number" id="admin-credit-amount" placeholder="10" min="1"
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;" id="admin-amount-label">지급 캐시</label>
+        <input type="number" id="admin-credit-amount" placeholder="500" min="1"
           style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:0;"/>
       </div>
     </div>
-    <div style="margin-bottom:12px;">
+    <div id="admin-sub-days" style="display:none;margin-bottom:12px;">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">구독 기간</label>
+      <select id="admin-sub-period" style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;">
+        <option value="30">1개월 (30일)</option>
+        <option value="90">3개월 (90일)</option>
+        <option value="180">6개월 (180일)</option>
+        <option value="365">1년 (365일)</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px;">
       <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">지급 사유</label>
-      <input type="text" id="admin-credit-reason" placeholder="예: 이벤트 당첨, 오류 보상 등"
+      <input type="text" id="admin-credit-reason" placeholder="예: 이벤트 당첨, 오류 보상, 테스트 등"
         style="width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-bottom:0;"/>
     </div>
     <button onclick="adminGrantCredit()"
       style="padding:12px 24px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:8px;color:#1a1000;font-size:14px;font-weight:700;cursor:pointer;">
-      ✅ 이용권 지급
+      ✅ 지급하기
     </button>
     <div id="admin-credit-result" style="margin-top:12px;font-size:13px;"></div>
   </div>
@@ -316,6 +339,36 @@ function getSajuUser() {
 const ADMIN_SB_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
 const ADMIN_SB_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
 
+let currentGrantType = 'cash';
+
+function setGrantType(type) {
+  currentGrantType = type;
+  ['cash','credits','subscription'].forEach(function(t) {
+    const btn = document.getElementById('grant-type-' + t);
+    if (!btn) return;
+    btn.style.background = t === type ? 'var(--gold)' : 'var(--bg3)';
+    btn.style.color = t === type ? '#1a1000' : 'var(--text)';
+    btn.style.border = t === type ? 'none' : '1px solid var(--border)';
+    btn.style.fontWeight = t === type ? '700' : '400';
+  });
+  const label = document.getElementById('admin-amount-label');
+  const subDays = document.getElementById('admin-sub-days');
+  const amt = document.getElementById('admin-credit-amount');
+  if (type === 'cash') {
+    if (label) label.textContent = '지급 캐시';
+    if (amt) amt.placeholder = '500';
+    if (subDays) subDays.style.display = 'none';
+  } else if (type === 'credits') {
+    if (label) label.textContent = '지급 이용권 수';
+    if (amt) amt.placeholder = '1';
+    if (subDays) subDays.style.display = 'none';
+  } else {
+    if (label) label.textContent = '구독 크레딧 (자동)';
+    if (amt) amt.placeholder = '30';
+    if (subDays) subDays.style.display = 'block';
+  }
+}
+
 async function adminGrantCredit() {
   const email = document.getElementById('admin-target-email').value.trim();
   const credits = parseInt(document.getElementById('admin-credit-amount').value);
@@ -323,7 +376,7 @@ async function adminGrantCredit() {
   const resultEl = document.getElementById('admin-credit-result');
 
   if (!email || !credits || credits < 1) {
-    resultEl.innerHTML = '<span style="color:#e74c3c;">이메일과 이용권 수를 입력해주세요</span>';
+    resultEl.innerHTML = '<span style="color:#e74c3c;">이메일과 수량을 입력해주세요</span>';
     return;
   }
 
@@ -331,58 +384,68 @@ async function adminGrantCredit() {
   const sb = window.supabase.createClient(ADMIN_SB_URL, ADMIN_SB_KEY);
 
   try {
-    // payments 테이블에서 user_id 찾기 (RLS 우회)
-    const { data: payUser } = await sb.from('payments').select('user_id').eq('user_id',
-      (await sb.from('users').select('id').eq('email', email).single()).data?.id
-    ).limit(1);
-
-    // users 테이블에서 직접 조회
-    const { data: userRows, error: userErr } = await sb.from('users').select('id,email,name').eq('email', email);
+    const { data: userRows } = await sb.from('users').select('id,email,name').eq('email', email);
     const user = userRows && userRows.length > 0 ? userRows[0] : null;
-
     if (!user) {
-      // user_credits에서 이메일로 찾기 불가 - 안내
-      resultEl.innerHTML = '<span style="color:#e74c3c;">유저를 찾을 수 없어요.<br>Supabase에서 직접 user_id를 확인해주세요.</span>';
+      resultEl.innerHTML = '<span style="color:#e74c3c;">유저를 찾을 수 없어요.</span>';
       return;
     }
 
-    // 이용권 조회
-    const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
-    const current = cd?.credits || 0;
+    const { data: cd } = await sb.from('user_credits').select('credits,cash_balance').eq('user_id', user.id).single();
+    const currentCredits = cd?.credits || 0;
+    const currentCash = cd?.cash_balance || 0;
+    const me = getSajuUser();
+    let resultMsg = '';
 
-    let grantError;
-    if (cd) {
-      const { error } = await sb.from('user_credits').update({
-        credits: current + credits,
-        updated_at: new Date().toISOString()
-      }).eq('user_id', user.id);
-      grantError = error;
-    } else {
-      const { error } = await sb.from('user_credits').insert({
-        user_id: user.id,
-        credits: credits
+    if (currentGrantType === 'cash') {
+      const newCash = currentCash + credits;
+      if (cd) {
+        await sb.from('user_credits').update({ cash_balance: newCash, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+      } else {
+        await sb.from('user_credits').insert({ user_id: user.id, cash_balance: credits });
+      }
+      await sb.from('cash_transactions').insert({
+        user_id: user.id, type: 'charge', amount: credits,
+        krw_amount: 0, payment_method: 'admin',
+        description: reason || '관리자 지급'
       });
-      grantError = error;
+      resultMsg = (user.name || email) + '님께 ' + credits.toLocaleString() + ' 캐시 지급! (보유: ' + newCash.toLocaleString() + ')';
+
+    } else if (currentGrantType === 'credits') {
+      const newCredits = currentCredits + credits;
+      if (cd) {
+        await sb.from('user_credits').update({ credits: newCredits, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+      } else {
+        await sb.from('user_credits').insert({ user_id: user.id, credits });
+      }
+      resultMsg = (user.name || email) + '님께 ' + credits + '회 이용권 지급!';
+
+    } else {
+      const subDays = parseInt(document.getElementById('admin-sub-period')?.value || '30');
+      const newCredits = currentCredits + subDays;
+      if (cd) {
+        await sb.from('user_credits').update({ credits: newCredits, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+      } else {
+        await sb.from('user_credits').insert({ user_id: user.id, credits: subDays });
+      }
+      resultMsg = (user.name || email) + '님께 ' + subDays + '일 구독 지급!';
     }
 
-    if (grantError) throw grantError;
-
-    const me = getSajuUser();
     await sb.from('admin_credits').insert({
       admin_id: me?.id || null,
       target_email: email,
       target_user_id: user.id,
       credits,
-      reason: reason || '수동 지급'
+      reason: '[' + currentGrantType + '] ' + (reason || '수동 지급')
     });
 
-    resultEl.innerHTML = `<span style="color:#27ae60;">✅ ${user.name || email}님께 ${credits}회 이용권 지급 완료! (기존 ${current}회 → ${current + credits}회)</span>`;
+    resultEl.innerHTML = '<span style="color:#27ae60;">✅ ' + resultMsg + '</span>';
     document.getElementById('admin-target-email').value = '';
     document.getElementById('admin-credit-amount').value = '';
     document.getElementById('admin-credit-reason').value = '';
     loadGrantHistory();
   } catch(e) {
-    resultEl.innerHTML = `<span style="color:#e74c3c;">오류: ${e.message}</span>`;
+    resultEl.innerHTML = '<span style="color:#e74c3c;">오류: ' + e.message + '</span>';
   }
 }
 
