@@ -135,18 +135,78 @@
   <h1 class="page-title">💎 이용권 구매</h1>
   <p class="page-sub">구독하고 AI 사주·운세·타로를 무제한으로 즐기세요</p>
 
-  <!-- ── 캐시 잔액 표시 ── -->
-  <div id="cash-balance-bar" style="display:none;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:16px 20px;margin-bottom:28px;align-items:center;justify-content:space-between;">
+  <!-- ── 보유 캐시+이용권 잔액 표시 ── -->
+  <div id="cash-balance-bar" style="display:none;background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.3);border-radius:16px;padding:20px 24px;margin-bottom:28px;align-items:center;justify-content:space-between;border-left:3px solid var(--gold);">
     <div>
-      <div style="font-size:12px;color:#a89c80;margin-bottom:4px;">보유 이용권</div>
-      <div style="font-size:24px;font-weight:800;color:#c9a84c;"><span id="user-cash-display">0</span>회</div>
+      <div style="font-size:12px;color:#a89c80;margin-bottom:4px;">보유 캐시</div>
+      <div style="font-size:28px;font-weight:800;color:#c9a84c;"><span id="user-cash-display">0</span> <span style="font-size:14px;color:#a89c80;">캐시</span></div>
+      <div style="font-size:11px;color:#5c5445;margin-top:4px;">보유 이용권: <span id="user-credits-display" style="color:#c9a84c;font-weight:700;">0</span>회</div>
     </div>
-    <div style="font-size:12px;color:#a89c80;text-align:right;">
-      이용권 1회 = 서비스 1회 이용<br>
-      <a href="https://saju-today.com/my" style="color:#c9a84c;">내역 보기</a>
+    <div style="text-align:right;">
+      <div style="font-size:11px;color:#5c5445;line-height:1.8;">500캐시 = 서비스 1회 이용<br>이용권 1회 = 서비스 1회 이용</div>
+      <a href="https://saju-today.com/my" style="color:#c9a84c;font-size:11px;text-decoration:none;">내역 보기 →</a>
     </div>
   </div>
 
+  <!-- ── 섹션 0: 캐시 충전 (상단) ── -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:16px;padding:24px;margin-bottom:28px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;">💰 캐시 충전</h2>
+      <span style="background:rgba(39,174,96,0.15);color:#27ae60;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;">카카오페이 · 크립토</span>
+    </div>
+    <p style="font-size:13px;color:#a89c80;margin-bottom:20px;">원하는 금액만큼 자유롭게 충전하세요. 500캐시 = 서비스 1회 이용</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="number" id="charge-amount-input" placeholder="충전 금액 입력 (원)" min="500" step="500"
+        style="flex:1;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:16px;font-family:'Noto Sans KR',sans-serif;"/>
+      <button onclick="chargeCustomAmount()"
+        style="padding:12px 20px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border:none;border-radius:10px;color:#0e0b14;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap;">
+        충전하기
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">빠른 선택</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+      <button onclick="setChargeAmount(500)" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;">500원</button>
+      <button onclick="setChargeAmount(1000)" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;">1,000원</button>
+      <button onclick="setChargeAmount(2390)" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;">2,390원</button>
+      <button onclick="setChargeAmount(5000)" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;">5,000원</button>
+      <button onclick="setChargeAmount(10000)" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;">10,000원</button>
+      <button onclick="setChargeAmount(30000)" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;">30,000원</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;">충전한 캐시는 유효기간 없이 사용 가능해요</div>
+  </div>
+
+  <!-- ── 섹션 0.5: 이용권 구매 (캐시로) ── -->
+  <div style="margin-bottom:40px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;">🎟 이용권 구매</h2>
+      <span style="background:rgba(201,168,76,0.15);color:#c9a84c;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;">보유 캐시로 구매</span>
+    </div>
+    <p style="font-size:13px;color:#a89c80;margin-bottom:20px;">보유한 캐시로 이용권을 구매하세요. 이용권은 캐시 차감 없이 바로 사용 가능해요.</p>
+    <div class="onetime-grid">
+      <div class="onetime-card" onclick="buyWithCash('이용권 1회', 500, 1)">
+        <div class="onetime-info">
+          <div class="onetime-name">이용권 1회</div>
+          <div class="onetime-desc">서비스 1회 이용 가능</div>
+        </div>
+        <div class="onetime-right">
+          <div class="onetime-price" style="color:#c9a84c;font-size:16px;">500 캐시</div>
+          <button class="onetime-buy">구매하기</button>
+        </div>
+      </div>
+      <div class="onetime-card popular" onclick="buyWithCash('이용권 5회', 2390, 5)">
+        <div class="onetime-info">
+          <div class="onetime-name">이용권 5회 <span style="font-size:11px;color:var(--gold);">🔥 인기</span></div>
+          <div class="onetime-desc">서비스 5회 이용 가능</div>
+        </div>
+        <div class="onetime-right">
+          <div class="onetime-original">2,500 캐시</div>
+          <div class="onetime-price" style="color:#c9a84c;font-size:16px;">2,390 캐시</div>
+          <div style="font-size:11px;color:#4caf7a;">↓ 4% 절약</div>
+          <button class="onetime-buy">구매하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- ── 섹션 1: 이용권 충전 ── -->
   <div style="margin-bottom:40px;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
@@ -358,7 +418,7 @@ async function getUsdtKrwRate() {
   } catch(e) { return 1380; }
 }
 
-async function showCryptoModal(productName, krwAmount, credits) {
+async function showCryptoModal(productName, krwAmount, credits, cashAmount) {
   if (!krwAmount || krwAmount === 0) {
     showToast('금액 정보가 없어요. 다시 시도해주세요');
     return;
@@ -447,6 +507,8 @@ async function showCryptoModal(productName, krwAmount, credits) {
   cryptoPaymentData = {
     productName, krwAmount: discountedKrw, credits,
     usdtAmount, userId: user.id, userEmail: user.email
+  },
+    cashAmount: cashAmount || discountedKrw
   };
 }
 
@@ -624,7 +686,7 @@ async function checkCryptoPayment() {
     }
 
     if (found) {
-      await grantCryptoCredits(credits, userId, productName, krwAmount, network, token);
+      await grantCryptoCredits(credits, userId, productName, krwAmount, network, token, cryptoPaymentData.cashAmount);
     }
     return found;
 
@@ -634,7 +696,7 @@ async function checkCryptoPayment() {
   }
 }
 
-async function grantCryptoCredits(credits, userId, productName, krwAmount, network, token) {
+async function grantCryptoCredits(credits, userId, productName, krwAmount, network, token, cashAmount) {
   const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
 
   // 중복 지급 방지: 세션 상태 확인
@@ -647,13 +709,20 @@ async function grantCryptoCredits(credits, userId, productName, krwAmount, netwo
     await sb.from('crypto_sessions').update({ status: 'completed' }).eq('id', cryptoPaymentData.sessionId);
   }
 
-  // 이용권 지급
-  const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', userId).single();
-  const current = cd?.credits || 0;
-  if (cd) {
-    await sb.from('user_credits').update({ credits: current + credits, updated_at: new Date().toISOString() }).eq('user_id', userId);
+  const { data: cd } = await sb.from('user_credits').select('credits,cash_balance').eq('user_id', userId).single();
+  const currentCredits = cd?.credits || 0;
+  const currentCash = cd?.cash_balance || 0;
+
+  if (credits === 0) {
+    // 캐시 충전
+    const addCash = cashAmount || krwAmount;
+    if (cd) { await sb.from('user_credits').update({ cash_balance: currentCash + addCash, updated_at: new Date().toISOString() }).eq('user_id', userId); }
+    else { await sb.from('user_credits').insert({ user_id: userId, cash_balance: addCash }); }
+    await sb.from('cash_transactions').insert({ user_id: userId, type:'charge', amount: addCash, krw_amount: krwAmount, payment_method: 'crypto', description: productName });
   } else {
-    await sb.from('user_credits').insert({ user_id: userId, credits });
+    // 이용권/구독 지급
+    if (cd) { await sb.from('user_credits').update({ credits: currentCredits + credits, updated_at: new Date().toISOString() }).eq('user_id', userId); }
+    else { await sb.from('user_credits').insert({ user_id: userId, credits }); }
   }
 
   // 결제 기록
@@ -688,12 +757,15 @@ async function grantCryptoCredits(credits, userId, productName, krwAmount, netwo
     }
   } catch(e) { console.warn('추천인 보상 오류:', e); }
 
-  document.getElementById('crypto-status').innerHTML = `
-    <div style="font-size:20px;margin-bottom:8px;">🎉</div>
-    <div style="font-size:15px;font-weight:700;color:#27ae60;">입금 확인 완료!</div>
-    <div style="font-size:13px;color:#a89c80;margin-top:6px;">${credits}회 이용권이 지급됐어요</div>`;
+  const msg = credits === 0
+    ? (cashAmount || krwAmount).toLocaleString() + ' 캐시가 충전됐어요!'
+    : credits + '회 이용권이 지급됐어요!';
+  document.getElementById('crypto-status').innerHTML =
+    '<div style="font-size:20px;margin-bottom:8px;">🎉</div>' +
+    '<div style="font-size:15px;font-weight:700;color:#27ae60;">입금 확인 완료!</div>' +
+    '<div style="font-size:13px;color:#a89c80;margin-top:6px;">' + msg + '</div>';
   document.getElementById('check-btn').style.display = 'none';
-  showToast('이용권 ' + credits + '회 지급됐어요! 🎉');
+  showToast('🎉 ' + msg);
   setTimeout(() => { closeCryptoModal(); window.location.href = 'https://saju-today.com/my'; }, 3000);
 }
 
@@ -708,12 +780,14 @@ async function loadCashBalance() {
   var user = getSajuUser ? getSajuUser() : null;
   if (!user) return;
   var sb2 = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
-  var { data } = await sb2.from('user_credits').select('credits').eq('user_id', user.id).single();
+  var { data } = await sb2.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
   var bar = document.getElementById('cash-balance-bar');
-  var disp = document.getElementById('user-cash-display');
-  if (bar && data) {
-    bar.style.display = 'flex';
-    if (disp) disp.textContent = (data.credits || 0).toLocaleString();
+  if (bar) bar.style.display = 'flex';
+  var cashEl = document.getElementById('user-cash-display');
+  var credEl = document.getElementById('user-credits-display');
+  if (data) {
+    if (cashEl) cashEl.textContent = (data.cash_balance || 0).toLocaleString();
+    if (credEl) credEl.textContent = (data.credits || 0).toLocaleString();
   }
 }
 document.addEventListener('DOMContentLoaded', loadCashBalance);
@@ -736,7 +810,7 @@ function getSajuUser() {
   try { var u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
 }
 
-function buyProduct(productName, amount, credits, isSubscription) {
+function buyProduct(productName, amount, credits, isSubscription, cashAmount) {
   var user = getSajuUser();
   if (!user) {
     showToast('로그인 후 구매할 수 있어요');
@@ -749,10 +823,10 @@ function buyProduct(productName, amount, credits, isSubscription) {
   var merchantUid = 'saju_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
 
   // 결제 수단 선택 모달 표시
-  showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user);
+  showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user, cashAmount || amount);
 }
 
-function showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user) {
+function showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user, cashAmount) {
   var existing = document.getElementById('payment-modal');
   if (existing) existing.remove();
 
@@ -766,7 +840,7 @@ function showPaymentModal(productName, amount, credits, isSubscription, merchant
     '<p style="font-size:20px;font-weight:800;color:#c9a84c;text-align:center;margin-bottom:24px;">' + amount.toLocaleString() + '원</p>' +
     '<p style="font-size:13px;color:#a89c80;text-align:center;margin-bottom:20px;">결제 수단을 선택해주세요</p>' +
     '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">' +
-    '<button id="pay-kakao-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#FEE500;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#191919;cursor:pointer;"><span style="font-size:22px;">💬</span> 카카오페이</button>' +
+    '<button id="pay-kakao-btn" disabled style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#FEE500;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#191919;cursor:not-allowed;opacity:0.7;position:relative;"><span style="font-size:22px;">💬</span> 카카오페이<span style="position:absolute;top:-8px;right:-8px;background:#e74c3c;color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;">심사 중</span></button>' +
     '<button id="pay-crypto-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:linear-gradient(135deg,#1a1628,#2d1f4e);border:1px solid rgba(201,168,76,0.3);border-radius:12px;font-size:15px;font-weight:700;color:#f0ead6;cursor:pointer;"><span style="font-size:22px;">💎</span> 크립토 결제 <span style="font-size:12px;color:#c9a84c;margin-left:4px;">(5% 할인)</span></button>' +
     '</div>' +
     '<button id="pay-cancel-btn" style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
@@ -781,7 +855,7 @@ function showPaymentModal(productName, amount, credits, isSubscription, merchant
   });
   document.getElementById('pay-crypto-btn').addEventListener('click', function() {
     modal.remove();
-    showCryptoModal(productName, amount, credits);
+    showCryptoModal(productName, amount, credits, cashAmount);
   });
   document.getElementById('pay-cancel-btn').addEventListener('click', function() { modal.remove(); });
 }
