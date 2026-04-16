@@ -1008,7 +1008,7 @@
 
 
 <!-- ─── 한자 선택기 모달 ─── -->
-<div id="hanja-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99998;justify-content:center;align-items:flex-start;padding-top:40px;overflow-y:auto;">
+<div id="hanja-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;justify-content:center;align-items:flex-start;padding-top:40px;overflow-y:auto;">
   <div style="background:#1a1628;border-radius:12px;padding:24px;width:92%;max-width:500px;max-height:85vh;overflow-y:auto;margin:0 auto;border:1px solid rgba(201,168,76,0.2);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <h3 style="font-size:16px;font-weight:700;color:#f0ead6;">✍️ 한자 선택</h3>
@@ -1029,25 +1029,8 @@
 </div>
 </div>
 <!-- ─── 한자 선택기 모달 ─── -->
-<div id="hanja-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99998;justify-content:center;align-items:flex-start;padding-top:40px;overflow-y:auto;">
-  <div style="background:#1a1628;border-radius:12px;padding:24px;width:92%;max-width:500px;max-height:85vh;overflow-y:auto;margin:0 auto;border:1px solid rgba(201,168,76,0.2);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <h3 style="font-size:16px;font-weight:700;color:#f0ead6;">✍️ 한자 선택</h3>
-      <button onclick="closeHanjaPicker()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
-    </div>
-    <p style="font-size:12px;color:#c9a84c;margin-bottom:8px;">성씨부터 각 글자의 한자를 선택하세요. 뜻이나 음으로 검색도 가능해요.</p>
-    <div style="background:rgba(26,74,107,0.15);border:1px solid rgba(26,74,107,0.4);border-radius:6px;padding:10px 14px;margin-bottom:16px;">
-      <p style="font-size:12px;color:var(--blue);margin:0;line-height:1.7;">
-        📖 목록에 없는 한자는 <strong>네이버 한자 사전</strong>(<a href="https://hanja.dict.naver.com" target="_blank" style="color:var(--blue);text-decoration:underline;">hanja.dict.naver.com</a>)에서 직접 찾아 아래 <strong>직접 입력</strong> 칸에 복사·붙여넣기 하세요.
-      </p>
-    </div>
-    <div id="hanja-picker-content"></div>
-    <div style="display:flex;gap:8px;margin-top:20px;position:sticky;bottom:0;background:#1a1628;padding-top:12px;">
-      <button onclick="confirmHanjaPicker()" style="flex:1;padding:12px;background:var(--ink);color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:'Noto Sans KR',sans-serif;font-weight:600;">✅ 선택 완료</button>
-      <button onclick="closeHanjaPicker()" style="padding:12px 16px;background:#0e0b14;border:1px solid rgba(201,168,76,0.3);border-radius:6px;cursor:pointer;font-size:14px;color:#f0ead6;font-family:'Noto Sans KR',sans-serif;">취소</button>
-    </div>
-  </div>
-<div class="toast" id="toast"></div>
+
+
 <script>
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -1919,7 +1902,7 @@ function searchHanja(charIdx, originalChar) {
     const safeChar2 = hanjaChar.replace(/'/g, '&#39;');
     return `<button onclick="selectHanja(${charIdx}, '${safeChar2}', '${safeH2}')"
       style="padding:8px 10px;border:2px solid rgba(201,168,76,0.3);border-radius:6px;background:#13101c;cursor:pointer;min-width:64px;text-align:center;">
-      <span class="hanja-btn-char">${hanjaChar}</span>
+      <span class="hanja-btn-char" style="color:#f0ead6;">${hanjaChar}</span>
       <span style="font-size:10px;color:var(--muted);display:block;margin-top:2px;">${meaning.split(' ').slice(0,2).join(' ')}</span>
     </button>`;
   }).join('');
