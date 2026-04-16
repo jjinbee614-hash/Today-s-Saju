@@ -1742,15 +1742,35 @@ async function checkAndUseCredit(serviceName) {
     return false;
   }
   const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
-  const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+  const { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+
   const credits = cd?.credits || 0;
-  if (credits <= 0) {
+  const cashBalance = cd?.cash_balance || 0;
+
+  // 구독자 (credits >= 30) 무제한 이용
+  if (credits >= 30) return true;
+
+  if (cashBalance < 500) {
     showCreditModal(serviceName);
     return false;
   }
-  const confirmed = await showConfirmCreditModal(serviceName, credits);
+
+  const confirmed = await showConfirmCreditModal(serviceName, cashBalance);
   if (!confirmed) return false;
-  await sb.from('user_credits').update({ credits: credits - 1, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+
+  await sb.from('user_credits').update({
+    cash_balance: cashBalance - 500,
+    updated_at: new Date().toISOString()
+  }).eq('user_id', user.id);
+
+  await sb.from('cash_transactions').insert({
+    user_id: user.id,
+    type: 'use',
+    amount: -500,
+    service: serviceName,
+    description: serviceName + ' 이용'
+  }).catch(() => {});
+
   return true;
 }
 
@@ -1764,13 +1784,13 @@ function showCreditModal(serviceName) {
     <div style="background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);">
       <div style="text-align:center;margin-bottom:20px;">
         <div style="font-size:36px;margin-bottom:12px;">🔮</div>
-        <h3 style="font-size:17px;font-weight:700;color:#f0ead6;margin-bottom:8px;">${serviceName} 유료 서비스</h3>
-        <p style="font-size:14px;color:#a89c80;line-height:1.7;">이용권 1회가 필요해요.<br>이용권을 구매하고 계속 이용해보세요!</p>
+        <h3 style="font-size:17px;font-weight:700;color:#f0ead6;margin-bottom:8px;">\${serviceName}</h3>
+        <p style="font-size:14px;color:#a89c80;line-height:1.7;">500 캐시가 필요해요.<br>캐시를 충전하고 이용해보세요!</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
         <button onclick="window.location.href='https://saju-today.com/pricing'"
           style="padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">
-          💎 이용권 구매하기
+          💰 캐시 충전하기
         </button>
         <button onclick="document.getElementById('credit-modal').remove()"
           style="padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">
@@ -1782,7 +1802,7 @@ function showCreditModal(serviceName) {
   document.body.appendChild(modal);
 }
 
-function showConfirmCreditModal(serviceName, credits) {
+function showConfirmCreditModal(serviceName, cashBalance) {
   return new Promise((resolve) => {
     const existing = document.getElementById('confirm-credit-modal');
     if (existing) existing.remove();
@@ -1792,9 +1812,9 @@ function showConfirmCreditModal(serviceName, credits) {
     modal.innerHTML = `
       <div style="background:#13101c;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;border:1px solid rgba(201,168,76,0.2);text-align:center;">
         <div style="font-size:32px;margin-bottom:12px;">🔮</div>
-        <h3 style="font-size:16px;font-weight:700;color:#f0ead6;margin-bottom:8px;">${serviceName}</h3>
-        <p style="font-size:14px;color:#a89c80;margin-bottom:6px;line-height:1.7;">이용권 1회를 사용하시겠어요?</p>
-        <p style="font-size:12px;color:#5c5445;margin-bottom:24px;">현재 보유: <b style="color:#c9a84c;">${credits}회</b></p>
+        <h3 style="font-size:16px;font-weight:700;color:#f0ead6;margin-bottom:8px;">\${serviceName}</h3>
+        <p style="font-size:14px;color:#a89c80;margin-bottom:6px;line-height:1.7;">500 캐시를 사용하시겠어요?</p>
+        <p style="font-size:12px;color:#5c5445;margin-bottom:24px;">보유 캐시: <b style="color:#c9a84c;">\${cashBalance.toLocaleString()} 캐시</b></p>
         <div style="display:flex;gap:10px;">
           <button id="confirm-no" style="flex:1;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>
           <button id="confirm-yes" style="flex:1;padding:13px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">사용하기</button>

@@ -1910,14 +1910,17 @@ async function initSajuAskSection() {
   }
 
   var sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
-  var res = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+  var res = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
   var credits = (res.data && res.data.credits) || 0;
+  var cashBalance = (res.data && res.data.cash_balance) || 0;
+  var isSubscriber = credits >= 30;
+  var hasBalance = isSubscriber || cashBalance >= 500;
 
   document.getElementById('saju-ask-credits').style.display = 'block';
-  document.getElementById('saju-credit-count').textContent = credits;
+  document.getElementById('saju-credit-count').textContent = isSubscriber ? '무제한' : cashBalance.toLocaleString() + ' 캐시';
 
-  if (credits <= 0) {
-    document.getElementById('saju-ask-btn').textContent = '이용권이 없어요 — 구매하기';
+  if (!hasBalance) {
+    document.getElementById('saju-ask-btn').textContent = '캐시가 없어요 — 충전하기';
     document.getElementById('saju-ask-btn').onclick = function() {
       window.location.href = 'https://saju-today.com/pricing';
     };
@@ -1933,11 +1936,13 @@ async function askSajuQuestion() {
 
   var sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
 
-  var creditRes = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
+  var creditRes = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
   var credits = (creditRes.data && creditRes.data.credits) || 0;
+  var cashBalance = (creditRes.data && creditRes.data.cash_balance) || 0;
+  var isSubscriber = credits >= 30;
 
-  if (credits <= 0) {
-    showToast('이용권이 없어요. 구매 페이지로 이동합니다');
+  if (!isSubscriber && cashBalance < 500) {
+    showToast('캐시가 없어요. 충전 페이지로 이동합니다');
     setTimeout(function(){ window.location.href = 'https://saju-today.com/pricing'; }, 1500);
     return;
   }
@@ -1948,8 +1953,11 @@ async function askSajuQuestion() {
   showToast('AI가 분석 중입니다...');
 
   try {
-    await sb.from('user_credits').update({ credits: credits - 1, updated_at: new Date().toISOString() }).eq('user_id', user.id);
-    document.getElementById('saju-credit-count').textContent = credits - 1;
+    if (!isSubscriber) {
+      await sb.from('user_credits').update({ cash_balance: cashBalance - 500, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+      document.getElementById('saju-credit-count').textContent = (cashBalance - 500).toLocaleString() + ' 캐시';
+      await sb.from('cash_transactions').insert({ user_id: user.id, type: 'use', amount: -500, service: 'AI 추가 질문', description: 'AI 추가 질문 이용' }).catch(() => {});
+    }
 
     var sajuContext = currentSajuData ? (
       '【사주 정보】\n' +
