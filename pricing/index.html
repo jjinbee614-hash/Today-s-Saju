@@ -6,12 +6,13 @@
   <title>이용권 구매 | 오늘의 사주</title>
   <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root { --bg:#0e0b14;--bg2:#13101c;--bg3:#1a1628;--gold:#c9a84c;--gold-light:#e8c96a;--gold-dim:rgba(201,168,76,0.15);--text:#f0ead6;--text2:#a89c80;--text3:#5c5445;--border:rgba(201,168,76,0.12);--border2:rgba(255,255,255,0.06);--r:16px; }
     * { box-sizing:border-box;margin:0;padding:0; }
     body { font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px; }
     @keyframes twinkle { 0%,100%{opacity:0.2;transform:scale(1)}50%{opacity:0.8;transform:scale(1.3)} }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
     nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(14,11,20,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border); }
     .nav-logo { font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;color:var(--text);text-decoration:none; }
@@ -20,20 +21,59 @@
     .nav-back:hover { border-color:var(--gold);color:var(--gold); }
 
     .container { max-width:680px;margin:0 auto;padding:80px 16px 40px;position:relative;z-index:1; }
+    .page-title { font-family:'Noto Serif KR',serif;text-align:center;font-size:26px;font-weight:700;margin-bottom:6px; }
+    .page-sub { text-align:center;font-size:13px;color:var(--text2);margin-bottom:24px; }
 
-    .page-title {
-      font-family:'Noto Serif KR',serif;
-      text-align:center;font-size:26px;font-weight:700;
-      margin-bottom:6px;
+    /* 캐시 잔액 박스 */
+    .cash-box {
+      background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(201,168,76,0.05));
+      border:1px solid rgba(201,168,76,0.3);border-radius:16px;
+      padding:20px 24px;margin-bottom:28px;
+      display:flex;align-items:center;justify-content:space-between;
     }
-    .page-sub { text-align:center;font-size:13px;color:var(--text2);margin-bottom:36px; }
+    .cash-box-left { }
+    .cash-box-label { font-size:12px;color:var(--text2);margin-bottom:4px; }
+    .cash-box-amount { font-size:28px;font-weight:800;color:var(--gold); }
+    .cash-box-unit { font-size:14px;font-weight:400;color:var(--text2);margin-left:4px; }
+    .cash-box-right { text-align:right; }
+    .cash-box-info { font-size:11px;color:var(--text3);line-height:1.8; }
+    .cash-box-link { color:var(--gold);text-decoration:none;font-size:11px; }
+
+    /* 충전 섹션 */
+    .charge-section {
+      background:var(--bg2);border:1px solid var(--border);
+      border-radius:16px;padding:24px;margin-bottom:28px;
+    }
+    .charge-title { font-family:'Noto Serif KR',serif;font-size:18px;font-weight:700;margin-bottom:4px; }
+    .charge-sub { font-size:12px;color:var(--text2);margin-bottom:20px; }
+    .charge-input-row { display:flex;gap:8px;margin-bottom:12px; }
+    .charge-input {
+      flex:1;padding:12px 16px;background:var(--bg3);
+      border:1px solid var(--border);border-radius:10px;
+      color:var(--text);font-size:16px;font-family:'Noto Sans KR',sans-serif;
+    }
+    .charge-input:focus { outline:none;border-color:var(--gold); }
+    .charge-quick { display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap; }
+    .charge-quick-btn {
+      padding:6px 14px;background:var(--bg3);border:1px solid var(--border);
+      border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;
+      transition:all 0.2s;
+    }
+    .charge-quick-btn:hover { border-color:var(--gold);color:var(--gold); }
+    .charge-btn {
+      width:100%;padding:14px;
+      background:linear-gradient(135deg,var(--gold),var(--gold-light));
+      color:#0e0b14;font-size:15px;font-weight:800;
+      border:none;border-radius:12px;cursor:pointer;
+      font-family:'Noto Sans KR',sans-serif;
+    }
+    .charge-btn:hover { opacity:0.88; }
 
     /* Section Heading */
     .section-heading {
       font-size:12px;font-weight:700;color:var(--text3);
       text-transform:uppercase;letter-spacing:1.5px;
-      margin:32px 0 14px;
-      display:flex;align-items:center;gap:8px;
+      margin:32px 0 14px;display:flex;align-items:center;gap:8px;
     }
     .section-heading::after { content:'';flex:1;height:1px;background:var(--border); }
 
@@ -45,32 +85,18 @@
       position:relative;transition:all 0.2s;cursor:pointer;
     }
     .plan-card:hover { border-color:rgba(201,168,76,0.4);box-shadow:0 4px 20px rgba(201,168,76,0.1); }
-    .plan-card.popular {
-      border-color:var(--gold);
-      box-shadow:0 0 0 1px var(--gold);
-    }
+    .plan-card.popular { border-color:var(--gold);box-shadow:0 0 0 1px var(--gold); }
     .popular-badge {
       position:absolute;top:-10px;left:50%;transform:translateX(-50%);
       background:var(--gold);color:#0e0b14;
-      font-size:10px;font-weight:800;padding:3px 12px;border-radius:20px;
-      white-space:nowrap;
+      font-size:10px;font-weight:800;padding:3px 12px;border-radius:20px;white-space:nowrap;
     }
     .plan-name { font-size:15px;font-weight:700;margin-bottom:6px; }
-    .plan-price {
-      font-size:22px;font-weight:800;color:var(--gold);
-      margin-bottom:3px;
-    }
+    .plan-price { font-size:22px;font-weight:800;color:var(--gold);margin-bottom:3px; }
     .plan-price span { font-size:13px;font-weight:400;color:var(--text2); }
-    .plan-discount {
-      font-size:11px;color:#4caf7a;font-weight:600;
-      margin-bottom:12px;
-    }
+    .plan-discount { font-size:11px;color:#4caf7a;font-weight:600;margin-bottom:12px; }
     .plan-features { list-style:none;margin-bottom:16px; }
-    .plan-features li {
-      font-size:12px;color:var(--text2);
-      padding:3px 0;
-      display:flex;align-items:center;gap:6px;
-    }
+    .plan-features li { font-size:12px;color:var(--text2);padding:3px 0;display:flex;align-items:center;gap:6px; }
     .plan-features li::before { content:'✓';color:var(--gold);font-size:11px; }
     .buy-btn {
       width:100%;padding:11px 0;
@@ -98,14 +124,12 @@
     .onetime-right { text-align:right;flex-shrink:0; }
     .onetime-price { font-size:18px;font-weight:800;color:var(--gold); }
     .onetime-original { font-size:11px;color:var(--text3);text-decoration:line-through; }
-    .onetime-discount { font-size:11px;color:#4caf7a;font-weight:700; }
     .onetime-buy {
       display:block;margin-top:8px;padding:7px 16px;
       background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);
       color:var(--gold);font-size:12px;font-weight:700;
       border-radius:20px;cursor:pointer;
-      font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;
-      white-space:nowrap;
+      font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;white-space:nowrap;
     }
     .onetime-buy:hover { background:var(--gold);color:#0e0b14; }
 
@@ -118,7 +142,7 @@
     .faq-arrow { transition:transform 0.2s;font-style:normal; }
 
     /* Toast */
-    .toast { position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap; }
+    .toast { position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap; }
     .toast.show { opacity:1; }
   </style>
 </head>
@@ -133,50 +157,82 @@
 
 <div class="container">
   <h1 class="page-title">💎 이용권 구매</h1>
-  <p class="page-sub">구독하고 AI 사주·운세·타로를 무제한으로 즐기세요</p>
+  <p class="page-sub">캐시를 충전하거나 이용권을 구매해 AI 사주·운세·타로를 이용하세요</p>
 
-  <!-- ── 캐시 잔액 표시 ── -->
-  <div id="cash-balance-bar" style="display:none;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:16px 20px;margin-bottom:28px;align-items:center;justify-content:space-between;">
-    <div>
-      <div style="font-size:12px;color:#a89c80;margin-bottom:4px;">보유 이용권</div>
-      <div style="font-size:24px;font-weight:800;color:#c9a84c;"><span id="user-cash-display">0</span>회</div>
+  <!-- ── 보유 캐시 잔액 박스 ── -->
+  <div class="cash-box" id="cash-balance-bar" style="display:none;">
+    <div class="cash-box-left">
+      <div class="cash-box-label">보유 캐시</div>
+      <div class="cash-box-amount"><span id="user-cash-display">0</span><span class="cash-box-unit">캐시</span></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">보유 이용권: <span id="user-credits-display" style="color:var(--gold);font-weight:700;">0</span>회</div>
     </div>
-    <div style="font-size:12px;color:#a89c80;text-align:right;">
-      이용권 1회 = 서비스 1회 이용<br>
-      <a href="https://saju-today.com/my" style="color:#c9a84c;">내역 보기</a>
+    <div class="cash-box-right">
+      <div class="cash-box-info">500캐시 = 서비스 1회 이용<br>이용권 1회 = 서비스 1회 이용</div>
+      <a href="https://saju-today.com/my" class="cash-box-link">내역 보기 →</a>
     </div>
   </div>
 
-  <!-- ── 섹션 1: 이용권 충전 ── -->
-  <div style="margin-bottom:40px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-      <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;">💰 이용권 충전</h2>
+  <!-- ── 섹션 0: 캐시 충전 (상단) ── -->
+  <div class="charge-section" style="border-left:3px solid var(--gold);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <div class="charge-title">💰 캐시 충전</div>
       <span style="background:rgba(39,174,96,0.15);color:#27ae60;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;">카카오페이 · 크립토</span>
     </div>
-    <p style="font-size:13px;color:#a89c80;margin-bottom:20px;">충전한 이용권으로 원하는 서비스를 자유롭게 이용하세요.</p>
+    <div class="charge-sub">원하는 금액만큼 자유롭게 충전하세요. 500캐시 = 서비스 1회 이용</div>
+
+    <!-- 금액 입력 -->
+    <div class="charge-input-row">
+      <input type="number" id="charge-amount-input" class="charge-input"
+        placeholder="충전 금액 입력 (원)" min="500" step="500"/>
+      <button onclick="chargeCustomAmount()" class="charge-btn" style="width:auto;padding:12px 20px;font-size:14px;">
+        충전하기
+      </button>
+    </div>
+
+    <!-- 빠른 선택 -->
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">빠른 선택</div>
+    <div class="charge-quick">
+      <button class="charge-quick-btn" onclick="setChargeAmount(500)">500원</button>
+      <button class="charge-quick-btn" onclick="setChargeAmount(1000)">1,000원</button>
+      <button class="charge-quick-btn" onclick="setChargeAmount(2390)">2,390원</button>
+      <button class="charge-quick-btn" onclick="setChargeAmount(5000)">5,000원</button>
+      <button class="charge-quick-btn" onclick="setChargeAmount(10000)">10,000원</button>
+      <button class="charge-quick-btn" onclick="setChargeAmount(30000)">30,000원</button>
+    </div>
+
+    <div style="font-size:11px;color:var(--text3);text-align:center;">
+      충전한 캐시는 유효기간 없이 사용 가능해요
+    </div>
+  </div>
+
+  <!-- ── 섹션 1: 이용권 구매 (캐시로) ── -->
+  <div style="margin-bottom:40px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;">🎟 이용권 구매</h2>
+      <span style="background:rgba(201,168,76,0.15);color:#c9a84c;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;">보유 캐시로 구매</span>
+    </div>
+    <p style="font-size:13px;color:#a89c80;margin-bottom:20px;">보유한 캐시로 이용권을 구매하세요. 이용권은 캐시 없이 바로 서비스 이용 가능해요.</p>
     <div class="onetime-grid">
-      <div class="onetime-card" onclick="buyProduct('1회 이용권', 500, 1, false)">
+      <div class="onetime-card" onclick="buyWithCash('1회 이용권', 500, 1)">
         <div class="onetime-info">
-          <div class="onetime-name">미니 충전</div>
-          <div class="onetime-desc">이용권 1회 지급</div>
+          <div class="onetime-name">이용권 1회</div>
+          <div class="onetime-desc">서비스 1회 이용 가능</div>
         </div>
         <div class="onetime-right">
-          <div class="onetime-original" style="font-size:12px;color:#888;text-decoration:line-through;">990원</div>
-          <div class="onetime-price">500원</div>
-          <div style="font-size:11px;color:#e74c3c;">🎉 이벤트가</div>
-          <button class="onetime-buy">충전하기</button>
+          <div class="onetime-price" style="color:#c9a84c;">500 캐시</div>
+          <button class="onetime-buy">구매하기</button>
         </div>
       </div>
-      <div class="onetime-card popular" onclick="buyProduct('5회 이용권', 2390, 5, false)">
+      <div class="onetime-card popular" onclick="buyWithCash('5회 이용권', 2390, 5)">
         <div class="onetime-info">
-          <div class="onetime-name">스탠다드 충전 <span style="font-size:11px;color:var(--gold);">🔥 인기</span></div>
-          <div class="onetime-desc">이용권 5회 지급</div>
+          <div class="onetime-name">이용권 5회 <span style="font-size:11px;color:var(--gold);">🔥 인기</span></div>
+          <div class="onetime-desc">서비스 5회 이용 가능</div>
         </div>
         <div class="onetime-right">
-          <div class="onetime-original" style="font-size:12px;color:#888;text-decoration:line-through;">4,900원</div>
-          <div class="onetime-price">2,390원</div>
-          <div style="font-size:11px;color:#e74c3c;">🎉 이벤트가</div>
-          <button class="onetime-buy">충전하기</button>
+          <div class="onetime-original">2,500 캐시</div>
+          <div class="onetime-price" style="color:#c9a84c;">2,390 캐시</div>
+          <div style="font-size:11px;color:#4caf7a;">↓ 4% 절약</div>
+          <button class="onetime-buy">구매하기</button>
         </div>
       </div>
     </div>
@@ -194,8 +250,8 @@
         <span class="popular-badge">🔥 추천</span>
         <div class="plan-name">1개월 구독</div>
         <div class="plan-price">5,900<span>원/월</span></div>
-        <div class="plan-discount" style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 8,900원</div>
-        <div style="color:#e74c3c;font-size:12px;margin-bottom:8px;">🎉 오픈 이벤트가</div>
+        <div style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 8,900원</div>
+        <div style="color:#e74c3c;font-size:12px;margin-bottom:12px;">🎉 오픈 이벤트가</div>
         <ul class="plan-features">
           <li>AI 분석 무제한</li>
           <li>모든 서비스 이용</li>
@@ -219,8 +275,8 @@
       <div class="plan-card" onclick="showCryptoModal('3개월 플랜', 14700, 90)">
         <div class="plan-name">3개월</div>
         <div class="plan-price">4,900<span>원/월</span></div>
-        <div class="plan-discount" style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 7,900원/월</div>
-        <div style="color:#e74c3c;font-size:12px;margin-bottom:8px;">🎉 오픈 이벤트가</div>
+        <div style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 7,900원/월</div>
+        <div style="color:#e74c3c;font-size:12px;margin-bottom:12px;">🎉 오픈 이벤트가</div>
         <ul class="plan-features">
           <li>AI 분석 무제한</li>
           <li>광고 없음</li>
@@ -232,8 +288,8 @@
         <span class="popular-badge">💎 베스트</span>
         <div class="plan-name">6개월</div>
         <div class="plan-price">3,900<span>원/월</span></div>
-        <div class="plan-discount" style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 6,900원/월</div>
-        <div style="color:#e74c3c;font-size:12px;margin-bottom:8px;">🎉 오픈 이벤트가</div>
+        <div style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 6,900원/월</div>
+        <div style="color:#e74c3c;font-size:12px;margin-bottom:12px;">🎉 오픈 이벤트가</div>
         <ul class="plan-features">
           <li>AI 분석 무제한</li>
           <li>광고 없음</li>
@@ -244,8 +300,8 @@
       <div class="plan-card" onclick="showCryptoModal('1년 플랜', 34800, 365)">
         <div class="plan-name">1년</div>
         <div class="plan-price">2,900<span>원/월</span></div>
-        <div class="plan-discount" style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 5,900원/월</div>
-        <div style="color:#e74c3c;font-size:12px;margin-bottom:8px;">🎉 오픈 이벤트가</div>
+        <div style="font-size:12px;color:#888;text-decoration:line-through;margin-bottom:2px;">원가 5,900원/월</div>
+        <div style="color:#e74c3c;font-size:12px;margin-bottom:12px;">🎉 오픈 이벤트가</div>
         <ul class="plan-features">
           <li>AI 분석 무제한</li>
           <li>광고 없음</li>
@@ -261,12 +317,12 @@
     <h3 style="font-size:14px;font-weight:700;color:#c9a84c;margin-bottom:12px;">💡 서비스 이용 안내</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:#a89c80;">
       <div>✨ 사주풀이 기본 — 무료</div>
-      <div>🔮 AI 추가 질문 — 이용권 1회</div>
-      <div>💑 궁합 분석 — 이용권 1회</div>
-      <div>✍️ 작명/이름감정 — 이용권 1회</div>
-      <div>👁️ 관상 분석 — 이용권 1회</div>
-      <div>📅 택일 — 이용권 1회</div>
-      <div>🌅 내일의 운세 — 이용권 1회</div>
+      <div>🔮 AI 추가 질문 — 500캐시 or 이용권 1회</div>
+      <div>💑 궁합 분석 — 500캐시 or 이용권 1회</div>
+      <div>✍️ 작명/이름감정 — 500캐시 or 이용권 1회</div>
+      <div>👁️ 관상 분석 — 500캐시 or 이용권 1회</div>
+      <div>📅 택일 — 500캐시 or 이용권 1회</div>
+      <div>🌅 내일의 운세 — 500캐시 or 이용권 1회</div>
       <div>🌙 꿈해몽/타로 — 무료</div>
     </div>
   </div>
@@ -275,28 +331,53 @@
   <div class="section-heading">자주 묻는 질문</div>
   <div>
     <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">캐시와 이용권의 차이는? <em class="faq-arrow">▾</em></div>
+      <div class="faq-a">캐시는 충전해두는 포인트로 500캐시 = 서비스 1회 이용이에요. 이용권은 캐시로 구매하는 서비스 이용 횟수예요. 구독 시 캐시 없이 무제한 이용 가능해요.</div>
+    </div>
+    <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">구독 취소는 어떻게 하나요? <em class="faq-arrow">▾</em></div>
       <div class="faq-a">마이페이지 → 멤버십 섹션에서 구독 취소가 가능합니다. 결제일로부터 7일 이내 미사용 시 전액 환불 가능합니다.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">무료 서비스와 유료 서비스의 차이는? <em class="faq-arrow">▾</em></div>
-      <div class="faq-a">무료: 기본 사주·운세 분석<br>유료: AI 분석 무제한 + 광고 없음 + 결과 저장 + 상세 분석 리포트</div>
+      <div class="faq-q" onclick="toggleFaq(this)">캐시는 얼마나 유효한가요? <em class="faq-arrow">▾</em></div>
+      <div class="faq-a">충전한 캐시는 유효기간 없이 사용 가능합니다.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">결제 수단은 무엇을 지원하나요? <em class="faq-arrow">▾</em></div>
-      <div class="faq-a">카카오페이, 크립토(USDT/USDC) 결제를 지원합니다.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">이용권은 언제까지 사용 가능한가요? <em class="faq-arrow">▾</em></div>
-      <div class="faq-a">구매일로부터 1년간 유효합니다.</div>
+      <div class="faq-a">카카오페이, 크립토(USDT/USDC) 결제를 지원합니다. 크립토 결제 시 5% 추가 할인이 적용됩니다.</div>
     </div>
   </div>
-
 </div>
 
-<footer style="text-align:center;padding:24px;border-top:1px solid var(--border);color:var(--text2);font-size:12px;position:relative;z-index:1;margin-top:40px;">
-  결제 관련 문의: <a href="mailto:contact@saju-today.com" style="color:var(--gold);text-decoration:none;">contact@saju-today.com</a>
-</footer>
+<div style="background:#0a0810;border-top:1px solid rgba(201,168,76,0.1);padding:28px 20px;text-align:center;color:#5c5445;font-size:11px;line-height:2.2;">
+  <div style="margin-bottom:10px;">
+    <a href="https://saju-today.com/terms-view" style="color:#5c5445;text-decoration:none;margin:0 8px;">이용약관</a> ·
+    <a href="https://saju-today.com/terms-view" style="color:#5c5445;text-decoration:none;margin:0 8px;">개인정보처리방침</a> ·
+    <a href="mailto:contact@saju-today.com" style="color:#5c5445;text-decoration:none;margin:0 8px;">문의하기</a>
+  </div>
+  <div>상호: 비즈글로벌 · 대표자: 정지훈 · 사업자등록번호: 760-40-01387</div>
+  <div>사업장 소재지: 경기도 용인시 · 대표전화: 010-4348-4389 · 이메일: contact@saju-today.com</div>
+  <div>통신판매업신고번호: 신고 준비 중</div>
+  <div style="margin-top:8px;">© 2025 비즈글로벌 All rights reserved.</div>
+</div>
+
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(14,11,20,0.96);backdrop-filter:blur(20px);border-top:1px solid rgba(201,168,76,0.12);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);">
+  <a href="https://saju-today.com" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">🏠</span><span style="font-size:10px;font-weight:600;">홈</span>
+  </a>
+  <a href="https://saju-today.com/saju" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">✨</span><span style="font-size:10px;font-weight:600;">사주</span>
+  </a>
+  <a href="https://saju-today.com/fortune" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">🌅</span><span style="font-size:10px;font-weight:600;">운세</span>
+  </a>
+  <a href="https://saju-today.com/pricing" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#c9a84c;padding:8px 4px;">
+    <span style="font-size:22px;line-height:1;">💎</span><span style="font-size:10px;font-weight:600;">이용권</span>
+  </a>
+  <button id="more-btn" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:#a89c80;padding:8px 4px;-webkit-tap-highlight-color:transparent;">
+    <span style="font-size:22px;line-height:1;">☰</span><span style="font-size:10px;font-weight:600;">더보기</span>
+  </button>
+</div>
 
 <script>
 // Stars
@@ -311,6 +392,165 @@
 
 var SUPABASE_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
+var IMP_CODE = 'imp15413732';
+var KAKAOPAY_CHANNEL_KEY = 'channel-key-a74262a2-6328-47cb-9b45-0677ac291959';
+
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+function getSajuUser() {
+  try { var u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
+}
+
+// ─── 캐시 잔액 로드 ───
+async function loadCashBalance() {
+  var user = getSajuUser();
+  if (!user) return;
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var { data } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+  var bar = document.getElementById('cash-balance-bar');
+  if (bar) bar.style.display = 'flex';
+  var cashEl = document.getElementById('user-cash-display');
+  var creditsEl = document.getElementById('user-credits-display');
+  if (cashEl) cashEl.textContent = ((data && data.cash_balance) || 0).toLocaleString();
+  if (creditsEl) creditsEl.textContent = ((data && data.credits) || 0).toLocaleString();
+}
+
+// ─── 캐시 충전 금액 설정 ───
+function setChargeAmount(amount) {
+  document.getElementById('charge-amount-input').value = amount;
+}
+
+function chargeCustomAmount() {
+  var amount = parseInt(document.getElementById('charge-amount-input').value);
+  if (!amount || amount < 500) {
+    showToast('최소 500원부터 충전 가능해요');
+    return;
+  }
+  buyProduct('캐시 충전 ' + amount.toLocaleString() + '원', amount, 0, false, amount);
+}
+
+// ─── 캐시로 이용권 구매 ───
+async function buyWithCash(productName, cashRequired, credits) {
+  var user = getSajuUser();
+  if (!user) {
+    showToast('로그인 후 구매할 수 있어요');
+    setTimeout(function(){ window.location.href = 'https://saju-today.com/login?redirect=/pricing'; }, 1500);
+    return;
+  }
+
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+  var currentCash = (cd && cd.cash_balance) || 0;
+  var currentCredits = (cd && cd.credits) || 0;
+
+  if (currentCash < cashRequired) {
+    showToast('캐시가 부족해요. 먼저 캐시를 충전해주세요!');
+    document.getElementById('charge-amount-input').value = cashRequired;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // 확인 모달
+  var confirmed = await showConfirmModal(productName, cashRequired + ' 캐시', currentCash + ' 캐시');
+  if (!confirmed) return;
+
+  try {
+    // 캐시 차감 + 이용권 추가
+    await sb.from('user_credits').update({
+      cash_balance: currentCash - cashRequired,
+      credits: currentCredits + credits,
+      updated_at: new Date().toISOString()
+    }).eq('user_id', user.id);
+
+    // 내역 기록
+    await sb.from('cash_transactions').insert({
+      user_id: user.id, type: 'use',
+      amount: -cashRequired, service: productName,
+      description: productName + ' 구매'
+    });
+
+    showToast('✅ ' + productName + ' 구매 완료! 이용권 ' + credits + '회 지급됐어요');
+    loadCashBalance();
+  } catch(e) {
+    showToast('오류: ' + e.message);
+  }
+}
+
+function showConfirmModal(title, cost, balance) {
+  return new Promise(function(resolve) {
+    var existing = document.getElementById('confirm-modal');
+    if (existing) existing.remove();
+    var modal = document.createElement('div');
+    modal.id = 'confirm-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    modal.innerHTML =
+      '<div style="background:#13101c;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;border:1px solid rgba(201,168,76,0.2);text-align:center;">' +
+      '<div style="font-size:32px;margin-bottom:12px;">🛒</div>' +
+      '<h3 style="font-size:16px;font-weight:700;color:#f0ead6;margin-bottom:8px;">' + title + '</h3>' +
+      '<p style="font-size:14px;color:#a89c80;margin-bottom:6px;">차감될 캐시: <b style="color:#c9a84c;">' + cost + '</b></p>' +
+      '<p style="font-size:12px;color:#5c5445;margin-bottom:24px;">보유 캐시: ' + balance + '</p>' +
+      '<div style="display:flex;gap:10px;">' +
+      '<button id="confirm-no" style="flex:1;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
+      '<button id="confirm-yes" style="flex:1;padding:13px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">구매하기</button>' +
+      '</div></div>';
+    document.body.appendChild(modal);
+    document.getElementById('confirm-yes').onclick = function() { modal.remove(); resolve(true); };
+    document.getElementById('confirm-no').onclick = function() { modal.remove(); resolve(false); };
+    modal.addEventListener('click', function(e) { if(e.target===modal) { modal.remove(); resolve(false); } });
+  });
+}
+
+// ─── 결제 (카카오페이/크립토) ───
+function buyProduct(productName, amount, credits, isSubscription, cashAmount) {
+  var user = getSajuUser();
+  if (!user) {
+    showToast('로그인 후 구매할 수 있어요');
+    setTimeout(function(){ window.location.href = 'https://saju-today.com/login?redirect=/pricing'; }, 1500);
+    return;
+  }
+  IMP.init(IMP_CODE);
+  var merchantUid = 'saju_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+  showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user, cashAmount || amount);
+}
+
+function showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user, cashAmount) {
+  var existing = document.getElementById('payment-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'payment-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML =
+    '<div style="background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);">' +
+    '<div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 20px;"></div>' +
+    '<h3 style="font-size:16px;font-weight:700;color:#f0ead6;margin-bottom:6px;text-align:center;">' + productName + '</h3>' +
+    '<p style="font-size:20px;font-weight:800;color:#c9a84c;text-align:center;margin-bottom:24px;">' + amount.toLocaleString() + '원</p>' +
+    '<p style="font-size:13px;color:#a89c80;text-align:center;margin-bottom:20px;">결제 수단을 선택해주세요</p>' +
+    '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">' +
+    '<button id="pay-kakao-btn" disabled style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#FEE500;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#191919;cursor:not-allowed;opacity:0.7;position:relative;">' +
+    '<span style="font-size:22px;">💬</span> 카카오페이' +
+    '<span style="position:absolute;top:-8px;right:-8px;background:#e74c3c;color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;">심사 중</span>' +
+    '</button>' +
+    '<button id="pay-crypto-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:linear-gradient(135deg,#1a1628,#2d1f4e);border:1px solid rgba(201,168,76,0.3);border-radius:12px;font-size:15px;font-weight:700;color:#f0ead6;cursor:pointer;">' +
+    '<span style="font-size:22px;">💎</span> 크립토 결제 <span style="font-size:12px;color:#c9a84c;margin-left:4px;">(5% 할인)</span>' +
+    '</button>' +
+    '</div>' +
+    '<button id="pay-cancel-btn" style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
+    '</div>';
+  modal.addEventListener('click', function(e) { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+
+  document.getElementById('pay-crypto-btn').addEventListener('click', function() {
+    modal.remove();
+    showCryptoModal(productName, amount, credits, cashAmount);
+  });
+  document.getElementById('pay-cancel-btn').addEventListener('click', function() { modal.remove(); });
+}
 
 // ─── 크립토 결제 ───
 const CRYPTO_WALLETS = {
@@ -320,13 +560,13 @@ const CRYPTO_WALLETS = {
 };
 
 const NETWORKS = [
-  { id:'eth',      name:'Ethereum',  img:'https://cryptologos.cc/logos/ethereum-eth-logo.png',      wallet:'evm',  tokens:['USDT','USDC'], api:'etherscan', decimals:6 },
-  { id:'bnb',      name:'BNB Chain', img:'https://cryptologos.cc/logos/bnb-bnb-logo.png',           wallet:'evm',  tokens:['USDT','USDC'], api:'bscscan',   decimals:18 },
-  { id:'arbitrum', name:'Arbitrum',  img:'https://cryptologos.cc/logos/arbitrum-arb-logo.png',      wallet:'evm',  tokens:['USDT','USDC'], api:'arbiscan',  decimals:6 },
-  { id:'optimism', name:'Optimism',  img:'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png', wallet:'evm',  tokens:['USDT','USDC'], api:'optimism',  decimals:6 },
-  { id:'base',     name:'Base',      img:'https://cryptologos.cc/logos/base-logo.png',              wallet:'evm',  tokens:['USDT','USDC'], api:'basescan',  decimals:6 },
-  { id:'sol',      name:'Solana',    img:'https://cryptologos.cc/logos/solana-sol-logo.png',        wallet:'sol',  tokens:['USDT','USDC'], api:'solana',    decimals:6 },
-  { id:'tron',     name:'Tron',      img:'https://cryptologos.cc/logos/tron-trx-logo.png',         wallet:'tron', tokens:['USDT','USDC'], api:'tron',      decimals:6 },
+  { id:'eth',      name:'Ethereum',  img:'https://cryptologos.cc/logos/ethereum-eth-logo.png',      wallet:'evm',  tokens:['USDT','USDC'], decimals:6 },
+  { id:'bnb',      name:'BNB Chain', img:'https://cryptologos.cc/logos/bnb-bnb-logo.png',           wallet:'evm',  tokens:['USDT','USDC'], decimals:18 },
+  { id:'arbitrum', name:'Arbitrum',  img:'https://cryptologos.cc/logos/arbitrum-arb-logo.png',      wallet:'evm',  tokens:['USDT','USDC'], decimals:6 },
+  { id:'optimism', name:'Optimism',  img:'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png', wallet:'evm', tokens:['USDT','USDC'], decimals:6 },
+  { id:'base',     name:'Base',      img:'https://cryptologos.cc/logos/base-logo.png',              wallet:'evm',  tokens:['USDT','USDC'], decimals:6 },
+  { id:'sol',      name:'Solana',    img:'https://cryptologos.cc/logos/solana-sol-logo.png',        wallet:'sol',  tokens:['USDT','USDC'], decimals:6 },
+  { id:'tron',     name:'Tron',      img:'https://cryptologos.cc/logos/tron-trx-logo.png',         wallet:'tron', tokens:['USDT','USDC'], decimals:6 },
 ];
 
 const TOKEN_CONTRACTS = {
@@ -358,22 +598,16 @@ async function getUsdtKrwRate() {
   } catch(e) { return 1380; }
 }
 
-async function showCryptoModal(productName, krwAmount, credits) {
-  if (!krwAmount || krwAmount === 0) {
-    showToast('금액 정보가 없어요. 다시 시도해주세요');
-    return;
-  }
-  const user = getSajuUser ? getSajuUser() : null;
+async function showCryptoModal(productName, krwAmount, credits, cashAmount) {
+  if (!krwAmount || krwAmount === 0) { showToast('금액 정보가 없어요'); return; }
+  const user = getSajuUser();
   if (!user) {
     showToast('로그인이 필요해요');
     setTimeout(() => window.location.href = 'https://saju-today.com/login', 1500);
     return;
   }
-
-  // 5% 할인 적용
   const discountedKrw = Math.floor(krwAmount * 0.95);
   const rate = await getUsdtKrwRate();
-  // 고유 금액 부여 (소수점 랜덤으로 사용자 구분)
   const uniqueSuffix = (Math.floor(Math.random() * 90) + 10) / 10000;
   const usdtAmount = ((discountedKrw / rate) + uniqueSuffix).toFixed(4);
 
@@ -389,16 +623,13 @@ async function showCryptoModal(productName, krwAmount, credits) {
         <h3 style="font-size:17px;font-weight:700;color:#f0ead6;">💎 크립토 결제</h3>
         <button onclick="closeCryptoModal()" style="background:none;border:none;color:#a89c80;font-size:22px;cursor:pointer;">✕</button>
       </div>
-
       <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:16px;margin-bottom:20px;text-align:center;">
         <div style="font-size:13px;color:#a89c80;margin-bottom:4px;">${productName}</div>
         <div style="font-size:24px;font-weight:800;color:#c9a84c;">${usdtAmount} USDT</div>
         <div style="font-size:12px;color:#5c5445;margin-top:4px;">
-          <s style="color:#5c5445;">${krwAmount.toLocaleString()}원</s>
-          → ${discountedKrw.toLocaleString()}원 (5% 할인)
+          <s>${krwAmount.toLocaleString()}원</s> → ${discountedKrw.toLocaleString()}원 (5% 할인)
         </div>
       </div>
-
       <div style="margin-bottom:16px;">
         <div style="font-size:13px;color:#a89c80;margin-bottom:10px;font-weight:600;">① 네트워크 선택</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="network-grid">
@@ -410,30 +641,28 @@ async function showCryptoModal(productName, krwAmount, credits) {
             </button>`).join('')}
         </div>
       </div>
-
       <div id="token-section" style="display:none;margin-bottom:16px;">
         <div style="font-size:13px;color:#a89c80;margin-bottom:10px;font-weight:600;">② 토큰 선택</div>
         <div style="display:flex;gap:8px;" id="token-grid"></div>
       </div>
-
       <div id="wallet-section" style="display:none;">
         <div style="font-size:13px;color:#a89c80;margin-bottom:10px;font-weight:600;">③ 아래 주소로 정확한 금액 전송</div>
         <div style="background:#0e0b14;border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:14px;margin-bottom:12px;">
           <div style="font-size:11px;color:#a89c80;margin-bottom:6px;">지갑 주소</div>
           <div id="wallet-addr" style="font-size:12px;color:#f0ead6;word-break:break-all;font-family:monospace;"></div>
-          <button onclick="copyWalletAddr()" style="margin-top:8px;padding:6px 12px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:6px;color:#c9a84c;font-size:11px;cursor:pointer;border:none;">📋 주소 복사</button>
+          <button onclick="copyWalletAddr()" id="copy-btn" style="margin-top:8px;padding:6px 12px;background:rgba(201,168,76,0.15);border:none;border-radius:6px;color:#c9a84c;font-size:11px;cursor:pointer;">📋 주소 복사</button>
         </div>
         <div style="background:#0e0b14;border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:14px;margin-bottom:12px;">
           <div style="font-size:11px;color:#a89c80;margin-bottom:4px;">전송 금액</div>
           <div id="crypto-amount-display" style="font-size:20px;font-weight:800;color:#c9a84c;"></div>
         </div>
         <div style="background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#e74c3c;line-height:1.7;">
-          ⚠️ 반드시 선택한 네트워크로 전송하세요. 다른 네트워크로 전송 시 복구 불가합니다.
+          ⚠️ 반드시 선택한 네트워크로 전송하세요. 다른 네트워크 전송 시 복구 불가합니다.
         </div>
         <div id="crypto-status" style="text-align:center;padding:16px;background:#0e0b14;border-radius:10px;margin-bottom:12px;">
           <div style="font-size:13px;color:#a89c80;">입금 확인 대기 중...</div>
           <div style="font-size:11px;color:#5c5445;margin-top:4px;">전송 후 1~3분 내 자동 확인됩니다</div>
-          <div class="big-spinner" style="width:24px;height:24px;border:2px solid rgba(201,168,76,0.2);border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite;margin:12px auto 0;"></div>
+          <div style="width:24px;height:24px;border:2px solid rgba(201,168,76,0.2);border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite;margin:12px auto 0;"></div>
         </div>
         <button onclick="startCryptoCheck()" id="check-btn"
           style="width:100%;padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">
@@ -441,116 +670,70 @@ async function showCryptoModal(productName, krwAmount, credits) {
         </button>
       </div>
     </div>`;
-
   document.body.appendChild(modal);
-
-  cryptoPaymentData = {
-    productName, krwAmount: discountedKrw, credits,
-    usdtAmount, userId: user.id, userEmail: user.email
-  };
+  cryptoPaymentData = { productName, krwAmount: discountedKrw, credits, cashAmount: cashAmount || discountedKrw, usdtAmount, userId: user.id, userEmail: user.email };
 }
 
 function selectNetwork(netId) {
-  document.querySelectorAll('[id^="net-btn-"]').forEach(b => {
-    b.style.borderColor = 'rgba(201,168,76,0.2)';
-    b.style.background = '#1a1628';
-  });
-  const btn = document.getElementById('net-btn-' + netId);
-  btn.style.borderColor = '#c9a84c';
-  btn.style.background = 'rgba(201,168,76,0.1)';
-
+  document.querySelectorAll('[id^="net-btn-"]').forEach(b => { b.style.borderColor='rgba(201,168,76,0.2)';b.style.background='#1a1628'; });
+  document.getElementById('net-btn-'+netId).style.borderColor='#c9a84c';
+  document.getElementById('net-btn-'+netId).style.background='rgba(201,168,76,0.1)';
   cryptoPaymentData.network = netId;
   cryptoPaymentData.token = null;
-
   const net = NETWORKS.find(n => n.id === netId);
-  const tokenGrid = document.getElementById('token-grid');
-  tokenGrid.innerHTML = net.tokens.map(t => `
-    <button onclick="selectToken('${t}')" id="tok-btn-${t}"
-      style="flex:1;padding:10px;border:1px solid rgba(201,168,76,0.2);border-radius:8px;background:#1a1628;cursor:pointer;font-size:14px;font-weight:700;color:#f0ead6;">
-      ${t}
-    </button>`).join('');
+  document.getElementById('token-grid').innerHTML = net.tokens.map(t =>
+    `<button onclick="selectToken('${t}')" id="tok-btn-${t}" style="flex:1;padding:10px;border:1px solid rgba(201,168,76,0.2);border-radius:8px;background:#1a1628;cursor:pointer;font-size:14px;font-weight:700;color:#f0ead6;">${t}</button>`
+  ).join('');
   document.getElementById('token-section').style.display = 'block';
   document.getElementById('wallet-section').style.display = 'none';
 }
 
 async function selectToken(token) {
-  document.querySelectorAll('[id^="tok-btn-"]').forEach(b => {
-    b.style.borderColor = 'rgba(201,168,76,0.2)';
-    b.style.background = '#1a1628';
-  });
-  const btn = document.getElementById('tok-btn-' + token);
-  btn.style.borderColor = '#c9a84c';
-  btn.style.background = 'rgba(201,168,76,0.1)';
-
+  document.querySelectorAll('[id^="tok-btn-"]').forEach(b => { b.style.borderColor='rgba(201,168,76,0.2)';b.style.background='#1a1628'; });
+  document.getElementById('tok-btn-'+token).style.borderColor='#c9a84c';
+  document.getElementById('tok-btn-'+token).style.background='rgba(201,168,76,0.1)';
   cryptoPaymentData.token = token;
   const net = NETWORKS.find(n => n.id === cryptoPaymentData.network);
   const walletAddr = CRYPTO_WALLETS[net.wallet];
-
   document.getElementById('wallet-addr').textContent = walletAddr;
   document.getElementById('crypto-amount-display').textContent = cryptoPaymentData.usdtAmount + ' ' + token;
   document.getElementById('wallet-section').style.display = 'block';
   cryptoPaymentData.walletAddr = walletAddr;
 
-  // Supabase에 세션 저장
   try {
-    const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data: session } = await sb.from('crypto_sessions').insert({
       user_id: cryptoPaymentData.userId,
       product_name: cryptoPaymentData.productName,
       krw_amount: cryptoPaymentData.krwAmount,
       usdt_amount: parseFloat(cryptoPaymentData.usdtAmount),
       network: cryptoPaymentData.network,
-      token: token,
-      wallet_addr: walletAddr,
-      credits: cryptoPaymentData.credits,
-      status: 'pending'
+      token, wallet_addr: walletAddr,
+      credits: cryptoPaymentData.credits, status: 'pending'
     }).select('id').single();
     if (session) cryptoPaymentData.sessionId = session.id;
-  } catch(e) { console.warn('세션 저장 실패:', e); }
+  } catch(e) {}
 }
 
 function copyWalletAddr() {
   const addr = document.getElementById('wallet-addr').textContent;
-  const btn = document.querySelector('#crypto-modal button[onclick="copyWalletAddr()"]');
+  const btn = document.getElementById('copy-btn');
   if (navigator.clipboard) {
     navigator.clipboard.writeText(addr).then(() => {
       showToast('주소가 복사됐어요! 📋');
-      if (btn) {
-        const orig = btn.innerHTML;
-        btn.innerHTML = '✅ 복사됐어요!';
-        btn.style.background = 'rgba(39,174,96,0.2)';
-        btn.style.borderColor = 'rgba(39,174,96,0.4)';
-        btn.style.color = '#27ae60';
-        setTimeout(() => {
-          btn.innerHTML = orig;
-          btn.style.background = 'rgba(201,168,76,0.15)';
-          btn.style.borderColor = 'rgba(201,168,76,0.3)';
-          btn.style.color = '#c9a84c';
-        }, 2000);
-      }
+      if (btn) { btn.innerHTML='✅ 복사됐어요!';btn.style.color='#27ae60'; setTimeout(()=>{btn.innerHTML='📋 주소 복사';btn.style.color='#c9a84c';},2000); }
     });
   } else {
-    const ta = document.createElement('textarea');
-    ta.value = addr;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+    const ta=document.createElement('textarea');ta.value=addr;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
     showToast('주소가 복사됐어요! 📋');
   }
 }
 
 async function startCryptoCheck() {
   const btn = document.getElementById('check-btn');
-  btn.disabled = true;
-  btn.textContent = '확인 중...';
-
+  btn.disabled = true; btn.textContent = '확인 중...';
   const statusEl = document.getElementById('crypto-status');
-  statusEl.innerHTML = `
-    <div style="font-size:13px;color:#c9a84c;font-weight:700;">입금 확인 중...</div>
-    <div style="font-size:11px;color:#5c5445;margin-top:4px;">블록체인에서 거래를 찾고 있어요</div>
-    <div class="big-spinner" style="width:24px;height:24px;border:2px solid rgba(201,168,76,0.2);border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite;margin:12px auto 0;"></div>`;
-
+  statusEl.innerHTML = '<div style="font-size:13px;color:#c9a84c;font-weight:700;">입금 확인 중...</div><div style="font-size:11px;color:#5c5445;margin-top:4px;">블록체인에서 거래를 찾고 있어요</div><div style="width:24px;height:24px;border:2px solid rgba(201,168,76,0.2);border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite;margin:12px auto 0;"></div>';
   let attempts = 0;
   cryptoCheckInterval = setInterval(async () => {
     attempts++;
@@ -558,127 +741,83 @@ async function startCryptoCheck() {
     if (found || attempts >= 3) {
       clearInterval(cryptoCheckInterval);
       if (!found) {
-        btn.disabled = false;
-        btn.textContent = '✅ 전송 완료했어요';
-        statusEl.innerHTML = `
-          <div style="font-size:13px;color:#e74c3c;">아직 입금이 확인되지 않았어요</div>
-          <div style="font-size:11px;color:#5c5445;margin-top:4px;">전송 후 잠시 후 다시 시도해주세요</div>`;
+        btn.disabled = false; btn.textContent = '✅ 전송 완료했어요';
+        statusEl.innerHTML = '<div style="font-size:13px;color:#e74c3c;">아직 입금이 확인되지 않았어요</div><div style="font-size:11px;color:#5c5445;margin-top:4px;">전송 후 잠시 후 다시 시도해주세요</div>';
       }
     }
   }, 10000);
 }
 
 async function checkCryptoPayment() {
-  const { network, token, walletAddr, usdtAmount, credits, userId, productName, krwAmount } = cryptoPaymentData;
-  const net = NETWORKS.find(n => n.id === network);
+  const { network, token, walletAddr, usdtAmount, credits, userId, productName, krwAmount, cashAmount } = cryptoPaymentData;
   const contractAddr = TOKEN_CONTRACTS[network]?.[token];
   const expectedAmount = parseFloat(usdtAmount);
-
   try {
     let found = false;
-
     if (network === 'tron') {
-      const res = await fetch(`https://api.trongrid.io/v1/accounts/${walletAddr}/transactions/trc20?limit=10&contract_address=${contractAddr}`, {
-        headers: { 'TRON-PRO-API-KEY': TRON_KEY }
-      });
+      const res = await fetch(`https://api.trongrid.io/v1/accounts/${walletAddr}/transactions/trc20?limit=10&contract_address=${contractAddr}`, { headers: { 'TRON-PRO-API-KEY': TRON_KEY } });
       const data = await res.json();
-      const recent = (data.data || []).find(tx => {
-        const amt = parseFloat(tx.value) / 1e6;
-        const isRecent = Date.now() - tx.block_timestamp < 600000;
-        return Math.abs(amt - expectedAmount) < 0.1 && isRecent;
-      });
-      found = !!recent;
-
+      found = !!(data.data||[]).find(tx => Math.abs(parseFloat(tx.value)/1e6 - expectedAmount) < 0.1 && Date.now()-tx.block_timestamp < 600000);
     } else if (network === 'sol') {
-      const res = await fetch(`https://api.mainnet-beta.solana.com`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0', id: 1,
-          method: 'getSignaturesForAddress',
-          params: [walletAddr, { limit: 5 }]
-        })
-      });
+      const res = await fetch('https://api.mainnet-beta.solana.com', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getSignaturesForAddress',params:[walletAddr,{limit:5}]}) });
       const data = await res.json();
-      found = (data.result || []).some(tx => {
-        return Date.now()/1000 - tx.blockTime < 600;
-      });
-
+      found = (data.result||[]).some(tx => Date.now()/1000-tx.blockTime < 600);
     } else {
       const apiMap = {
-        eth: `https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
-        bnb: `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
-        arbitrum: `https://api.arbiscan.io/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
-        optimism: `https://api-optimistic.etherscan.io/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
-        base: `https://api.basescan.org/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
+        eth:`https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
+        bnb:`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
+        arbitrum:`https://api.arbiscan.io/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
+        optimism:`https://api-optimistic.etherscan.io/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
+        base:`https://api.basescan.org/api?module=account&action=tokentx&contractaddress=${contractAddr}&address=${walletAddr}&sort=desc&apikey=${ETHERSCAN_KEY}`,
       };
       const res = await fetch(apiMap[network]);
       const data = await res.json();
-      const recent = (data.result || []).find(tx => {
-        const decimals = network === 'bnb' ? 18 : 6;
-        const amt = parseFloat(tx.value) / Math.pow(10, decimals);
-        const isRecent = Date.now()/1000 - parseInt(tx.timeStamp) < 600;
-        return Math.abs(amt - expectedAmount) < 0.1 && isRecent;
-      });
-      found = !!recent;
+      found = !!(data.result||[]).find(tx => { const d=network==='bnb'?18:6; return Math.abs(parseFloat(tx.value)/Math.pow(10,d)-expectedAmount)<0.1 && Date.now()/1000-parseInt(tx.timeStamp)<600; });
     }
-
-    if (found) {
-      await grantCryptoCredits(credits, userId, productName, krwAmount, network, token);
-    }
+    if (found) await grantCryptoCredits(credits, userId, productName, krwAmount, network, token, cashAmount);
     return found;
-
-  } catch(e) {
-    console.error('크립토 체크 오류:', e);
-    return false;
-  }
+  } catch(e) { return false; }
 }
 
-async function grantCryptoCredits(credits, userId, productName, krwAmount, network, token) {
-  const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
-
-  // 중복 지급 방지: 세션 상태 확인
+async function grantCryptoCredits(credits, userId, productName, krwAmount, network, token, cashAmount) {
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   if (cryptoPaymentData && cryptoPaymentData.sessionId) {
-    const { data: existingSession } = await sb.from('crypto_sessions').select('status').eq('id', cryptoPaymentData.sessionId).single();
-    if (existingSession && existingSession.status === 'completed') {
-      showToast('이미 처리된 결제입니다.');
-      return;
-    }
-    await sb.from('crypto_sessions').update({ status: 'completed' }).eq('id', cryptoPaymentData.sessionId);
+    const { data: sess } = await sb.from('crypto_sessions').select('status').eq('id', cryptoPaymentData.sessionId).single();
+    if (sess && sess.status === 'completed') { showToast('이미 처리된 결제입니다.'); return; }
+    await sb.from('crypto_sessions').update({ status:'completed' }).eq('id', cryptoPaymentData.sessionId);
   }
 
-  // 이용권 지급
-  const { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', userId).single();
-  const current = cd?.credits || 0;
-  if (cd) {
-    await sb.from('user_credits').update({ credits: current + credits, updated_at: new Date().toISOString() }).eq('user_id', userId);
+  const { data: cd } = await sb.from('user_credits').select('credits,cash_balance').eq('user_id', userId).single();
+  const currentCredits = cd?.credits || 0;
+  const currentCash = cd?.cash_balance || 0;
+
+  // 캐시 충전인 경우 cash_balance 증가, 이용권인 경우 credits 증가
+  if (credits === 0) {
+    // 캐시 충전
+    const addCash = cashAmount || krwAmount;
+    if (cd) { await sb.from('user_credits').update({ cash_balance: currentCash + addCash, updated_at: new Date().toISOString() }).eq('user_id', userId); }
+    else { await sb.from('user_credits').insert({ user_id: userId, cash_balance: addCash }); }
+    await sb.from('cash_transactions').insert({ user_id: userId, type:'charge', amount: addCash, krw_amount: krwAmount, payment_method: 'crypto_'+network, description: productName });
   } else {
-    await sb.from('user_credits').insert({ user_id: userId, credits });
+    // 이용권 or 구독
+    if (cd) { await sb.from('user_credits').update({ credits: currentCredits + credits, updated_at: new Date().toISOString() }).eq('user_id', userId); }
+    else { await sb.from('user_credits').insert({ user_id: userId, credits }); }
   }
 
-  // 결제 기록
   const ts = Date.now();
-  await sb.from('payments').insert({
-    user_id: userId,
-    imp_uid: 'crypto_' + ts,
-    merchant_uid: 'crypto_' + ts,
-    amount: krwAmount,
-    product_name: productName + ' (크립토 ' + network.toUpperCase() + ')',
-    credits_added: credits,
-    status: 'paid'
-  });
+  await sb.from('payments').insert({ user_id: userId, imp_uid:'crypto_'+ts, merchant_uid:'crypto_'+ts, amount: krwAmount, product_name: productName+' (크립토 '+network.toUpperCase()+')', credits_added: credits, status:'paid' });
 
-  // 추천인 보상
+  // 레퍼럴 보상
   try {
     const refCode = localStorage.getItem('referral_code');
     if (refCode) {
-      const { data: refData } = await sb.from('referrals').select('id, user_id').eq('code', refCode).single();
+      const { data: refData } = await sb.from('referrals').select('id,user_id').eq('code', refCode).single();
       if (refData) {
         const refReward = credits >= 180 ? 3 : credits >= 90 ? 2 : 1;
         const { data: refCd } = await sb.from('user_credits').select('credits').eq('user_id', refData.user_id).single();
-        const refCurrent = refCd?.credits || 0;
+        const refCurrent = (refCd && refCd.credits) || 0;
         if (refCd) {
-          await sb.from('user_credits').update({ credits: refCurrent + refReward, updated_at: new Date().toISOString() }).eq('user_id', refData.user_id);
+          await sb.from('user_credits').update({ credits: refCurrent + refReward }).eq('user_id', refData.user_id);
         } else {
           await sb.from('user_credits').insert({ user_id: refData.user_id, credits: refReward });
         }
@@ -686,14 +825,12 @@ async function grantCryptoCredits(credits, userId, productName, krwAmount, netwo
         localStorage.removeItem('referral_code');
       }
     }
-  } catch(e) { console.warn('추천인 보상 오류:', e); }
+  } catch(e) {}
 
-  document.getElementById('crypto-status').innerHTML = `
-    <div style="font-size:20px;margin-bottom:8px;">🎉</div>
-    <div style="font-size:15px;font-weight:700;color:#27ae60;">입금 확인 완료!</div>
-    <div style="font-size:13px;color:#a89c80;margin-top:6px;">${credits}회 이용권이 지급됐어요</div>`;
+  const msg = credits === 0 ? (cashAmount || krwAmount).toLocaleString() + ' 캐시 충전됐어요! 🎉' : credits + '회 이용권 지급됐어요! 🎉';
+  document.getElementById('crypto-status').innerHTML = '<div style="font-size:20px;margin-bottom:8px;">🎉</div><div style="font-size:15px;font-weight:700;color:#27ae60;">입금 확인 완료!</div><div style="font-size:13px;color:#a89c80;margin-top:6px;">' + msg + '</div>';
   document.getElementById('check-btn').style.display = 'none';
-  showToast('이용권 ' + credits + '회 지급됐어요! 🎉');
+  showToast(msg);
   setTimeout(() => { closeCryptoModal(); window.location.href = 'https://saju-today.com/my'; }, 3000);
 }
 
@@ -703,201 +840,10 @@ function closeCryptoModal() {
   if (modal) modal.remove();
 }
 
-// ─── 이용권 잔액 표시 ───
-async function loadCashBalance() {
-  var user = getSajuUser ? getSajuUser() : null;
-  if (!user) return;
-  var sb2 = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
-  var { data } = await sb2.from('user_credits').select('credits').eq('user_id', user.id).single();
-  var bar = document.getElementById('cash-balance-bar');
-  var disp = document.getElementById('user-cash-display');
-  if (bar && data) {
-    bar.style.display = 'flex';
-    if (disp) disp.textContent = (data.credits || 0).toLocaleString();
-  }
-}
+function toggleFaq(el) { el.closest('.faq-item').classList.toggle('open'); }
+
 document.addEventListener('DOMContentLoaded', loadCashBalance);
 
-
-
-var IMP_CODE = 'imp15413732';
-var KAKAOPAY_CHANNEL_KEY = 'channel-key-a74262a2-6328-47cb-9b45-0677ac291959';
-
-var toastTimer;
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3500);
-}
-
-function getSajuUser() {
-  try { var u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
-}
-
-function buyProduct(productName, amount, credits, isSubscription) {
-  var user = getSajuUser();
-  if (!user) {
-    showToast('로그인 후 구매할 수 있어요');
-    setTimeout(function(){ window.location.href = 'https://saju-today.com/login?redirect=/pricing'; }, 1500);
-    return;
-  }
-
-  IMP.init(IMP_CODE);
-
-  var merchantUid = 'saju_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-
-  // 결제 수단 선택 모달 표시
-  showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user);
-}
-
-function showPaymentModal(productName, amount, credits, isSubscription, merchantUid, user) {
-  var existing = document.getElementById('payment-modal');
-  if (existing) existing.remove();
-
-  var modal = document.createElement('div');
-  modal.id = 'payment-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
-  modal.innerHTML =
-    '<div style="background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);">' +
-    '<div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 20px;"></div>' +
-    '<h3 style="font-size:16px;font-weight:700;color:#f0ead6;margin-bottom:6px;text-align:center;">' + productName + '</h3>' +
-    '<p style="font-size:20px;font-weight:800;color:#c9a84c;text-align:center;margin-bottom:24px;">' + amount.toLocaleString() + '원</p>' +
-    '<p style="font-size:13px;color:#a89c80;text-align:center;margin-bottom:20px;">결제 수단을 선택해주세요</p>' +
-    '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">' +
-    '<button id="pay-kakao-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#FEE500;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#191919;cursor:pointer;"><span style="font-size:22px;">💬</span> 카카오페이</button>' +
-    '<button id="pay-crypto-btn" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:linear-gradient(135deg,#1a1628,#2d1f4e);border:1px solid rgba(201,168,76,0.3);border-radius:12px;font-size:15px;font-weight:700;color:#f0ead6;cursor:pointer;"><span style="font-size:22px;">💎</span> 크립토 결제 <span style="font-size:12px;color:#c9a84c;margin-left:4px;">(5% 할인)</span></button>' +
-    '</div>' +
-    '<button id="pay-cancel-btn" style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
-    '</div>';
-
-  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
-
-  document.getElementById('pay-kakao-btn').addEventListener('click', function() {
-    modal.remove();
-    proceedPayment('kakao', productName, amount, credits, isSubscription, merchantUid, user);
-  });
-  document.getElementById('pay-crypto-btn').addEventListener('click', function() {
-    modal.remove();
-    showCryptoModal(productName, amount, credits);
-  });
-  document.getElementById('pay-cancel-btn').addEventListener('click', function() { modal.remove(); });
-}
-
-function proceedPayment(method, productName, amount, credits, isSubscription, merchantUid, user) {
-  var buyerName = (user.user_metadata && user.user_metadata.full_name) || '구매자';
-  var paymentData = method === 'kakao' ? {
-    pg: 'kakaopay',
-    channel_key: KAKAOPAY_CHANNEL_KEY,
-    pay_method: 'card',
-    merchant_uid: merchantUid,
-    name: productName,
-    amount: amount,
-    buyer_email: user.email || '',
-    buyer_name: buyerName
-  } : {
-    pg: 'tosspayments',
-    channel_key: 'channel-key-558c51e2-64c7-450c-a9e2-eea5aaf2365c',
-    pay_method: 'card',
-    merchant_uid: merchantUid,
-    name: productName,
-    amount: amount,
-    buyer_email: user.email || '',
-    buyer_name: buyerName
-  };
-
-  IMP.request_pay(paymentData, async function(rsp) {
-    if (rsp.success) {
-      showToast('결제 처리 중입니다...');
-      try {
-        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Save payment record
-        await sb.from('payments').insert({
-          user_id: user.id,
-          merchant_uid: merchantUid,
-          imp_uid: rsp.imp_uid,
-          product_name: productName,
-          amount: amount,
-          credits: credits,
-          is_subscription: isSubscription,
-          status: 'paid',
-          paid_at: new Date().toISOString()
-        });
-
-        // Upsert user_credits (add to existing)
-        var creditRes = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
-        var existing = (creditRes.data && creditRes.data.credits) || 0;
-        await sb.from('user_credits').upsert({
-          user_id: user.id,
-          credits: existing + credits,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-
-        // Update membership for subscriptions
-        if (isSubscription) {
-          var months = productName.indexOf('1개월') >= 0 ? 1 :
-                       productName.indexOf('3개월') >= 0 ? 3 :
-                       productName.indexOf('6개월') >= 0 ? 6 : 12;
-          var expiry = new Date();
-          expiry.setMonth(expiry.getMonth() + months);
-          await sb.from('users').upsert({
-            id: user.id,
-            membership: productName,
-            membership_expires_at: expiry.toISOString(),
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'id' });
-        }
-
-        showToast('결제 완료! 마이페이지로 이동합니다 ✨');
-        setTimeout(function(){ window.location.href = 'https://saju-today.com/my'; }, 1500);
-      } catch(e) {
-        showToast('결제는 완료됐지만 처리 중 오류가 발생했어요. 고객센터에 문의해주세요.');
-        console.error('Payment post-processing error:', e);
-      }
-    } else {
-      showToast('결제 실패: ' + (rsp.error_msg || '알 수 없는 오류'));
-    }
-  });
-}
-
-function toggleFaq(el) {
-  var item = el.closest('.faq-item');
-  item.classList.toggle('open');
-}
-</script>
-
-<div style="background:#0a0810;border-top:1px solid rgba(201,168,76,0.1);padding:28px 20px;text-align:center;color:#5c5445;font-size:11px;line-height:2.2;">
-  <div style="margin-bottom:10px;">
-    <a href="https://saju-today.com/terms-view" style="color:#5c5445;text-decoration:none;margin:0 8px;">이용약관</a> ·
-    <a href="https://saju-today.com/terms-view" style="color:#5c5445;text-decoration:none;margin:0 8px;">개인정보처리방침</a> ·
-    <a href="mailto:contact@saju-today.com" style="color:#5c5445;text-decoration:none;margin:0 8px;">문의하기</a>
-  </div>
-  <div>상호: 비즈글로벌 · 대표자: 정지훈 · 사업자등록번호: 760-40-01387</div>
-  <div>사업장 소재지: 경기도 용인시 · 대표전화: 010-4348-4389 · 이메일: contact@saju-today.com</div>
-  <div>통신판매업신고번호: 신고 준비 중</div>
-  <div style="margin-top:8px;">© 2025 비즈글로벌 All rights reserved.</div>
-</div>
-<div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(14,11,20,0.96);backdrop-filter:blur(20px);border-top:1px solid rgba(201,168,76,0.12);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);">
-  <a href="https://saju-today.com" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">🏠</span><span style="font-size:10px;font-weight:600;">홈</span>
-  </a>
-  <a href="https://saju-today.com/saju" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">✨</span><span style="font-size:10px;font-weight:600;">사주</span>
-  </a>
-  <a href="https://saju-today.com/fortune" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">🌅</span><span style="font-size:10px;font-weight:600;">운세</span>
-  </a>
-  <a href="https://saju-today.com/pricing" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#c9a84c;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">💎</span><span style="font-size:10px;font-weight:600;">이용권</span>
-  </a>
-  <button id="more-btn" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:#a89c80;padding:8px 4px;-webkit-tap-highlight-color:transparent;">
-    <span style="font-size:22px;line-height:1;">☰</span><span style="font-size:10px;font-weight:600;">더보기</span>
-  </button>
-</div>
-<script>
 (function(){
   var btn = document.getElementById('more-btn');
   if(btn){
