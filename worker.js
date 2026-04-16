@@ -147,6 +147,49 @@ export default {
       }
     }
 
+    // ─── Stripe Checkout 세션 생성 ───
+    if (path === '/stripe/create-checkout') {
+      try {
+        const { amount, currency, productName, userId, userEmail, credits, isSubscription, successUrl, cancelUrl } = await request.json();
+
+        const sessionParams = new URLSearchParams();
+        sessionParams.append('mode', isSubscription ? 'subscription' : 'payment');
+        sessionParams.append('currency', currency || 'krw');
+        sessionParams.append('line_items[0][price_data][currency]', currency || 'krw');
+        sessionParams.append('line_items[0][price_data][unit_amount]', Math.round(amount));
+        sessionParams.append('line_items[0][price_data][product_data][name]', productName || '오늘의 사주 이용권');
+        if (isSubscription) {
+          sessionParams.append('line_items[0][price_data][recurring][interval]', 'month');
+        }
+        sessionParams.append('line_items[0][quantity]', '1');
+        sessionParams.append('customer_email', userEmail || '');
+        sessionParams.append('metadata[user_id]', userId || '');
+        sessionParams.append('metadata[credits]', String(credits || 0));
+        sessionParams.append('metadata[product_name]', productName || '');
+        sessionParams.append('success_url', successUrl || 'https://saju-today.com/pricing?stripe=success&credits=' + credits);
+        sessionParams.append('cancel_url', cancelUrl || 'https://saju-today.com/pricing');
+
+        const sessionRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + env.STRIPE_SECRET_KEY,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: sessionParams.toString(),
+        });
+        const session = await sessionRes.json();
+
+        return new Response(JSON.stringify(session), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     return new Response('Not found', { status: 404, headers: corsHeaders });
   }
 };
