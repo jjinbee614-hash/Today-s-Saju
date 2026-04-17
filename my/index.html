@@ -751,8 +751,19 @@ async function doAttendance() {
   }
 }
 
+
+async function loadMyCashBalance() {
+  const user = getSajuUser ? getSajuUser() : null;
+  if (!user) return;
+  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+  const { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+  const el = document.getElementById('my-credits-display');
+  if (el) el.textContent = (cd?.cash_balance || 0).toLocaleString();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof loadAttendance === 'function') loadAttendance();
+  loadMyCashBalance();
 });
 </script>
 </body>
