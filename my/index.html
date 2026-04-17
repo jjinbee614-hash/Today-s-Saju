@@ -236,35 +236,34 @@
       </div>
     </div>
 
-    <!-- 이용권 선물하기 섹션 -->
+    <!-- 캐시 선물하기 섹션 -->
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">🎀 이용권 선물하기</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;">보유한 이용권을 친구에게 선물할 수 있어요.</p>
+      <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">🎀 캐시 선물하기</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;">보유한 캐시를 친구에게 선물할 수 있어요.</p>
       <div style="margin-bottom:12px;">
         <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">받는 분 이메일</label>
         <input type="email" id="gift-email" placeholder="friend@example.com"
           style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box;"/>
       </div>
       <div style="margin-bottom:12px;">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">선물할 이용권 수</label>
-        <input type="number" id="gift-amount" placeholder="1" min="1"
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">선물할 캐시</label>
+        <input type="number" id="gift-amount" placeholder="500" min="100" step="100"
           style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box;"/>
       </div>
-      <div style="margin-bottom:16px;">
+      <div style="margin-bottom:12px;">
         <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">메시지 (선택)</label>
         <input type="text" id="gift-message" placeholder="생일 축하해! 🎂"
           style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box;"/>
       </div>
-      <div style="background:rgba(201,168,76,0.06);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);margin-bottom:16px;">
-        현재 보유 이용권: <b id="my-credits-display" style="color:var(--gold);">-</b>회
+      <div style="background:rgba(201,168,76,0.06);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);margin-bottom:16px;">
+        현재 보유 캐시: <b id="my-credits-display" style="color:var(--gold);">-</b> 캐시
       </div>
       <button onclick="sendGift()" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:8px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">
-        🎀 선물하기
+        🎀 캐시 선물하기
       </button>
       <div id="gift-result" style="margin-top:12px;font-size:13px;text-align:center;"></div>
     </div>
-
-    <!-- 로그아웃 -->
+<!-- 로그아웃 -->
     <div style="text-align:center;margin-top:8px;">
       <button class="btn-outline" onclick="doLogout()">로그아웃</button>
     </div>
@@ -408,7 +407,7 @@ async function loadReferralData(userId, userEmail) {
     }
     var { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', userId).single();
     var el = document.getElementById('my-credits-display');
-    if (el) el.textContent = cd?.credits || 0;
+    if (el) el.textContent = (cd?.cash_balance || 0).toLocaleString();
   } catch(e) { console.warn('referral load error:', e); }
 }
 
@@ -434,41 +433,51 @@ function shareReferral() {
 }
 
 async function sendGift() {
-  var { data: { session } } = await sb.auth.getSession();
-  if (!session) { showToast('로그인이 필요해요'); return; }
-  var user = session.user;
-  var email = document.getElementById('gift-email').value.trim();
-  var amount = parseInt(document.getElementById('gift-amount').value);
-  var message = document.getElementById('gift-message').value.trim();
-  var resultEl = document.getElementById('gift-result');
+  const user = getSajuUser();
+  if (!user) { showToast('로그인이 필요해요'); return; }
+  const email = document.getElementById('gift-email').value.trim();
+  const amount = parseInt(document.getElementById('gift-amount').value);
+  const message = document.getElementById('gift-message').value.trim();
+  const resultEl = document.getElementById('gift-result');
 
-  if (!email || !amount || amount < 1) {
-    resultEl.innerHTML = '<span style="color:#e74c3c;">이메일과 이용권 수를 입력해주세요</span>'; return;
+  if (!email || !amount || amount < 100) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">이메일과 선물할 캐시를 입력해주세요 (최소 100캐시)</span>';
+    return;
   }
   if (email === user.email) {
-    resultEl.innerHTML = '<span style="color:#e74c3c;">자신에게는 선물할 수 없어요</span>'; return;
+    resultEl.innerHTML = '<span style="color:#e74c3c;">자신에게는 선물할 수 없어요</span>';
+    return;
   }
 
-  var { data: cd } = await sb.from('user_credits').select('credits').eq('user_id', user.id).single();
-  var myCredits = cd?.credits || 0;
-  if (myCredits < amount) {
-    resultEl.innerHTML = '<span style="color:#e74c3c;">이용권이 부족해요 (보유: ' + myCredits + '회)</span>'; return;
+  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+  const { data: cd } = await sb.from('user_credits').select('cash_balance').eq('user_id', user.id).single();
+  const myCash = cd?.cash_balance || 0;
+
+  if (myCash < amount) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">캐시가 부족해요 (보유: ' + myCash.toLocaleString() + ' 캐시)</span>';
+    return;
   }
 
   resultEl.innerHTML = '처리 중...';
-  try {
-    var { data: receiver } = await sb.from('users').select('id,email,name').eq('email', email).single();
 
-    await sb.from('user_credits').update({ credits: myCredits - amount }).eq('user_id', user.id);
+  try {
+    const { data: receiver } = await sb.from('users').select('id,email,name').eq('email', email).single();
+
+    // 내 캐시 차감
+    await sb.from('user_credits').update({ cash_balance: myCash - amount }).eq('user_id', user.id);
 
     if (receiver) {
-      var { data: rcd } = await sb.from('user_credits').select('credits').eq('user_id', receiver.id).single();
-      var rc = rcd?.credits || 0;
+      const { data: rcd } = await sb.from('user_credits').select('cash_balance').eq('user_id', receiver.id).single();
+      const rc = rcd?.cash_balance || 0;
       if (rcd) {
-        await sb.from('user_credits').update({ credits: rc + amount }).eq('user_id', receiver.id);
+        await sb.from('user_credits').update({ cash_balance: rc + amount }).eq('user_id', receiver.id);
       } else {
-        await sb.from('user_credits').insert({ user_id: receiver.id, credits: amount });
+        await sb.from('user_credits').insert({ user_id: receiver.id, cash_balance: amount });
       }
+      await sb.from('cash_transactions').insert([
+        { user_id: user.id, type: 'use', amount: -amount, service: '캐시 선물', description: email + '에게 캐시 선물' },
+        { user_id: receiver.id, type: 'charge', amount: amount, service: '캐시 선물', description: user.email + '로부터 캐시 선물' }
+      ]);
     }
 
     await sb.from('credit_gifts').insert({
@@ -480,14 +489,14 @@ async function sendGift() {
       status: receiver ? 'delivered' : 'pending'
     });
 
-    var el = document.getElementById('my-credits-display');
-    if (el) el.textContent = myCredits - amount;
-    resultEl.innerHTML = '<span style="color:#27ae60;">✅ ' + email + '님께 ' + amount + '회 이용권을 선물했어요! 🎀</span>';
+    document.getElementById('my-credits-display').textContent = (myCash - amount).toLocaleString();
+    resultEl.innerHTML = '<span style="color:#27ae60;">✅ ' + email + '님께 ' + amount.toLocaleString() + ' 캐시를 선물했어요! 🎀</span>';
     document.getElementById('gift-email').value = '';
     document.getElementById('gift-amount').value = '';
     document.getElementById('gift-message').value = '';
+
   } catch(e) {
-    await sb.from('user_credits').update({ credits: myCredits }).eq('user_id', user.id);
+    await sb.from('user_credits').update({ cash_balance: myCash }).eq('user_id', user.id);
     resultEl.innerHTML = '<span style="color:#e74c3c;">오류: ' + e.message + '</span>';
   }
 }
