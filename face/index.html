@@ -6,6 +6,95 @@
   <title>관상 분석 — AI가 읽는 얼굴의 운명 | 오늘의 사주</title>
   <meta name="description" content="사진 한 장으로 AI가 전통 관상학 관점에서 성격, 재물운, 애정운, 직업운을 분석해드립니다."/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ─── 이용권/캐시 체크 함수 ───
+async function checkAndUseCredit(serviceName) {
+  const user = getSajuUser ? getSajuUser() : null;
+  if (!user) {
+    showToast('로그인 후 이용할 수 있어요');
+    setTimeout(() => window.location.href = 'https://saju-today.com/login', 1500);
+    return false;
+  }
+  const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+  const { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+  const credits = cd?.credits || 0;
+  const cashBalance = cd?.cash_balance || 0;
+
+  if (credits >= 30) return true;
+
+  if (cashBalance < 500) {
+    showCreditModal(serviceName);
+    return false;
+  }
+
+  const confirmed = await showConfirmCreditModal(serviceName, cashBalance);
+  if (!confirmed) return false;
+
+  await sb.from('user_credits').update({
+    cash_balance: cashBalance - 500,
+    updated_at: new Date().toISOString()
+  }).eq('user_id', user.id);
+
+  await sb.from('cash_transactions').insert({
+    user_id: user.id, type: 'use', amount: -500,
+    service: serviceName, description: serviceName + ' 이용'
+  }).catch(() => {});
+
+  return true;
+}
+
+function showConfirmCreditModal(serviceName, cashBalance) {
+  return new Promise((resolve) => {
+    const existing = document.getElementById('confirm-credit-modal');
+    if (existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.id = 'confirm-credit-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    const inner = document.createElement('div');
+    inner.style.cssText = 'background:#13101c;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;border:1px solid rgba(201,168,76,0.2);text-align:center;';
+    inner.innerHTML =
+      '<div style="font-size:32px;margin-bottom:12px;">🔮</div>' +
+      '<h3 style="font-size:16px;font-weight:700;color:#f0ead6;margin-bottom:8px;">' + serviceName + '</h3>' +
+      '<p style="font-size:14px;color:#a89c80;margin-bottom:6px;line-height:1.7;">500 캐시를 사용하시겠어요?</p>' +
+      '<p style="font-size:12px;color:#5c5445;margin-bottom:24px;">보유 캐시: <b style="color:#c9a84c;">' + cashBalance.toLocaleString() + ' 캐시</b></p>' +
+      '<div style="display:flex;gap:10px;">' +
+      '<button id="confirm-no" style="flex:1;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
+      '<button id="confirm-yes" style="flex:1;padding:13px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">사용하기</button>' +
+      '</div>';
+    modal.appendChild(inner);
+    modal.addEventListener('click', function(e) { if(e.target===modal){modal.remove();resolve(false);} });
+    document.body.appendChild(modal);
+    document.getElementById('confirm-yes').onclick = () => { modal.remove(); resolve(true); };
+    document.getElementById('confirm-no').onclick = () => { modal.remove(); resolve(false); };
+  });
+}
+
+function showCreditModal(serviceName) {
+  const existing = document.getElementById('credit-modal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'credit-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+  const inner = document.createElement('div');
+  inner.style.cssText = 'background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);';
+  inner.innerHTML =
+    '<div style="text-align:center;margin-bottom:20px;">' +
+    '<div style="font-size:36px;margin-bottom:12px;">🔮</div>' +
+    '<h3 style="font-size:17px;font-weight:700;color:#f0ead6;margin-bottom:8px;">' + serviceName + '</h3>' +
+    '<p style="font-size:14px;color:#a89c80;line-height:1.7;">캐시가 부족해요.<br>캐시를 충전하고 이용해보세요!</p>' +
+    '<p style="font-size:12px;color:#5c5445;margin-top:8px;">💡 500캐시 = 서비스 1회 이용</p>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">' +
+    '<button onclick="window.location.href='https://saju-today.com/pricing'" style="padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">💰 캐시 충전하러 가기</button>' +
+    '<button onclick="document.getElementById('credit-modal').remove()" style="padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
+    '</div>';
+  modal.appendChild(inner);
+  modal.addEventListener('click', function(e) { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+</script>
+
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root { --bg:#0e0b14; --bg2:#13101c; --bg3:#1a1628; --gold:#c9a84c; --gold-light:#e8c96a; --gold-dim:rgba(201,168,76,0.15); --text:#f0ead6; --text2:#a89c80; --text3:#5c5445; --border:rgba(201,168,76,0.12); --border2:rgba(255,255,255,0.06); --red:#c0392b; --blue:#1a4a6b; --ink:#f0ead6; --paper:#0e0b14; --card:#13101c; --muted:#a89c80; }
@@ -510,95 +599,11 @@ async function shareResult(resultId, pageTitle) {
   <div style="margin-top:8px;">© 2025 비즈글로벌 All rights reserved.</div>
 </div>
 <script>
-async function checkAndUseCredit(serviceName) {
-  const user = getSajuUser ? getSajuUser() : null;
-  if (!user) {
-    showToast('로그인 후 이용할 수 있어요');
-    setTimeout(() => window.location.href = 'https://saju-today.com/login', 1500);
-    return false;
-  }
-  const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
-  const { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
 
-  const credits = cd?.credits || 0;
-  const cashBalance = cd?.cash_balance || 0;
 
-  // 구독자 (credits >= 30) 무제한 이용
-  if (credits >= 30) return true;
 
-  if (cashBalance < 500) {
-    showCreditModal(serviceName);
-    return false;
-  }
 
-  const confirmed = await showConfirmCreditModal(serviceName, cashBalance);
-  if (!confirmed) return false;
 
-  await sb.from('user_credits').update({
-    cash_balance: cashBalance - 500,
-    updated_at: new Date().toISOString()
-  }).eq('user_id', user.id);
-
-  await sb.from('cash_transactions').insert({
-    user_id: user.id,
-    type: 'use',
-    amount: -500,
-    service: serviceName,
-    description: serviceName + ' 이용'
-  }).catch(() => {});
-
-  return true;
-}
-
-function showConfirmCreditModal(serviceName, cashBalance) {
-  return new Promise((resolve) => {
-    const existing = document.getElementById('confirm-credit-modal');
-    if (existing) existing.remove();
-    const modal = document.createElement('div');
-    modal.id = 'confirm-credit-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
-    const inner = document.createElement('div');
-    inner.style.cssText = 'background:#13101c;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;border:1px solid rgba(201,168,76,0.2);text-align:center;';
-    inner.innerHTML =
-      '<div style="font-size:32px;margin-bottom:12px;">🔮</div>' +
-      '<h3 style="font-size:16px;font-weight:700;color:#f0ead6;margin-bottom:8px;">' + serviceName + '</h3>' +
-      '<p style="font-size:14px;color:#a89c80;margin-bottom:6px;line-height:1.7;">500 캐시를 사용하시겠어요?</p>' +
-      '<p style="font-size:12px;color:#5c5445;margin-bottom:24px;">보유 캐시: <b style="color:#c9a84c;">' + cashBalance.toLocaleString() + ' 캐시</b></p>' +
-      '<div style="display:flex;gap:10px;">' +
-      '<button id="confirm-no" style="flex:1;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
-      '<button id="confirm-yes" style="flex:1;padding:13px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">사용하기</button>' +
-      '</div>';
-    modal.appendChild(inner);
-    modal.addEventListener('click', function(e) { if(e.target===modal){modal.remove();resolve(false);} });
-    document.body.appendChild(modal);
-    document.getElementById('confirm-yes').onclick = () => { modal.remove(); resolve(true); };
-    document.getElementById('confirm-no').onclick = () => { modal.remove(); resolve(false); };
-  });
-}
-
-function showCreditModal(serviceName) {
-  const existing = document.getElementById('credit-modal');
-  if (existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'credit-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
-  const inner = document.createElement('div');
-  inner.style.cssText = 'background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);';
-  inner.innerHTML =
-    '<div style="text-align:center;margin-bottom:20px;">' +
-    '<div style="font-size:36px;margin-bottom:12px;">🔮</div>' +
-    '<h3 style="font-size:17px;font-weight:700;color:#f0ead6;margin-bottom:8px;">' + serviceName + '</h3>' +
-    '<p style="font-size:14px;color:#a89c80;line-height:1.7;">캐시가 부족해요.<br>캐시를 충전하고 이용해보세요!</p>' +
-    '<p style="font-size:12px;color:#5c5445;margin-top:8px;">💡 500캐시 = 서비스 1회 이용</p>' +
-    '</div>' +
-    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">' +
-    '<button onclick="window.location.href='https://saju-today.com/pricing'" style="padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;color:#1a1000;font-size:15px;font-weight:700;cursor:pointer;">💰 캐시 충전하러 가기</button>' +
-    '<button onclick="document.getElementById('credit-modal').remove()" style="padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;">취소</button>' +
-    '</div>';
-  modal.appendChild(inner);
-  modal.addEventListener('click', function(e) { if(e.target===modal) modal.remove(); });
-  document.body.appendChild(modal);
-}
 </script>
 </body>
 </html>
