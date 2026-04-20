@@ -1380,11 +1380,12 @@ async function loadWeeklyFortune() {
 
   // 이번 주 월요일~일요일
   const now = new Date();
-  const kst = new Date(now.getTime() + 9*60*60*1000);
-  const dayOfWeek = kst.getDay();
+  // KST 기준 오늘 요일 - 브라우저 로컬 시간 기준으로 직접 계산
+  const dayOfWeek = now.getDay(); // 한국 브라우저는 KST 기준
   // 이번 주 일요일~토요일
-  const thisWeekSunday = new Date(kst);
-  thisWeekSunday.setDate(kst.getDate() - dayOfWeek);
+  const thisWeekSunday = new Date(now);
+  thisWeekSunday.setDate(now.getDate() - dayOfWeek);
+  thisWeekSunday.setHours(0,0,0,0);
   const thisWeekSaturday = new Date(thisWeekSunday);
   thisWeekSaturday.setDate(thisWeekSunday.getDate() + 6);
 
@@ -1417,8 +1418,7 @@ async function loadWeeklyFortune() {
   const dayNames = ['일','월','화','수','목','금','토'];
   const weekDayPillars = [];
   // 이번 주 일요일 기준
-  const sunday_start = new Date(kst);
-  sunday_start.setDate(kst.getDate() - dayOfWeek);
+  const sunday_start = new Date(thisWeekSunday);
   for (let i = 0; i < 7; i++) {
     const d = new Date(sunday_start);
     d.setDate(sunday_start.getDate() + i);
@@ -1463,8 +1463,7 @@ ${weekPillarStr}
 function renderWeeklyFortune(r, weekStr) {
   const weekContent = document.getElementById('fortune-week-content');
   const today = new Date();
-  const kst = new Date(today.getTime() + 9*60*60*1000);
-  const todayDayIdx = kst.getDay(); // 0=일,1=월,...,6=토
+  const todayDayIdx = today.getDay(); // 브라우저 로컬(KST) 기준 0=일,1=월,...,6=토
 
   const daysHTML = (r.days || []).map(function(d, i) {
     const score = d.score || 70;
