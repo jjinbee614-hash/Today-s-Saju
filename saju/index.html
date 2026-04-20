@@ -1969,9 +1969,12 @@ async function askSajuQuestion() {
       '- 오행분포: ' + JSON.stringify(currentSajuData.r.elements)
     ) : '';
 
+    var currentYear = new Date().getFullYear();
     var prompt = '당신은 전통 명리학 전문가입니다. 아래 사주 정보를 바탕으로 질문에 답해주세요.\n\n' +
+      '【현재 연도】' + currentYear + '년 기준으로 답변해주세요.\n\n' +
       sajuContext + '\n\n【질문】' + question + '\n\n' +
       '사주 오행과 천간지지를 근거로 구체적이고 실용적인 답변을 해주세요.\n' +
+      '현재 연도(' + currentYear + '년) 기준으로 운세를 분석해주세요.\n' +
       '긍정적인 면과 주의할 점을 균형있게 설명하고, 조언을 포함해주세요.\n' +
       '답변은 500자 내외로 작성해주세요.';
 
