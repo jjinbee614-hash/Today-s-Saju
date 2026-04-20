@@ -1469,14 +1469,21 @@ function renderWeeklyFortune(r, weekStr) {
     const score = d.score || 70;
     const color = score >= 80 ? '#27ae60' : score >= 60 ? '#c9913a' : '#c0392b';
     const isToday = i === todayDayIdx;
-    return `<div style="background:${isToday ? 'rgba(201,168,76,0.1)' : 'var(--card)'};border:${isToday ? '1px solid var(--gold)' : '1px solid var(--border)'};border-radius:10px;padding:14px 12px;text-align:center;">
-      <div style="font-size:12px;font-weight:700;color:${isToday ? 'var(--gold)' : 'var(--muted)'};margin-bottom:6px;">${d.day}${isToday ? ' (오늘)' : ''}</div>
-      <div style="font-size:20px;font-weight:800;color:${color};margin-bottom:4px;">${score}</div>
-      <div style="background:var(--border);border-radius:3px;height:4px;margin-bottom:8px;">
-        <div style="height:4px;border-radius:3px;width:${score}%;background:${color};"></div>
+    return `<div style="background:${isToday ? 'rgba(201,168,76,0.1)' : 'var(--card)'};border:${isToday ? '1px solid var(--gold)' : '1px solid var(--border)'};border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;">
+      <div style="width:36px;text-align:center;flex-shrink:0;">
+        <div style="font-size:13px;font-weight:700;color:${isToday ? 'var(--gold)' : 'var(--muted)'};">${d.day}</div>
+        ${isToday ? '<div style="font-size:9px;color:var(--gold);margin-top:2px;">오늘</div>' : ''}
       </div>
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;">${d.keyword || ''}</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.5;">${d.advice || ''}</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:16px;font-weight:800;color:${color};">${score}점</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text);">${d.keyword || ''}</span>
+          <div style="flex:1;background:var(--border);border-radius:3px;height:5px;">
+            <div style="height:5px;border-radius:3px;width:${score}%;background:${color};"></div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;">${d.advice || ''}</div>
+      </div>
     </div>`;
   }).join('');
 
@@ -1494,7 +1501,7 @@ function renderWeeklyFortune(r, weekStr) {
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px;">
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
       ${daysHTML}
     </div>
 
