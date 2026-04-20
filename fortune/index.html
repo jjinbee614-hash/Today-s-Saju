@@ -1382,12 +1382,13 @@ async function loadWeeklyFortune() {
   const now = new Date();
   const kst = new Date(now.getTime() + 9*60*60*1000);
   const dayOfWeek = kst.getDay();
-  const monday = new Date(kst);
-  monday.setDate(kst.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  // 이번 주 일요일~토요일
+  const thisWeekSunday = new Date(kst);
+  thisWeekSunday.setDate(kst.getDate() - dayOfWeek);
+  const thisWeekSaturday = new Date(thisWeekSunday);
+  thisWeekSaturday.setDate(thisWeekSunday.getDate() + 6);
 
-  const weekStr = `${monday.getMonth()+1}월 ${monday.getDate()}일 ~ ${sunday.getMonth()+1}월 ${sunday.getDate()}일`;
+  const weekStr = (thisWeekSunday.getMonth()+1)+'월 '+thisWeekSunday.getDate()+'일 ~ '+(thisWeekSaturday.getMonth()+1)+'월 '+thisWeekSaturday.getDate()+'일';
 
   const weekContent = document.getElementById('fortune-week-content');
   weekContent.style.display = 'block';
@@ -1402,7 +1403,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 키
-  const cacheKey = `fortune_week_v1_${fy}_${fm}_${fd}_${monday.getFullYear()}${monday.getMonth()+1}${monday.getDate()}`;
+  const cacheKey = 'fortune_week_v2_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1413,11 +1414,14 @@ async function loadWeeklyFortune() {
   const dp = `${fp.dp.heavenly}${fp.dp.earthly}`;
 
   // 이번 주 각 날의 일진
-  const dayNames = ['월','화','수','목','금','토','일'];
+  const dayNames = ['일','월','화','수','목','금','토'];
   const weekDayPillars = [];
+  // 이번 주 일요일 기준
+  const sunday_start = new Date(kst);
+  sunday_start.setDate(kst.getDate() - dayOfWeek);
   for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+    const d = new Date(sunday_start);
+    d.setDate(sunday_start.getDate() + i);
     const dp2 = calcDayPillar(d.getFullYear(), d.getMonth()+1, d.getDate());
     weekDayPillars.push({
       name: dayNames[i],
@@ -1426,7 +1430,7 @@ async function loadWeeklyFortune() {
     });
   }
 
-  const weekPillarStr = weekDayPillars.map(d => `${d.name}(${d.date}) ${d.pillar}`).join(', ');
+  const weekPillarStr = weekDayPillars.map(function(d){ return d.name+'('+d.date+') '+d.pillar; }).join(', ');
   const currentYear = new Date().getFullYear();
 
   const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 이번 주(${weekStr}) 운세를 요일별로 분석하세요.
@@ -1460,7 +1464,7 @@ function renderWeeklyFortune(r, weekStr) {
   const weekContent = document.getElementById('fortune-week-content');
   const today = new Date();
   const kst = new Date(today.getTime() + 9*60*60*1000);
-  const todayDayIdx = kst.getDay() === 0 ? 6 : kst.getDay() - 1;
+  const todayDayIdx = kst.getDay(); // 0=일,1=월,...,6=토
 
   const daysHTML = (r.days || []).map(function(d, i) {
     const score = d.score || 70;
