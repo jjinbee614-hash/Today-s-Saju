@@ -954,15 +954,19 @@ function showCreditModal(serviceName) {
     <h2 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:30px;margin-bottom:8px;" id="fortune-page-title">오늘의 운세</h2>
     <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">생년월일을 입력하면 AI가 사주 운세를 풀어드립니다.</p>
 
-    <!-- 오늘/내일 탭 -->
+    <!-- 오늘/내일/이번 주 탭 -->
     <div style="display:flex;gap:8px;margin-bottom:24px;">
       <button id="fortune-today-tab" onclick="setFortuneDay('today')"
-        style="flex:1;padding:10px;border:2px solid var(--gold);border-radius:8px;background:var(--gold);color:white;cursor:pointer;font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
-        🌅 오늘의 운세
+        style="flex:1;padding:10px;border:2px solid var(--gold);border-radius:8px;background:var(--gold);color:white;cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
+        🌅 오늘
       </button>
       <button id="fortune-tomorrow-tab" onclick="setFortuneDay('tomorrow')"
-        style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
-        🌙 내일의 운세
+        style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
+        🌙 내일
+      </button>
+      <button id="fortune-week-tab" onclick="setFortuneDay('week')"
+        style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
+        📅 이번 주
       </button>
     </div>
 
@@ -979,6 +983,7 @@ function showCreditModal(serviceName) {
       <button class="submit-btn" id="fortune-submit-btn" style="width:auto;padding:12px 24px;margin:0;" onclick="loadFortune()">🌅 오늘의 운세 보기 ✦</button>
     </div>
 
+    <div id="fortune-week-content" style="display:none;margin-top:16px;"></div>
     <div id="fortune-content" style="display:none;">
       <div class="fortune-date-bar">
         <h3 id="fortune-title">🌅 오늘의 운세</h3>
@@ -1219,40 +1224,58 @@ document.addEventListener('DOMContentLoaded', function() {
 let fortuneDay = 'today'; // 'today' or 'tomorrow'
 
 async function setFortuneDay(day) {
-  if (day === 'tomorrow') {
-    const ok = await checkAndUseCredit('내일의 운세');
+  if (day === 'tomorrow' || day === 'week') {
+    const ok = await checkAndUseCredit(day === 'week' ? '이번 주의 운세' : '내일의 운세');
     if (!ok) return;
   }
   fortuneDay = day;
   const isToday = day === 'today';
+  const isWeek = day === 'week';
 
   // 탭 스타일
   const todayTab = document.getElementById('fortune-today-tab');
   const tomorrowTab = document.getElementById('fortune-tomorrow-tab');
-  if (todayTab) {
-    todayTab.style.background = isToday ? 'var(--gold)' : 'var(--card)';
-    todayTab.style.color = isToday ? 'white' : 'var(--ink)';
-    todayTab.style.borderColor = isToday ? 'var(--gold)' : 'var(--border)';
-  }
-  if (tomorrowTab) {
-    tomorrowTab.style.background = !isToday ? 'var(--gold)' : 'var(--card)';
-    tomorrowTab.style.color = !isToday ? 'white' : 'var(--ink)';
-    tomorrowTab.style.borderColor = !isToday ? 'var(--gold)' : 'var(--border)';
+  const weekTab = document.getElementById('fortune-week-tab');
+
+  [todayTab, tomorrowTab, weekTab].forEach(function(tab) {
+    if (tab) {
+      tab.style.background = 'var(--card)';
+      tab.style.color = 'var(--ink)';
+      tab.style.borderColor = 'var(--border)';
+    }
+  });
+
+  const activeTab = isToday ? todayTab : isWeek ? weekTab : tomorrowTab;
+  if (activeTab) {
+    activeTab.style.background = 'var(--gold)';
+    activeTab.style.color = 'white';
+    activeTab.style.borderColor = 'var(--gold)';
   }
 
   // 버튼 & 제목 변경
   const btn = document.getElementById('fortune-submit-btn');
   const title = document.getElementById('fortune-page-title');
-  if (btn) btn.textContent = isToday ? '🌅 오늘의 운세 보기 ✦' : '🌙 내일의 운세 보기 ✦';
-  if (title) title.textContent = isToday ? '오늘의 운세' : '내일의 운세';
+  if (isWeek) {
+    if (btn) btn.textContent = '📅 이번 주 운세 보기 ✦';
+    if (title) title.textContent = '이번 주의 운세';
+  } else if (isToday) {
+    if (btn) btn.textContent = '🌅 오늘의 운세 보기 ✦';
+    if (title) title.textContent = '오늘의 운세';
+  } else {
+    if (btn) btn.textContent = '🌙 내일의 운세 보기 ✦';
+    if (title) title.textContent = '내일의 운세';
+  }
 
   // 결과 초기화
   const content = document.getElementById('fortune-content');
   if (content) content.style.display = 'none';
+  const weekContent = document.getElementById('fortune-week-content');
+  if (weekContent) weekContent.style.display = 'none';
 }
 
 
 async function loadFortune() {
+  if (fortuneDay === 'week') { await loadWeeklyFortune(); return; }
   const birth = document.getElementById('fortune-birth').value.trim();
   if (!birth) { showToast('생년월일을 입력해 주세요'); return; }
 
@@ -1340,6 +1363,144 @@ async function loadFortune() {
   }
 }
 
+
+async function loadWeeklyFortune() {
+  const birth = document.getElementById('fortune-birth').value.trim();
+  if (!birth) { showToast('생년월일을 입력해 주세요'); return; }
+
+  const birthParts = birth.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
+  if (!birthParts) { showToast('생년월일 형식이 올바르지 않습니다'); return; }
+
+  const fy = parseInt(birthParts[1]);
+  const fm = parseInt(birthParts[2]);
+  const fd = parseInt(birthParts[3]);
+  const ftimeMatch = birth.match(/([가-힣]+시)/);
+  const ftime = ftimeMatch ? ftimeMatch[1] : '모름';
+  const fp = calcSaju(fy, fm, fd, ftime);
+
+  // 이번 주 월요일~일요일
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9*60*60*1000);
+  const dayOfWeek = kst.getDay();
+  const monday = new Date(kst);
+  monday.setDate(kst.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const weekStr = `${monday.getMonth()+1}월 ${monday.getDate()}일 ~ ${sunday.getMonth()+1}월 ${sunday.getDate()}일`;
+
+  const weekContent = document.getElementById('fortune-week-content');
+  weekContent.style.display = 'block';
+  weekContent.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:16px;">📅 이번 주의 운세</h3>
+      <span style="font-size:13px;color:var(--muted);">${weekStr}</span>
+    </div>
+    <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:8px;padding:24px;text-align:center;">
+      <div class="spinner" style="margin:0 auto 16px;"></div>
+      <p style="font-size:13px;color:#f0e6d3;">이번 주 운세를 분석하고 있어요...</p>
+    </div>`;
+
+  // 캐시 키
+  const cacheKey = `fortune_week_v1_${fy}_${fm}_${fd}_${monday.getFullYear()}${monday.getMonth()+1}${monday.getDate()}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
+  }
+
+  const yp = `${fp.yp.heavenly}${fp.yp.earthly}`;
+  const mp = `${fp.mp.heavenly}${fp.mp.earthly}`;
+  const dp = `${fp.dp.heavenly}${fp.dp.earthly}`;
+
+  // 이번 주 각 날의 일진
+  const dayNames = ['월','화','수','목','금','토','일'];
+  const weekDayPillars = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dp2 = calcDayPillar(d.getFullYear(), d.getMonth()+1, d.getDate());
+    weekDayPillars.push({
+      name: dayNames[i],
+      date: `${d.getMonth()+1}/${d.getDate()}`,
+      pillar: `${dp2.heavenly}${dp2.earthly}`
+    });
+  }
+
+  const weekPillarStr = weekDayPillars.map(d => `${d.name}(${d.date}) ${d.pillar}`).join(', ');
+  const currentYear = new Date().getFullYear();
+
+  const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 이번 주(${weekStr}) 운세를 요일별로 분석하세요.
+
+【사주】
+- 생년월일시: ${fy}년 ${fm}월 ${fd}일 ${ftime}
+- 사주: 연주 ${yp} / 월주 ${mp} / 일주 ${dp}
+- 일간: ${fp.dp.heavenly} (${fp.daymaster})
+- 오행: ${Object.entries(fp.elements).map(([k,v])=>k+' '+v+'%').join(', ')}
+
+【이번 주 일진】
+${weekPillarStr}
+
+현재 연도: ${currentYear}년
+
+각 요일의 일진과 이 사람의 일간 관계를 분석하여 요일별 운세를 작성하세요.
+순수 JSON만 출력하세요. 코드블록 없이.
+
+{"weekSummary":"이번 주 전체 흐름 2문장","bestDay":"가장 좋은 요일 (예: 수요일)","bestDayReason":"이유 1문장","cautiousDay":"주의할 요일","cautiousDayReason":"이유 1문장","days":[{"day":"월","score":75,"keyword":"키워드 2~3글자","advice":"조언 1문장"},{"day":"화","score":80,"keyword":"키워드","advice":"조언"},{"day":"수","score":85,"keyword":"키워드","advice":"조언"},{"day":"목","score":70,"keyword":"키워드","advice":"조언"},{"day":"금","score":78,"keyword":"키워드","advice":"조언"},{"day":"토","score":82,"keyword":"키워드","advice":"조언"},{"day":"일","score":76,"keyword":"키워드","advice":"조언"}],"weekAdvice":"이번 주 핵심 조언 1~2문장"}`;
+
+  try {
+    const r = await callAPI(prompt);
+    localStorage.setItem(cacheKey, JSON.stringify(r));
+    renderWeeklyFortune(r, weekStr);
+  } catch(e) {
+    weekContent.innerHTML += `<div style="color:#e74c3c;padding:16px;">⚠️ 오류: ${e.message}</div>`;
+  }
+}
+
+function renderWeeklyFortune(r, weekStr) {
+  const weekContent = document.getElementById('fortune-week-content');
+  const today = new Date();
+  const kst = new Date(today.getTime() + 9*60*60*1000);
+  const todayDayIdx = kst.getDay() === 0 ? 6 : kst.getDay() - 1;
+
+  const daysHTML = (r.days || []).map(function(d, i) {
+    const score = d.score || 70;
+    const color = score >= 80 ? '#27ae60' : score >= 60 ? '#c9913a' : '#c0392b';
+    const isToday = i === todayDayIdx;
+    return `<div style="background:${isToday ? 'rgba(201,168,76,0.1)' : 'var(--card)'};border:${isToday ? '1px solid var(--gold)' : '1px solid var(--border)'};border-radius:10px;padding:14px 12px;text-align:center;">
+      <div style="font-size:12px;font-weight:700;color:${isToday ? 'var(--gold)' : 'var(--muted)'};margin-bottom:6px;">${d.day}${isToday ? ' (오늘)' : ''}</div>
+      <div style="font-size:20px;font-weight:800;color:${color};margin-bottom:4px;">${score}</div>
+      <div style="background:var(--border);border-radius:3px;height:4px;margin-bottom:8px;">
+        <div style="height:4px;border-radius:3px;width:${score}%;background:${color};"></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;">${d.keyword || ''}</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5;">${d.advice || ''}</div>
+    </div>`;
+  }).join('');
+
+  weekContent.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:16px;">📅 이번 주의 운세</h3>
+      <span style="font-size:13px;color:var(--muted);">${weekStr}</span>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:10px;padding:20px;margin-bottom:20px;color:#f0e6d3;">
+      <p style="font-size:14px;line-height:2;margin-bottom:14px;">${r.weekSummary || ''}</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        ${r.bestDay ? `<span style="background:rgba(39,174,96,0.2);border:1px solid rgba(39,174,96,0.4);border-radius:20px;padding:5px 14px;font-size:12px;">✨ 행운의 날: ${r.bestDay} (${r.bestDayReason || ''})</span>` : ''}
+        ${r.cautiousDay ? `<span style="background:rgba(192,57,43,0.2);border:1px solid rgba(192,57,43,0.4);border-radius:20px;padding:5px 14px;font-size:12px;">⚠️ 주의: ${r.cautiousDay} (${r.cautiousDayReason || ''})</span>` : ''}
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px;">
+      ${daysHTML}
+    </div>
+
+    ${r.weekAdvice ? `<div style="background:rgba(201,168,76,0.08);border-left:3px solid var(--gold);padding:14px 18px;border-radius:0 8px 8px 0;">
+      <div style="font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:6px;">💡 이번 주 조언</div>
+      <p style="font-size:13px;line-height:1.8;">${r.weekAdvice}</p>
+    </div>` : ''}
+  `;
+}
 
 function renderFortune(r) {
   const currentYear = new Date().getFullYear();
