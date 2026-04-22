@@ -4,13 +4,20 @@
   "promptSuffix": "すべての回答を日本語でお答えください。",
   "nav": {
     "home": "ホーム",
-    "saju": "四柱",
-    "fortune": "運勢",
-    "pricing": "購入",
+    "saju": "✨ 私の四柱推命",
+    "fortune": "🌅 今日／明日の運勢",
+    "pricing": "💎 サービス購入",
     "more": "もっと",
     "login": "ログイン",
     "logout": "ログアウト",
-    "my": "マイページ"
+    "my": "マイページ",
+    "compat": "💑 相性占い",
+    "naming": "✍️ 命名／姓名鑑定",
+    "dream": "🌙 夢占い",
+    "tarot": "🃏 タロット",
+    "face": "👁️ 人相",
+    "date": "📅 日取り",
+    "register": "📋 四柱登録"
   },
   "common": {
     "cancel": "キャンセル",
@@ -47,7 +54,26 @@
     "todayLabel": "今日",
     "inputLabel": "生年月日・時間を入力",
     "aboutTitle": "今日／明日の運勢とは",
-    "weekAdviceLabel": "今週のアドバイス"
+    "weekAdviceLabel": "今週のアドバイス",
+    "autoFill": "様の生年月日が自動入力されました",
+    "year": "年生まれ",
+    "todayFortune": "今日の運勢",
+    "tomorrowFortune": "明日の運勢",
+    "luckyNumber": "ラッキーナンバー",
+    "luckyColor": "ラッキーカラー",
+    "luckyDir": "ラッキー方角",
+    "luckyTime": "ラッキー時間帯",
+    "aboutDesc": "日運とは、今日の日辰とあなたの四柱日干がどのように相互作用するかを分析するものです。同じ日でも人によって日辰との関係が異なるため、運勢も違ってきます。",
+    "analysisTitle": "運勢分析項目",
+    "analysis1": "総合運 — 今日一日の全体的な運気",
+    "analysis2": "恋愛運 — 恋愛·結婚·人間関係",
+    "analysis3": "金運 — 金銭·投資·支出",
+    "analysis4": "仕事運 — 業務·就職·事業",
+    "analysis5": "健康運 — 心身の健康",
+    "analysisDesc": "毎日深夜に日辰が変わります。明日の運勢を事前に確認して、一日の準備をしましょう。",
+    "solar": "新暦",
+    "lunar": "旧暦",
+    "leapLunar": "旧暦(閏月)"
   },
   "pricing": {
     "title": "💎 サービス購入",
@@ -59,5 +85,14 @@
     "myCash": "保有ポイント",
     "myTickets": "保有利用券",
     "viewHistory": "履歴を見る →"
+  },
+  "footer": {
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "contact": "お問い合わせ",
+    "company": "会社：BiZ Global · 代表：鄭志勳 · 登録番号：760-40-01387",
+    "address": "住所：韓国京畿道龍仁市 · 電話：+82-10-4348-4389 · メール：contact@saju-today.com",
+    "bizNum": "通信販売業申告番号：申告準備中",
+    "copyright": "© 2025 BiZ Global All rights reserved."
   }
 }

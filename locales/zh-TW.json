@@ -4,13 +4,20 @@
   "promptSuffix": "請以繁體中文回答所有內容。",
   "nav": {
     "home": "首頁",
-    "saju": "命理",
-    "fortune": "運勢",
-    "pricing": "購買",
+    "saju": "✨ 我的命理",
+    "fortune": "🌅 今日／明日運勢",
+    "pricing": "💎 購買服務",
     "more": "更多",
     "login": "登入",
     "logout": "登出",
-    "my": "我的"
+    "my": "我的",
+    "compat": "💑 合婚配對",
+    "naming": "✍️ 命名／姓名鑑定",
+    "dream": "🌙 解夢",
+    "tarot": "🃏 塔羅牌",
+    "face": "👁️ 面相",
+    "date": "📅 擇日",
+    "register": "📋 登錄命理"
   },
   "common": {
     "cancel": "取消",
@@ -47,7 +54,26 @@
     "todayLabel": "今天",
     "inputLabel": "輸入出生日期時辰",
     "aboutTitle": "關於今日／明日運勢",
-    "weekAdviceLabel": "本週建議"
+    "weekAdviceLabel": "本週建議",
+    "autoFill": "的生日已自動填入",
+    "year": "年生",
+    "todayFortune": "今日運勢",
+    "tomorrowFortune": "明日運勢",
+    "luckyNumber": "幸運數字",
+    "luckyColor": "幸運色",
+    "luckyDir": "幸運方位",
+    "luckyTime": "幸運時段",
+    "aboutDesc": "日運是分析今日日辰與您四柱日干之間的相互作用。即使是同一天，每個人與日辰的關係不同，運勢也會有所差異。",
+    "analysisTitle": "運勢分析項目",
+    "analysis1": "綜合運 — 今日整體氣運",
+    "analysis2": "愛情運 — 戀愛·婚姻·人際關係",
+    "analysis3": "財運 — 金錢·投資·支出",
+    "analysis4": "事業運 — 工作·求職·創業",
+    "analysis5": "健康運 — 身心健康",
+    "analysisDesc": "每天午夜日辰更換，提前確認明日運勢，為新的一天做好準備。",
+    "solar": "陽曆",
+    "lunar": "農曆",
+    "leapLunar": "農曆(閏月)"
   },
   "pricing": {
     "title": "💎 購買服務",
@@ -59,5 +85,14 @@
     "myCash": "我的點數",
     "myTickets": "我的使用券",
     "viewHistory": "查看紀錄 →"
+  },
+  "footer": {
+    "terms": "服務條款",
+    "privacy": "隱私權政策",
+    "contact": "聯絡我們",
+    "company": "公司：BiZ Global · 負責人：鄭志勳 · 統編：760-40-01387",
+    "address": "地址：韓國京畿道龍仁市 · 電話：+82-10-4348-4389 · 信箱：contact@saju-today.com",
+    "bizNum": "通信販賣業申報號碼：申報準備中",
+    "copyright": "© 2025 BiZ Global All rights reserved."
   }
 }
