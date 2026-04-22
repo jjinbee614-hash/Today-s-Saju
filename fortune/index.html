@@ -1303,7 +1303,17 @@ function autoFillFortune() {
   if (notice) notice.style.display = 'none';
 }
 document.addEventListener('DOMContentLoaded', async function() {
-  await (typeof I18N !== 'undefined' ? I18N.init() : Promise.resolve());
+  if (typeof I18N !== 'undefined') await I18N.init();
+  // 제목/버튼 강제 업데이트
+  var _l = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  var titleEl = document.getElementById('fortune-page-title');
+  var btnEl = document.getElementById('fortune-submit-btn');
+  if (titleEl) {
+    titleEl.textContent = _l==='zh-TW'?'今日運勢':_l==='ja'?'今日の運勢':'오늘의 운세';
+  }
+  if (btnEl) {
+    btnEl.textContent = _l==='zh-TW'?'🌅 查看今日運勢 ✦':_l==='ja'?'🌅 今日の運勢を見る ✦':'🌅 오늘의 운세 보기 ✦';
+  }
   autoFillFortune();
   setFortuneDay('today');
 });
@@ -1362,15 +1372,25 @@ async function setFortuneDay(day) {
   // 버튼 & 제목 변경
   const btn = document.getElementById('fortune-submit-btn');
   const title = document.getElementById('fortune-page-title');
+  var _l = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  var _labels = {
+    ko:    { todayBtn:'🌅 오늘의 운세 보기 ✦', tomorrowBtn:'🌙 내일의 운세 보기 ✦', weekBtn:'📅 이번 주 운세 보기 ✦',
+             todayTitle:'오늘의 운세', tomorrowTitle:'내일의 운세', weekTitle:'이번 주의 운세' },
+    'zh-TW':{ todayBtn:'🌅 查看今日運勢 ✦', tomorrowBtn:'🌙 查看明日運勢 ✦', weekBtn:'📅 查看本週運勢 ✦',
+             todayTitle:'今日運勢', tomorrowTitle:'明日運勢', weekTitle:'本週運勢' },
+    ja:    { todayBtn:'🌅 今日の運勢を見る ✦', tomorrowBtn:'🌙 明日の運勢を見る ✦', weekBtn:'📅 今週の運勢を見る ✦',
+             todayTitle:'今日の運勢', tomorrowTitle:'明日の運勢', weekTitle:'今週の運勢' }
+  };
+  var _lb = _labels[_l] || _labels['ko'];
   if (isWeek) {
-    if (btn) btn.textContent = '📅 이번 주 운세 보기 ✦';
-    if (title) title.textContent = '이번 주의 운세';
+    if (btn) btn.textContent = _lb.weekBtn;
+    if (title) title.textContent = _lb.weekTitle;
   } else if (isToday) {
-    if (btn) btn.textContent = '🌅 오늘의 운세 보기 ✦';
-    if (title) title.textContent = '오늘의 운세';
+    if (btn) btn.textContent = _lb.todayBtn;
+    if (title) title.textContent = _lb.todayTitle;
   } else {
-    if (btn) btn.textContent = '🌙 내일의 운세 보기 ✦';
-    if (title) title.textContent = '내일의 운세';
+    if (btn) btn.textContent = _lb.tomorrowBtn;
+    if (title) title.textContent = _lb.tomorrowTitle;
   }
 
   // 결과 초기화
