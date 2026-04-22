@@ -1696,7 +1696,7 @@ function renderFortune(r) {
   document.getElementById('fortune-main-text').innerHTML = `
     <p style="font-size:13px;line-height:2;margin-bottom:16px;color:#f0e6d3;">${r.summary||''}</p>
     <div style="background:rgba(201,145,58,0.15);border-left:3px solid var(--gold);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;">
-      <div style="font-size:11px;color:#f5c97a;letter-spacing:1px;margin-bottom:6px;">_adviceLabel + '</div>
+      <div style="font-size:11px;color:#f5c97a;letter-spacing:1px;margin-bottom:6px;">${_adviceLabel}</div>
       <p style="font-size:12px;line-height:1.8;margin:0;color:#f0e6d3;">${r.advice||''}</p>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
