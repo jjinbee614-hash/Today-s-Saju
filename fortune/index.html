@@ -1484,9 +1484,9 @@ async function loadWeeklyFortune() {
   const tomD = new Date(); tomD.setDate(todayD.getDate()+1);
   const todayFtimeKey = ftime || '모름';
 
-  const todayCacheKey = 'fortune_v5_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
+  const todayCacheKey = 'fortune_v6_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
     todayD.getFullYear() + (todayD.getMonth()+1) + todayD.getDate();
-  const tomCacheKey = 'fortune_v5_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
+  const tomCacheKey = 'fortune_v6_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
     tomD.getFullYear() + (tomD.getMonth()+1) + tomD.getDate();
 
   try {
