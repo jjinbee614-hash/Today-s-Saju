@@ -1102,6 +1102,40 @@ function calcDayPillar(year, month, day) {
     element: HS_ELEM[hs], description: HS_KOR[hs]+'일 '+EB_KOR[eb]+'일' };
 }
 
+
+// ─── 일간-일지 오행 점수 직접 계산 (AI 없이) ───
+function calcDayScore(dayMasterHs, targetEb) {
+  // 오행 인덱스: 목(0)화(1)토(2)금(3)수(4)
+  const hsElem = [0,0,1,1,2,2,3,3,4,4]; // 甲乙=목, 丙丁=화, 戊己=토, 庚辛=금, 壬癸=수
+  const ebElem = [4,2,0,0,2,1,1,2,3,3,2,4]; // 子=수,丑=토,寅=목...
+  const myElem = hsElem[dayMasterHs];
+  const dayElem = ebElem[targetEb];
+  // 상생: 목→화→토→금→수→목
+  const generates = [1,2,3,4,0]; // 목생화, 화생토, 토생금, 금생수, 수생목
+  // 상극: 목→토→수→화→금→목
+  const controls  = [2,3,4,0,1]; // 목극토, 화극금, 토극수, 금극목, 수극화
+
+  let base = 70;
+  if (generates[myElem] === dayElem) base = 82; // 내가 생해주는 오행 → 설기 (보통)
+  else if (generates[dayElem] === myElem) base = 85; // 일진이 나를 생해줌 → 길
+  else if (controls[myElem] === dayElem) base = 75; // 내가 극하는 오행 → 보통
+  else if (controls[dayElem] === myElem) base = 52; // 일진이 나를 극함 → 흉
+  else if (myElem === dayElem) base = 72; // 비화 → 보통
+  return base;
+}
+
+function calcFortuneScores(dayMasterHs, targetEb) {
+  const base = calcDayScore(dayMasterHs, targetEb);
+  // 항목별로 ±5 범위에서 다르게
+  return {
+    overall: base,
+    love:    Math.min(99, Math.max(40, base + [-5,-3,0,3,5][targetEb % 5])),
+    money:   Math.min(99, Math.max(40, base + [-3,0,5,-5,3][targetEb % 5])),
+    work:    Math.min(99, Math.max(40, base + [3,-5,-3,5,0][targetEb % 5])),
+    health:  Math.min(99, Math.max(40, base + [0,5,-5,0,-3][targetEb % 5])),
+  };
+}
+
 function calcTimePillar(dayHs, timeName) {
   const timeMap = {자시:0,축시:1,인시:2,묘시:3,진시:4,사시:5,오시:6,미시:7,신시:8,유시:9,술시:10,해시:11,모름:-1};
   const ti = timeMap[timeName] ?? -1;
@@ -1317,7 +1351,7 @@ async function loadFortune() {
 
   // ── 캐시 확인 (생년월일+오늘날짜 기준) ──
   // 캐시 키를 실제 분석 날짜 기준으로 통일 (어제의 내일 = 오늘의 오늘)
-  const cacheKey = `fortune_v6_${fy}_${fm}_${fd}_${ftime}_${today.getFullYear()}${today.getMonth()+1}${today.getDate()}`;
+  const cacheKey = `fortune_v7_${fy}_${fm}_${fd}_${ftime}_${today.getFullYear()}${today.getMonth()+1}${today.getDate()}`;
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try {
@@ -1363,6 +1397,13 @@ async function loadFortune() {
     // 캐시 저장
     try { localStorage.setItem(cacheKey, JSON.stringify(r)); } catch(e) {}
 
+    // JS 직접 계산 점수로 보정 (오늘/내일/이번주 일관성 유지)
+    const _refScores = calcFortuneScores(fp.dp.hs, todayPillars.dp.eb);
+    r.overall = _refScores.overall;
+    r.love    = _refScores.love;
+    r.money   = _refScores.money;
+    r.work    = _refScores.work;
+    r.health  = _refScores.health;
     renderFortune(r);
 
   } catch(err) {
@@ -1408,7 +1449,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 확인
-  const cacheKey = 'fortune_week_v9_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  const cacheKey = 'fortune_week_v10_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1451,11 +1492,13 @@ async function loadWeeklyFortune() {
 순수 JSON만 출력하세요. 코드블록 없이.
 {"score":75,"keyword":"키워드 2~3글자","advice":"조언 1문장"}`;
 
+    // 점수는 JS 직접 계산 (오늘/내일과 동일 기준)
+    const _ds = calcDayScore(fp.dp.hs, dPillar.eb);
     try {
       const r = await callAPI(prompt);
-      dayResults.push({ day: dName, score: r.score||70, keyword: r.keyword||'', advice: r.advice||'' });
+      dayResults.push({ day: dName, score: _ds, keyword: r.keyword||'', advice: r.advice||'' });
     } catch(e) {
-      dayResults.push({ day: dName, score: 70, keyword: '분석불가', advice: '일시적 오류가 발생했습니다.' });
+      dayResults.push({ day: dName, score: _ds, keyword: '분석불가', advice: '일시적 오류가 발생했습니다.' });
     }
   }
 
@@ -1479,34 +1522,7 @@ async function loadWeeklyFortune() {
     weekAdvice: summaryR.weekAdvice || ''
   };
 
-  // 오늘/내일 운세 캐시에서 점수 읽어서 이번주 해당 요일에 덮어쓰기
-  const todayD = new Date();
-  const tomD = new Date(); tomD.setDate(todayD.getDate()+1);
-  const todayFtimeKey = ftime || '모름';
 
-  const todayCacheKey = 'fortune_v6_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
-    todayD.getFullYear() + (todayD.getMonth()+1) + todayD.getDate();
-  const tomCacheKey = 'fortune_v6_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
-    tomD.getFullYear() + (tomD.getMonth()+1) + tomD.getDate();
-
-  try {
-    const todayCache = localStorage.getItem(todayCacheKey);
-    if (todayCache) {
-      const td = JSON.parse(todayCache);
-      const todayIdx = todayD.getDay(); // 0=일~6=토
-      if (result.days[todayIdx]) {
-        result.days[todayIdx].score = td.overall || result.days[todayIdx].score;
-      }
-    }
-    const tomCache = localStorage.getItem(tomCacheKey);
-    if (tomCache) {
-      const tm = JSON.parse(tomCache);
-      const tomIdx = tomD.getDay();
-      if (result.days[tomIdx]) {
-        result.days[tomIdx].score = tm.overall || result.days[tomIdx].score;
-      }
-    }
-  } catch(e) {}
 
   try { localStorage.setItem(cacheKey, JSON.stringify(result)); } catch(e) {}
   renderWeeklyFortune(result, weekStr);
