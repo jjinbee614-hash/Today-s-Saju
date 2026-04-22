@@ -6,7 +6,6 @@
   <title>꿈 해몽 — AI가 분석하는 오늘의 꿈 | 오늘의 사주</title>
   <meta name="description" content="간밤에 꾼 꿈을 입력하면 AI가 길흉을 판단하고 상세하게 해몽해드립니다."/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/i18n.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root { --bg:#0e0b14; --bg2:#13101c; --bg3:#1a1628; --gold:#c9a84c; --gold-light:#e8c96a; --gold-dim:rgba(201,168,76,0.15); --text:#f0ead6; --text2:#a89c80; --text3:#5c5445; --border:rgba(201,168,76,0.12); --border2:rgba(255,255,255,0.06); --red:#c0392b; --blue:#1a4a6b; --ink:#f0ead6; --paper:#0e0b14; --card:#13101c; --muted:#a89c80; }
@@ -64,7 +63,6 @@
   <div class="nav-links">
     <a href="https://saju-today.com" class="nav-btn" style="text-decoration:none;">홈</a>
     <div id="nav-user-area" style="display:flex;align-items:center;"></div>
-    <button id="lang-btn" onclick="I18N.showPicker()" style="background:none;border:1px solid rgba(201,168,76,0.3);padding:6px 12px;border-radius:20px;color:#c9a84c;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">🌐 KO</button>
     <button class="nav-btn" id="menu-btn" onclick="toggleMenu()">☰ 메뉴</button>
   </div>
 </nav>
@@ -375,15 +373,9 @@ async function runDream() {
   }
 
   try {
-    let prompt = `꿈 해몽 전문가. 순수 JSON만 출력.
+    const prompt = `꿈 해몽 전문가. 순수 JSON만 출력.
 꿈:${dreamText} 분위기:${dreamMood}${sajuInfo}
 {"gilhung":"대길","gilhungScore":85,"gilhungEmoji":"🟢","summary":"한줄요약","interpretation":"해몽 2문장","symbols":[{"symbol":"요소","meaning":"의미"}],"fortune":{"wealth":"재물","love":"애정","career":"직업","caution":"주의"},"advice":"조언 1문장"}`;
-
-    
-// 언어 suffix 추가
-if (typeof I18N !== 'undefined' && I18N.getPromptSuffix()) {
-  prompt += '\n\n' + I18N.getPromptSuffix();
-}
 
     const r = await callAPI(prompt);
 

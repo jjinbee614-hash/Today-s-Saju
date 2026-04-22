@@ -6,7 +6,6 @@
   <title>관상 분석 — AI가 읽는 얼굴의 운명 | 오늘의 사주</title>
   <meta name="description" content="사진 한 장으로 AI가 전통 관상학 관점에서 성격, 재물운, 애정운, 직업운을 분석해드립니다."/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/i18n.js"></script>
 
 <script>
 // ─── 이용권/캐시 체크 함수 ───
@@ -185,7 +184,6 @@ function showCreditModal(serviceName) {
   <div class="nav-links">
     <a href="https://saju-today.com" class="nav-btn" style="text-decoration:none;">홈</a>
     <div id="nav-user-area" style="display:flex;align-items:center;"></div>
-    <button id="lang-btn" onclick="I18N.showPicker()" style="background:none;border:1px solid rgba(201,168,76,0.3);padding:6px 12px;border-radius:20px;color:#c9a84c;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">🌐 KO</button>
     <button class="nav-btn" id="menu-btn" onclick="toggleMenu()">☰ 메뉴</button>
   </div>
 </nav>
@@ -311,10 +309,6 @@ function showToast(msg) {
 
 const WORKER_URL = 'https://saju-proxy.jjinbee614.workers.dev';
 
-// 언어 suffix 추가
-if (typeof I18N !== 'undefined' && I18N.getPromptSuffix()) {
-  prompt += '\n\n' + I18N.getPromptSuffix();
-}
 function callAPI(prompt) {
   return fetch(WORKER_URL, {
     method:"POST",
@@ -399,7 +393,7 @@ async function runFaceReading() {
   resultEl.innerHTML = '<div class="saju-loading"><div class="big-spinner"></div><p>관상을 분석하고 있습니다...<br>얼굴의 특징을 하나하나 살피는 중이에요.</p></div>';
   resultEl.scrollIntoView({behavior:'smooth', block:'start'});
 
-  let prompt = `당신은 동양 관상학 전문가입니다. 이 사람의 얼굴 사진을 보고 전통 관상학 관점에서 상세하게 분석해주세요.
+  const prompt = `당신은 동양 관상학 전문가입니다. 이 사람의 얼굴 사진을 보고 전통 관상학 관점에서 상세하게 분석해주세요.
 성별: ${gender}
 
 순수 JSON만 출력하세요. 코드블록 없이.
