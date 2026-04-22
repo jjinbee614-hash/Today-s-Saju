@@ -1535,6 +1535,9 @@ if (typeof I18N !== 'undefined' && I18N.getPromptSuffix()) {
 
 
 async function loadWeeklyFortune() {
+  var _wl = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  var _weekTitle = _wl==='zh-TW'?'📅 本週運勢':_wl==='ja'?'📅 今週の運勢':'📅 이번 주의 운세';
+  var _analyzingMsg = _wl==='zh-TW'?'正在分析本週運勢...':_wl==='ja'?'今週の運勢を分析中...':'이번 주 운세를 분석하고 있어요...';
   const birth = document.getElementById('fortune-birth').value.trim();
   if (!birth) { showToast('생년월일을 입력해 주세요'); return; }
 
@@ -1578,7 +1581,7 @@ async function loadWeeklyFortune() {
     </div>
     <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:8px;padding:24px;text-align:center;">
       <div class="spinner" style="margin:0 auto 16px;"></div>
-      <p style="font-size:13px;color:#f0e6d3;">${typeof I18N!=='undefined'&&I18N.getLang()==='zh-TW'?'正在分析本週運勢...':typeof I18N!=='undefined'&&I18N.getLang()==='ja'?'今週の運勢を分析中...':'이번 주 운세를 분석하고 있어요...'}</p>
+      <p style="font-size:13px;color:#f0e6d3;">${_analyzingMsg}</p>
     </div>`;
 
   // 캐시 키
