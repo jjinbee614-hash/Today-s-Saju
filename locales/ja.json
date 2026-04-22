@@ -1,0 +1,40 @@
+{
+  "lang": "ja",
+  "langName": "日本語",
+  "promptSuffix": "すべての回答を日本語でお答えください。",
+  "nav": {
+    "home": "ホーム", "saju": "四柱", "fortune": "運勢",
+    "pricing": "購入", "more": "もっと",
+    "login": "ログイン", "logout": "ログアウト", "my": "マイページ"
+  },
+  "common": {
+    "cancel": "キャンセル", "confirm": "使用する", "buy": "購入する",
+    "charge": "チャージする", "loading": "分析中...",
+    "loginRequired": "ログインが必要です",
+    "useTicket": "利用券を1回使用しますか？",
+    "myTickets": "保有利用券", "myCash": "保有ポイント",
+    "needTicket": "このサービスには利用券が必要です。",
+    "goToPricing": "🎟 利用券を購入する",
+    "hasCash": "保有ポイントで利用券を購入してご利用ください！",
+    "noCash": "ポイントをチャージして利用券を購入してください。"
+  },
+  "fortune": {
+    "title": "今日の運勢",
+    "sub": "生年月日を入力すると、AIが四柱推命で運勢を占います。",
+    "today": "🌅 今日", "tomorrow": "🌙 明日", "week": "📅 今週",
+    "inputPlaceholder": "例：1995年5月15日 午の刻",
+    "btnToday": "🌅 今日の運勢を見る ✦",
+    "btnTomorrow": "🌙 明日の運勢を見る ✦",
+    "btnWeek": "📅 今週の運勢を見る ✦",
+    "overall": "総合運", "love": "恋愛運", "money": "金運",
+    "work": "仕事運", "health": "健康運",
+    "advice": "今日のアドバイス", "todayLabel": "今日"
+  },
+  "pricing": {
+    "title": "💎 サービス購入",
+    "cashTitle": "💰 ポイントチャージ", "ticketTitle": "🎟 利用券購入",
+    "planTitle": "📅 長期プラン", "chargeBtn": "チャージする",
+    "buyWithCash": "ポイントで購入", "myCash": "保有ポイント",
+    "myTickets": "保有利用券", "viewHistory": "履歴を見る →"
+  }
+}
