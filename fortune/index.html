@@ -1213,9 +1213,14 @@ function autoFillFortune() {
   const note = document.getElementById('fortune-autofill-note');
   if (note) {
     note.style.display = 'flex';
-    const autoMsg = typeof I18N !== 'undefined' && I18N.getLang() !== 'ko'
-      ? (I18N.getLang() === 'zh-TW' ? '✅ 已自動填入生日資料' : '✅ 生年月日が自動入力されました')
-      : \`✅ \${name || ''}님의 생년월일이 자동 입력됐어요\`;
+    var autoMsg;
+    if (typeof I18N !== 'undefined' && I18N.getLang() === 'zh-TW') {
+      autoMsg = '✅ 已自動填入生日資料';
+    } else if (typeof I18N !== 'undefined' && I18N.getLang() === 'ja') {
+      autoMsg = '✅ 生年月日が自動入力されました';
+    } else {
+      autoMsg = '✅ ' + (name || '') + '님의 생년월일이 자동 입력됐어요';
+    }
     note.innerHTML = autoMsg;
   }
   const notice = document.getElementById('fortune-register-notice');
