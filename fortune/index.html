@@ -1492,8 +1492,10 @@ async function loadFortune() {
   }
 
   document.getElementById('fortune-score-cards').innerHTML = '';
+  var _ll = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  var _loadMsg = _ll==='zh-TW'?'AI正在分析今日運勢...':_ll==='ja'?'AIが運勢を分析中です...':'AI가 오늘의 운세를 살피고 있습니다...';
   document.getElementById('fortune-main-text').innerHTML =
-    `<div class="analysis-loading"><div class="spinner"></div> AI가 오늘의 운세를 살피고 있습니다...</div>`;
+    '<div class="analysis-loading"><div class="spinner"></div> ' + _loadMsg + '</div>';
 
   try {
     let prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 사주팔자와 오늘 일진을 바탕으로 오늘 하루 운세를 분석하세요.
