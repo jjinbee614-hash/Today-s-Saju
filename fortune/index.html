@@ -1481,7 +1481,8 @@ async function loadFortune() {
 
   // ── 캐시 확인 (생년월일+오늘날짜 기준) ──
   // 캐시 키를 실제 분석 날짜 기준으로 통일 (어제의 내일 = 오늘의 오늘)
-  const cacheKey = `fortune_v3_${fy}_${fm}_${fd}_${ftime}_${today.getFullYear()}${today.getMonth()+1}${today.getDate()}`;
+  var _dLang = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+    const cacheKey = `fortune_v4_${_dLang}_${fy}_${fm}_${fd}_${ftime}_${today.getFullYear()}${today.getMonth()+1}${today.getDate()}`;
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try {
@@ -1585,7 +1586,8 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 키
-  const cacheKey = 'fortune_week_v2_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  var _cLang = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  const cacheKey = 'fortune_week_v3_'+_cLang+'_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
