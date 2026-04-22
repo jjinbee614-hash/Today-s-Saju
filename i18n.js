@@ -94,6 +94,9 @@ const I18N = {
     if (!btn) return;
     const flags = { ko: '🇰🇷 KO', 'zh-TW': '🇹🇼 TW', ja: '🇯🇵 JP' };
     btn.textContent = flags[this._lang] || '🌐';
+    // 언어 변경 후 페이지별 함수 재실행
+    if (typeof autoFillFortune === 'function') autoFillFortune();
+    if (typeof setFortuneDay === 'function') setFortuneDay(typeof fortuneDay !== 'undefined' ? fortuneDay : 'today');
   },
 
   showPicker() {
