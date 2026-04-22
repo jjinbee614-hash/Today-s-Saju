@@ -160,4 +160,7 @@ const I18N = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => I18N.init());
+document.addEventListener('DOMContentLoaded', () => {
+  // fortune 페이지는 자체 DOMContentLoaded에서 await init() 호출
+  if (typeof autoFillFortune === 'undefined') I18N.init();
+});
