@@ -1447,7 +1447,15 @@ async function loadFortune() {
   const todayStr = today.getFullYear() + '년 ' + (today.getMonth()+1) + '월 ' + today.getDate() + '일';
   const isToday = fortuneDay === 'today';
 
-  document.getElementById('fortune-today-date').textContent = todayStr + ' (' + daysArr[today.getDay()] + ')';
+  var _dateStr;
+  if (_li === 'zh-TW') {
+    _dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日 (' + daysArr[today.getDay()] + ')';
+  } else if (_li === 'ja') {
+    _dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日 (' + daysArr[today.getDay()] + ')';
+  } else {
+    _dateStr = todayStr + ' (' + daysArr[today.getDay()] + ')';
+  }
+  document.getElementById('fortune-today-date').textContent = _dateStr;
   var _ti = typeof I18N !== 'undefined' ? I18N : null;
   var _yearSuffix = _ti ? _ti.get('fortune.year') : '년생';
   var _dayLabel = isToday ? (_ti ? _ti.get('fortune.todayFortune') : '오늘의 운세') : (_ti ? _ti.get('fortune.tomorrowFortune') : '내일의 운세');
@@ -1551,18 +1559,26 @@ async function loadWeeklyFortune() {
   const thisWeekSaturday = new Date(thisWeekSunday);
   thisWeekSaturday.setDate(thisWeekSunday.getDate() + 6);
 
-  const weekStr = (thisWeekSunday.getMonth()+1)+'월 '+thisWeekSunday.getDate()+'일 ~ '+(thisWeekSaturday.getMonth()+1)+'월 '+thisWeekSaturday.getDate()+'일';
+  var _wl = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  var weekStr;
+  if (_wl === 'zh-TW') {
+    weekStr = (thisWeekSunday.getMonth()+1)+'月'+thisWeekSunday.getDate()+'日 ～ '+(thisWeekSaturday.getMonth()+1)+'月'+thisWeekSaturday.getDate()+'日';
+  } else if (_wl === 'ja') {
+    weekStr = (thisWeekSunday.getMonth()+1)+'月'+thisWeekSunday.getDate()+'日 ～ '+(thisWeekSaturday.getMonth()+1)+'月'+thisWeekSaturday.getDate()+'日';
+  } else {
+    weekStr = (thisWeekSunday.getMonth()+1)+'월 '+thisWeekSunday.getDate()+'일 ~ '+(thisWeekSaturday.getMonth()+1)+'월 '+thisWeekSaturday.getDate()+'일';
+  }
 
   const weekContent = document.getElementById('fortune-week-content');
   weekContent.style.display = 'block';
   weekContent.innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
-      <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:16px;">📅 이번 주의 운세</h3>
+      <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:16px;">${_weekTitle}</h3>
       <span style="font-size:13px;color:var(--muted);">${weekStr}</span>
     </div>
     <div style="background:linear-gradient(135deg,#1a1008,#2d1f0e);border-radius:8px;padding:24px;text-align:center;">
       <div class="spinner" style="margin:0 auto 16px;"></div>
-      <p style="font-size:13px;color:#f0e6d3;">이번 주 운세를 분석하고 있어요...</p>
+      <p style="font-size:13px;color:#f0e6d3;">${typeof I18N!=='undefined'&&I18N.getLang()==='zh-TW'?'正在分析本週運勢...':typeof I18N!=='undefined'&&I18N.getLang()==='ja'?'今週の運勢を分析中...':'이번 주 운세를 분석하고 있어요...'}</p>
     </div>`;
 
   // 캐시 키
@@ -1631,7 +1647,16 @@ if (typeof I18N !== 'undefined' && I18N.getPromptSuffix()) {
 function renderWeeklyFortune(r, weekStr) {
   const weekContent = document.getElementById('fortune-week-content');
   const today = new Date();
-  const todayDayIdx = today.getDay(); // 브라우저 로컬(KST) 기준 0=일,1=월,...,6=토
+  const todayDayIdx = today.getDay();
+  var _wrl = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  const dayLabels = _wrl==='zh-TW'?['日','一','二','三','四','五','六']:
+                    _wrl==='ja'?['日','月','火','水','木','金','土']:
+                    ['일','월','화','수','목','금','토'];
+  var _weekTitle = _wrl==='zh-TW'?'📅 本週運勢':_wrl==='ja'?'📅 今週の運勢':'📅 이번 주의 운세';
+  var _bestDayLabel = _wrl==='zh-TW'?'✨ 幸運日':_wrl==='ja'?'✨ ラッキーデー':'✨ 행운의 날';
+  var _cautiousLabel = _wrl==='zh-TW'?'⚠️ 注意日':_wrl==='ja'?'⚠️ 注意日':'⚠️ 주의';
+  var _weekAdviceLabel = _wrl==='zh-TW'?'💡 本週建議':_wrl==='ja'?'💡 今週のアドバイス':'💡 이번 주 조언';
+  var _todayLabel = _wrl==='zh-TW'?'今天':_wrl==='ja'?'今日':'오늘';
 
   const daysHTML = (r.days || []).map(function(d, i) {
     const score = d.score || 70;
@@ -1640,7 +1665,7 @@ function renderWeeklyFortune(r, weekStr) {
     return `<div style="background:${isToday ? 'rgba(201,168,76,0.1)' : 'var(--card)'};border:${isToday ? '1px solid var(--gold)' : '1px solid var(--border)'};border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;">
       <div style="width:36px;text-align:center;flex-shrink:0;">
         <div style="font-size:13px;font-weight:700;color:${isToday ? 'var(--gold)' : 'var(--muted)'};">${d.day}</div>
-        ${isToday ? '<div style="font-size:9px;color:var(--gold);margin-top:2px;">오늘</div>' : ''}
+        ${isToday ? '<div style="font-size:9px;color:var(--gold);margin-top:2px;">' + _todayLabel + '</div>' : ''}
       </div>
       <div style="flex:1;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -1657,7 +1682,7 @@ function renderWeeklyFortune(r, weekStr) {
 
   weekContent.innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
-      <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:16px;">📅 이번 주의 운세</h3>
+      <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:16px;">${_weekTitle}</h3>
       <span style="font-size:13px;color:var(--muted);">${weekStr}</span>
     </div>
 
