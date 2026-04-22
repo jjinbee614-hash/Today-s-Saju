@@ -1313,7 +1313,7 @@ async function runDatePick() {
   // 해당 월 일수 계산
   const daysInMonth = new Date(year, month, 0).getDate();
 
-  const prompt = `당신은 전통 명리학 택일 전문가입니다. ${year}년 ${month}월에 ${selectedPurpose}을(를) 위한 가장 좋은 날짜를 추천해주세요.${sajuInfo}
+  let prompt = `당신은 전통 명리학 택일 전문가입니다. ${year}년 ${month}월에 ${selectedPurpose}을(를) 위한 가장 좋은 날짜를 추천해주세요.${sajuInfo}
 
 ${year}년 ${month}월은 총 ${daysInMonth}일입니다. 이 달의 일진(日辰)을 분석하여 ${selectedPurpose}에 적합한 날짜 TOP 5를 추천해주세요.
 ${selectedPurpose}의 특성에 맞는 오행과 천간지지를 고려하고, 손 없는 날, 길신이 있는 날을 우선으로 추천해주세요.

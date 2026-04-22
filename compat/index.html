@@ -1319,7 +1319,7 @@ async function runCompat() {
   const myInfo    = `${myY}년 ${myM}월 ${myD}일 ${myT} (${compatMyGender}) — ${fmt(mySaju)}`;
   const theirInfo = `${thY}년 ${thM}월 ${thD}일 ${thT} (${compatTheirGender}) — ${fmt(theirSaju)}`;
 
-  const prompt = `당신은 사주명리학 전문가입니다. 두 사람의 사주 궁합을 분석해 JSON으로만 응답하세요. 코드블록 없이 순수 JSON만 출력하세요.
+  let prompt = `당신은 사주명리학 전문가입니다. 두 사람의 사주 궁합을 분석해 JSON으로만 응답하세요. 코드블록 없이 순수 JSON만 출력하세요.
 
 【나】${myInfo}
 【상대방】${theirInfo}

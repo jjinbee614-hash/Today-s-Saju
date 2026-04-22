@@ -399,7 +399,7 @@ async function runFaceReading() {
   resultEl.innerHTML = '<div class="saju-loading"><div class="big-spinner"></div><p>관상을 분석하고 있습니다...<br>얼굴의 특징을 하나하나 살피는 중이에요.</p></div>';
   resultEl.scrollIntoView({behavior:'smooth', block:'start'});
 
-  const prompt = `당신은 동양 관상학 전문가입니다. 이 사람의 얼굴 사진을 보고 전통 관상학 관점에서 상세하게 분석해주세요.
+  let prompt = `당신은 동양 관상학 전문가입니다. 이 사람의 얼굴 사진을 보고 전통 관상학 관점에서 상세하게 분석해주세요.
 성별: ${gender}
 
 순수 JSON만 출력하세요. 코드블록 없이.

@@ -1333,7 +1333,7 @@ async function loadFortune() {
     `<div class="analysis-loading"><div class="spinner"></div> AI가 오늘의 운세를 살피고 있습니다...</div>`;
 
   try {
-    const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 사주팔자와 오늘 일진을 바탕으로 오늘 하루 운세를 분석하세요.
+    let prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 사주팔자와 오늘 일진을 바탕으로 오늘 하루 운세를 분석하세요.
 
 【이 사람의 사주】
 - 생년월일시: ${fy}년 ${fm}월 ${fd}일 ${ftime}
@@ -1441,7 +1441,7 @@ async function loadWeeklyFortune() {
   const weekPillarStr = weekDayPillars.map(function(d){ return d.name+'('+d.date+') '+d.pillar; }).join(', ');
   const currentYear = new Date().getFullYear();
 
-  const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 이번 주(${weekStr}) 운세를 요일별로 분석하세요.
+  let prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 이번 주(${weekStr}) 운세를 요일별로 분석하세요.
 
 【사주】
 - 생년월일시: ${fy}년 ${fm}월 ${fd}일 ${ftime}
@@ -1788,7 +1788,7 @@ async function runCompat() {
   const myInfo    = `${myY}년 ${myM}월 ${myD}일 ${myT} (${compatMyGender}) — ${fmt(mySaju)}`;
   const theirInfo = `${thY}년 ${thM}월 ${thD}일 ${thT} (${compatTheirGender}) — ${fmt(theirSaju)}`;
 
-  const prompt = `당신은 사주명리학 전문가입니다. 두 사람의 사주 궁합을 분석해 JSON으로만 응답하세요. 코드블록 없이 순수 JSON만 출력하세요.
+  let prompt = `당신은 사주명리학 전문가입니다. 두 사람의 사주 궁합을 분석해 JSON으로만 응답하세요. 코드블록 없이 순수 JSON만 출력하세요.
 
 【나】${myInfo}
 【상대방】${theirInfo}

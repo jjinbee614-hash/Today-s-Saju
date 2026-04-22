@@ -368,7 +368,7 @@ async function runTarot() {
     return pos + ': ' + c.name + '(' + c.en + ') — ' + c.meaning;
   }).join('\n');
 
-  const prompt = '타로 전문가. 순수 JSON만 출력.\n카드:' + cardInfo + '\n질문:' + (question || '오늘의 전반적인 운세') + '\n{"summary":"전체 한줄요약","cards":[{"name":"카드명","position":"위치","interpretation":"해석 2문장","advice":"조언 1문장"}],"overall":"종합 해석 2문장","action":"지금 당장 할 행동 1문장"}';
+  let prompt = '타로 전문가. 순수 JSON만 출력.\n카드:' + cardInfo + '\n질문:' + (question || '오늘의 전반적인 운세') + '\n{"summary":"전체 한줄요약","cards":[{"name":"카드명","position":"위치","interpretation":"해석 2문장","advice":"조언 1문장"}],"overall":"종합 해석 2문장","action":"지금 당장 할 행동 1문장"}';
 
   try {
     

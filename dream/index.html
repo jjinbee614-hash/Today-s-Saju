@@ -375,7 +375,7 @@ async function runDream() {
   }
 
   try {
-    const prompt = `꿈 해몽 전문가. 순수 JSON만 출력.
+    let prompt = `꿈 해몽 전문가. 순수 JSON만 출력.
 꿈:${dreamText} 분위기:${dreamMood}${sajuInfo}
 {"gilhung":"대길","gilhungScore":85,"gilhungEmoji":"🟢","summary":"한줄요약","interpretation":"해몽 2문장","symbols":[{"symbol":"요소","meaning":"의미"}],"fortune":{"wealth":"재물","love":"애정","career":"직업","caution":"주의"},"advice":"조언 1문장"}`;
 
