@@ -69,6 +69,34 @@ const I18N = {
       else if (day === 'tomorrow') fortuneBtn.textContent = this.get('fortune.btnTomorrow');
       else fortuneBtn.textContent = this.get('fortune.btnToday');
     }
+    // fortune 페이지 제목
+    const fortuneTitle = document.getElementById('fortune-page-title');
+    if (fortuneTitle) {
+      const day = typeof fortuneDay !== 'undefined' ? fortuneDay : 'today';
+      if (day === 'week') fortuneTitle.textContent = this.get('fortune.week').replace(/[🌅🌙📅]\s*/,'') + ' ' + this.get('fortune.weekFortune');
+      else if (day === 'tomorrow') fortuneTitle.textContent = this.get('fortune.tomorrowFortune') || '明日運勢';
+      else fortuneTitle.textContent = this.get('fortune.todayFortune') || '今日運勢';
+    }
+    // fortune 탭 버튼
+    const todayTab = document.getElementById('fortune-today-tab');
+    const tomorrowTab = document.getElementById('fortune-tomorrow-tab');
+    const weekTab = document.getElementById('fortune-week-tab');
+    if (todayTab) todayTab.textContent = this.get('fortune.today') || '🌅 오늘';
+    if (tomorrowTab) tomorrowTab.textContent = this.get('fortune.tomorrow') || '🌙 내일';
+    if (weekTab) weekTab.textContent = this.get('fortune.week') || '📅 이번 주';
+    // submit 버튼
+    const submitBtn = document.getElementById('fortune-submit-btn');
+    if (submitBtn) {
+      const day2 = typeof fortuneDay !== 'undefined' ? fortuneDay : 'today';
+      if (day2 === 'week') submitBtn.textContent = this.get('fortune.btnWeek');
+      else if (day2 === 'tomorrow') submitBtn.textContent = this.get('fortune.btnTomorrow');
+      else submitBtn.textContent = this.get('fortune.btnToday');
+    }
+    // 양력/음력 버튼
+    const solarBtn = document.getElementById('cal-solar-btn');
+    const lunarBtn = document.getElementById('cal-lunar-btn');
+    if (solarBtn) solarBtn.textContent = this.get('fortune.solar') || '양력';
+    if (lunarBtn) lunarBtn.textContent = this.get('fortune.lunar') || '음력';
     // nav 메뉴 번역
     const menuMap = {
       'https://saju-today.com/saju': 'services.saju',
