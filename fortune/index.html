@@ -1408,7 +1408,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 확인
-  const cacheKey = 'fortune_week_v8_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  const cacheKey = 'fortune_week_v9_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1478,6 +1478,35 @@ async function loadWeeklyFortune() {
     cautiousDayReason: summaryR.cautiousDayReason || '',
     weekAdvice: summaryR.weekAdvice || ''
   };
+
+  // 오늘/내일 운세 캐시에서 점수 읽어서 이번주 해당 요일에 덮어쓰기
+  const todayD = new Date();
+  const tomD = new Date(); tomD.setDate(todayD.getDate()+1);
+  const todayFtimeKey = ftime || '모름';
+
+  const todayCacheKey = 'fortune_v5_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
+    todayD.getFullYear() + (todayD.getMonth()+1) + todayD.getDate();
+  const tomCacheKey = 'fortune_v5_' + fy + '_' + fm + '_' + fd + '_' + todayFtimeKey + '_' +
+    tomD.getFullYear() + (tomD.getMonth()+1) + tomD.getDate();
+
+  try {
+    const todayCache = localStorage.getItem(todayCacheKey);
+    if (todayCache) {
+      const td = JSON.parse(todayCache);
+      const todayIdx = todayD.getDay(); // 0=일~6=토
+      if (result.days[todayIdx]) {
+        result.days[todayIdx].score = td.overall || result.days[todayIdx].score;
+      }
+    }
+    const tomCache = localStorage.getItem(tomCacheKey);
+    if (tomCache) {
+      const tm = JSON.parse(tomCache);
+      const tomIdx = tomD.getDay();
+      if (result.days[tomIdx]) {
+        result.days[tomIdx].score = tm.overall || result.days[tomIdx].score;
+      }
+    }
+  } catch(e) {}
 
   try { localStorage.setItem(cacheKey, JSON.stringify(result)); } catch(e) {}
   renderWeeklyFortune(result, weekStr);
