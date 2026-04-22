@@ -6,6 +6,7 @@
   <title>AI 궁합 분석 | 오늘의 사주</title>
   <meta name="description" content="연인·배우자·친구와의 사주 궁합을 AI가 종합 분석합니다."/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/i18n.js"></script>
 
 <script>
 // ─── 이용권/캐시 체크 함수 ───
@@ -931,6 +932,7 @@ function showCreditModal(serviceName) {
   <div class="nav-links">
     <a href="https://saju-today.com" class="nav-btn" style="text-decoration:none;">홈</a>
     <div id="nav-user-area" style="display:flex;align-items:center;"></div>
+    <button id="lang-btn" onclick="I18N.showPicker()" style="background:none;border:1px solid rgba(201,168,76,0.3);padding:6px 12px;border-radius:20px;color:#c9a84c;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">🌐 KO</button>
     <button class="nav-btn" id="menu-btn" onclick="toggleMenu()">☰ 메뉴</button>
   </div>
 </nav>
@@ -1325,6 +1327,12 @@ async function runCompat() {
 {"totalScore":85,"summary":"두 사람 궁합 한줄 핵심 (예: 서로를 성장시키는 상생의 궁합)","overview":"이 궁합의 전체 흐름 2~3문장","strengths":["잘 맞는 점 1","잘 맞는 점 2","잘 맞는 점 3"],"cautions":["주의할 점 1","주의할 점 2","주의할 점 3"],"areas":{"love":{"score":88,"comment":"애정 궁합 설명"},"work":{"score":75,"comment":"재물·일 궁합 설명"},"communication":{"score":82,"comment":"소통 궁합 설명"},"future":{"score":79,"comment":"미래·발전 궁합 설명"}},"tip":"두 사람에게 전하는 핵심 조언 1~2문장"}`;
 
   try {
+    
+// 언어 suffix 추가
+if (typeof I18N !== 'undefined' && I18N.getPromptSuffix()) {
+  prompt += '\n\n' + I18N.getPromptSuffix();
+}
+
     const r = await callAPI(prompt);
     renderCompatResult(r, myY,myM,myD,thY,thM,thD, mySaju,theirSaju);
     const shareDivCompat = document.getElementById('compat-share'); if(shareDivCompat) shareDivCompat.style.display='flex';

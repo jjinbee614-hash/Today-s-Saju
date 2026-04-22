@@ -6,6 +6,7 @@
   <title>타로 카드 — AI 타로 점 | 오늘의 사주</title>
   <meta name="description" content="카드 덱에서 직접 타로 카드를 선택하면 AI가 상세하게 해석해드립니다."/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/i18n.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root { --bg:#0e0b14; --bg2:#13101c; --bg3:#1a1628; --gold:#c9a84c; --gold-light:#e8c96a; --gold-dim:rgba(201,168,76,0.15); --text:#f0ead6; --text2:#a89c80; --text3:#5c5445; --border:rgba(201,168,76,0.12); --border2:rgba(255,255,255,0.06); --red:#c0392b; --blue:#1a4a6b; --ink:#f0ead6; --paper:#0e0b14; --card:#13101c; --muted:#a89c80; }
@@ -73,6 +74,7 @@
   <div class="nav-links">
     <a href="https://saju-today.com" class="nav-btn" style="text-decoration:none;">홈</a>
     <div id="nav-user-area" style="display:flex;align-items:center;"></div>
+    <button id="lang-btn" onclick="I18N.showPicker()" style="background:none;border:1px solid rgba(201,168,76,0.3);padding:6px 12px;border-radius:20px;color:#c9a84c;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">🌐 KO</button>
     <button class="nav-btn" id="menu-btn" onclick="toggleMenu()">☰ 메뉴</button>
   </div>
 </nav>
@@ -369,6 +371,12 @@ async function runTarot() {
   const prompt = '타로 전문가. 순수 JSON만 출력.\n카드:' + cardInfo + '\n질문:' + (question || '오늘의 전반적인 운세') + '\n{"summary":"전체 한줄요약","cards":[{"name":"카드명","position":"위치","interpretation":"해석 2문장","advice":"조언 1문장"}],"overall":"종합 해석 2문장","action":"지금 당장 할 행동 1문장"}';
 
   try {
+    
+// 언어 suffix 추가
+if (typeof I18N !== 'undefined' && I18N.getPromptSuffix()) {
+  prompt += '\n\n' + I18N.getPromptSuffix();
+}
+
     const r = await callAPI(prompt);
     let html = '<div style="background:#120a04;border-radius:12px;padding:24px 16px;margin-bottom:16px;text-align:center;">'
       + '<div style="color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:16px;">✦ 뽑은 카드 공개 ✦</div>'
