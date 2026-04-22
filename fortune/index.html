@@ -1207,12 +1207,16 @@ function autoFillFortune() {
     return;
   }
   const { year, month, day, time, calType, isLeap, name } = myProfile;
-  var _cal = typeof I18N !== 'undefined' ? I18N : null;
+  var _lang = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
   var calLabel;
   if (calType === '음력') {
-    calLabel = isLeap ? (_cal ? _cal.get('fortune.leapLunar') : '음력(윤달)') : (_cal ? _cal.get('fortune.lunar') : '음력');
+    if (_lang === 'zh-TW') calLabel = isLeap ? '農曆(閏月)' : '農曆';
+    else if (_lang === 'ja') calLabel = isLeap ? '旧暦(閏月)' : '旧暦';
+    else calLabel = isLeap ? '음력(윤달)' : '음력';
   } else {
-    calLabel = _cal ? _cal.get('fortune.solar') : '양력';
+    if (_lang === 'zh-TW') calLabel = '陽曆';
+    else if (_lang === 'ja') calLabel = '新暦';
+    else calLabel = '양력';
   }
   const fb = document.getElementById('fortune-birth');
   if (fb) fb.value = year + '년 ' + month + '월 ' + day + '일 ' + time + ' (' + calLabel + ')';
