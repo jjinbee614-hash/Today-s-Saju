@@ -1428,10 +1428,9 @@ async function loadFortune() {
 
   document.getElementById('fortune-today-date').textContent = todayStr + ' (' + daysArr[today.getDay()] + ')';
   var _ti = typeof I18N !== 'undefined' ? I18N : null;
-  var _yearBorn = birth.split('년')[0];
   var _yearSuffix = _ti ? _ti.get('fortune.year') : '년생';
   var _dayLabel = isToday ? (_ti ? _ti.get('fortune.todayFortune') : '오늘의 운세') : (_ti ? _ti.get('fortune.tomorrowFortune') : '내일의 운세');
-  document.getElementById('fortune-title').textContent = (isToday ? '🌅' : '🌙') + ' ' + _yearBorn + _yearSuffix + ' ' + _dayLabel;
+  document.getElementById('fortune-title').textContent = (isToday ? '🌅' : '🌙') + ' ' + fy + _yearSuffix + ' ' + _dayLabel;
 
   const fortuneContent = document.getElementById('fortune-content');
   fortuneContent.style.display = 'block';
