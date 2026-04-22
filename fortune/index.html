@@ -1207,9 +1207,15 @@ function autoFillFortune() {
     return;
   }
   const { year, month, day, time, calType, isLeap, name } = myProfile;
-  const calLabel = calType === '음력' ? (isLeap ? '음력(윤달)' : '음력') : '양력';
+  var _cal = typeof I18N !== 'undefined' ? I18N : null;
+  var calLabel;
+  if (calType === '음력') {
+    calLabel = isLeap ? (_cal ? _cal.get('fortune.leapLunar') : '음력(윤달)') : (_cal ? _cal.get('fortune.lunar') : '음력');
+  } else {
+    calLabel = _cal ? _cal.get('fortune.solar') : '양력';
+  }
   const fb = document.getElementById('fortune-birth');
-  if (fb) fb.value = `${year}년 ${month}월 ${day}일 ${time} (${calLabel})`;
+  if (fb) fb.value = year + '년 ' + month + '월 ' + day + '일 ' + time + ' (' + calLabel + ')';
   const note = document.getElementById('fortune-autofill-note');
   if (note) {
     note.style.display = 'flex';
