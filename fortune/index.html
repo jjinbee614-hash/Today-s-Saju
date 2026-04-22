@@ -953,22 +953,22 @@ function showCreditModal(serviceName) {
 <div class="container">
 <div id="page-fortune" class="page active">
   <div class="fortune-page">
-    <h2 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:30px;margin-bottom:8px;" id="fortune-page-title">오늘의 운세</h2>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">생년월일을 입력하면 AI가 사주 운세를 풀어드립니다.</p>
+    <h2 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:30px;margin-bottom:8px;" id="fortune-page-title" data-i18n="fortune.title">오늘의 운세</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px;" data-i18n="fortune.sub">생년월일을 입력하면 AI가 사주 운세를 풀어드립니다.</p>
 
     <!-- 오늘/내일/이번 주 탭 -->
     <div style="display:flex;gap:8px;margin-bottom:24px;">
       <button id="fortune-today-tab" onclick="setFortuneDay('today')"
         style="flex:1;padding:10px;border:2px solid var(--gold);border-radius:8px;background:var(--gold);color:white;cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
-        🌅 오늘
+        <span data-i18n="fortune.today">🌅 오늘</span>
       </button>
       <button id="fortune-tomorrow-tab" onclick="setFortuneDay('tomorrow')"
         style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
-        🌙 내일
+        <span data-i18n="fortune.tomorrow">🌙 내일</span>
       </button>
       <button id="fortune-week-tab" onclick="setFortuneDay('week')"
         style="flex:1;padding:10px;border:2px solid var(--border);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;">
-        📅 이번 주
+        <span data-i18n="fortune.week">📅 이번 주</span>
       </button>
     </div>
 
@@ -980,9 +980,9 @@ function showCreditModal(serviceName) {
     <div class="birth-input-row">
       <div style="flex:1;">
         <label>생년월일시 입력</label>
-        <input type="text" id="fortune-birth" placeholder="예: 1995년 5월 15일 오시" />
+        <input type="text" id="fortune-birth" placeholder="예: 1995년 5월 15일 오시" data-i18n-placeholder="fortune.inputPlaceholder" />
       </div>
-      <button class="submit-btn" id="fortune-submit-btn" style="width:auto;padding:12px 24px;margin:0;" onclick="loadFortune()">🌅 오늘의 운세 보기 ✦</button>
+      <button class="submit-btn" id="fortune-submit-btn" style="width:auto;padding:12px 24px;margin:0;" onclick="loadFortune()" data-i18n="fortune.btnToday">🌅 오늘의 운세 보기 ✦</button>
     </div>
 
     <div id="fortune-week-content" style="display:none;margin-top:16px;"></div>

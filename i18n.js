@@ -43,7 +43,7 @@ const I18N = {
   },
 
   apply() {
-    // data-i18n 속성이 있는 요소 자동 번역
+    // data-i18n 텍스트
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       const val = this.get(key);
@@ -53,6 +53,38 @@ const I18N = {
         } else {
           el.textContent = val;
         }
+      }
+    });
+    // data-i18n-placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      const val = this.get(key);
+      if (val && val !== key) el.placeholder = val;
+    });
+    // fortune 전용: 버튼 텍스트 동적 업데이트
+    const fortuneBtn = document.getElementById('fortune-submit-btn');
+    if (fortuneBtn) {
+      const day = typeof fortuneDay !== 'undefined' ? fortuneDay : 'today';
+      if (day === 'week') fortuneBtn.textContent = this.get('fortune.btnWeek');
+      else if (day === 'tomorrow') fortuneBtn.textContent = this.get('fortune.btnTomorrow');
+      else fortuneBtn.textContent = this.get('fortune.btnToday');
+    }
+    // nav 메뉴 번역
+    const menuMap = {
+      'https://saju-today.com/saju': 'services.saju',
+      'https://saju-today.com/fortune': 'services.fortune',
+      'https://saju-today.com/compat': 'services.compat',
+      'https://saju-today.com/naming': 'services.naming',
+      'https://saju-today.com/dream': 'services.dream',
+      'https://saju-today.com/tarot': 'services.tarot',
+      'https://saju-today.com/face': 'services.face',
+      'https://saju-today.com/date': 'services.date',
+    };
+    document.querySelectorAll('#nav-menu a').forEach(a => {
+      const key = menuMap[a.href];
+      if (key) {
+        const val = this.get(key);
+        if (val && val !== key) a.textContent = val;
       }
     });
   },
