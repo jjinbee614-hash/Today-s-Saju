@@ -979,7 +979,7 @@ function showCreditModal(serviceName) {
     </div>
     <div class="birth-input-row">
       <div style="flex:1;">
-        <label>생년월일시 입력</label>
+        <label data-i18n="fortune.inputLabel">생년월일시 입력</label>
         <input type="text" id="fortune-birth" placeholder="예: 1995년 5월 15일 오시" data-i18n-placeholder="fortune.inputPlaceholder" />
       </div>
       <button class="submit-btn" id="fortune-submit-btn" style="width:auto;padding:12px 24px;margin:0;" onclick="loadFortune()" data-i18n="fortune.btnToday">🌅 오늘의 운세 보기 ✦</button>
@@ -1002,13 +1002,13 @@ function showCreditModal(serviceName) {
 </div>
 </div>
 <div id="fortune-share" style="display:none;flex-direction:row;justify-content:center;align-items:center;width:100%;gap:10px;margin-top:20px;flex-wrap:wrap;">
-  <button onclick="shareResult('fortune-content', '오늘의 운세 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);">
+  <button onclick="shareResult('fortune-content', '오늘의 운세 결과')" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,#c9913a,#e8b56a);border:none;border-radius:50px;color:white;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(201,145,58,0.3);" data-i18n="common.share">
     🔗 결과 공유하기
   </button>
 </div>
 
 <div style="max-width:800px;margin:0 auto;padding:40px 20px 60px;color:var(--ink);">
-  <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;margin-bottom:14px;">오늘/내일의 운세란?</h2>
+  <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;margin-bottom:14px;" data-i18n="fortune.aboutTitle">오늘/내일의 운세란?</h2>
   <p style="font-size:14px;line-height:2;margin-bottom:16px;color:var(--muted);">일운(日運)은 오늘의 일진(日辰)과 내 사주의 일간(日干)이 어떻게 상호작용하는지를 분석합니다. 같은 날이라도 사람마다 일진과의 관계가 달라 운세가 다르게 나타납니다.</p>
   <h3 style="font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;margin-bottom:10px;">운세 분석 항목</h3>
   <ul style="font-size:14px;line-height:2;color:var(--muted);padding-left:20px;margin-bottom:16px;">
@@ -1213,7 +1213,10 @@ function autoFillFortune() {
   const note = document.getElementById('fortune-autofill-note');
   if (note) {
     note.style.display = 'flex';
-    note.innerHTML = `✅ ${name || ''}님의 생년월일이 자동 입력됐어요`;
+    const autoMsg = typeof I18N !== 'undefined' && I18N.getLang() !== 'ko'
+      ? (I18N.getLang() === 'zh-TW' ? '✅ 已自動填入生日資料' : '✅ 生年月日が自動入力されました')
+      : \`✅ \${name || ''}님의 생년월일이 자동 입력됐어요\`;
+    note.innerHTML = autoMsg;
   }
   const notice = document.getElementById('fortune-register-notice');
   if (notice) notice.style.display = 'none';
@@ -1528,12 +1531,13 @@ function renderWeeklyFortune(r, weekStr) {
 
 function renderFortune(r) {
   const currentYear = new Date().getFullYear();
+  const t = typeof I18N !== 'undefined' ? I18N : null;
   const scoreItems = [
-    {label:'종합운', score:r.overall, icon:'⭐', desc:r.overallDesc},
-    {label:'애정운', score:r.love,    icon:'💕', desc:r.loveDesc},
-    {label:'재물운', score:r.money,   icon:'💰', desc:r.moneyDesc},
-    {label:'직업운', score:r.work,    icon:'💼', desc:r.workDesc},
-    {label:'건강운', score:r.health,  icon:'💚', desc:r.healthDesc},
+    {label: t ? t.get('fortune.overall') : '종합운', score:r.overall, icon:'⭐', desc:r.overallDesc},
+    {label: t ? t.get('fortune.love')    : '애정운', score:r.love,    icon:'💕', desc:r.loveDesc},
+    {label: t ? t.get('fortune.money')   : '재물운', score:r.money,   icon:'💰', desc:r.moneyDesc},
+    {label: t ? t.get('fortune.work')    : '직업운', score:r.work,    icon:'💼', desc:r.workDesc},
+    {label: t ? t.get('fortune.health')  : '건강운', score:r.health,  icon:'💚', desc:r.healthDesc},
   ];
   document.getElementById('fortune-score-cards').innerHTML = scoreItems.map((item, i) => {
     const score = item.score || 70;
