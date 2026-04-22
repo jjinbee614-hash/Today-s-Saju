@@ -73,7 +73,14 @@
     "analysisDesc": "每天午夜日辰更換，提前確認明日運勢，為新的一天做好準備。",
     "solar": "陽曆",
     "lunar": "農曆",
-    "leapLunar": "農曆(閏月)"
+    "leapLunar": "農曆(閏月)",
+    "leapMonth": "閏月",
+    "labelYear": "出生年份",
+    "labelMonth": "月",
+    "labelDay": "日",
+    "labelTime": "出生時辰",
+    "registerNotice": "先登錄命理資料，即可自動填入。",
+    "registerBtn": "前往登錄 →"
   },
   "pricing": {
     "title": "💎 購買服務",

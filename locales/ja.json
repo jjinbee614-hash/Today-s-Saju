@@ -73,7 +73,14 @@
     "analysisDesc": "毎日深夜に日辰が変わります。明日の運勢を事前に確認して、一日の準備をしましょう。",
     "solar": "新暦",
     "lunar": "旧暦",
-    "leapLunar": "旧暦(閏月)"
+    "leapLunar": "旧暦(閏月)",
+    "leapMonth": "閏月",
+    "labelYear": "生まれ年",
+    "labelMonth": "月",
+    "labelDay": "日",
+    "labelTime": "生まれ時刻",
+    "registerNotice": "命理情報を登録すると自動入力されます。",
+    "registerBtn": "登録する →"
   },
   "pricing": {
     "title": "💎 サービス購入",

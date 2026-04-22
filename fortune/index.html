@@ -974,16 +974,69 @@ function showCreditModal(serviceName) {
 
     <div id="fortune-autofill-note" style="display:none;align-items:center;gap:8px;background:rgba(201,145,58,0.08);border:1px solid rgba(201,145,58,0.3);border-radius:6px;padding:10px 16px;margin-bottom:16px;"></div>
     <div id="fortune-register-notice" style="display:none;background:rgba(201,145,58,0.08);border:1px solid rgba(201,145,58,0.3);border-radius:8px;padding:14px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);">
-      💡 <strong style="color:var(--gold);">사주를 먼저 등록하면 자동으로 입력됩니다.</strong>
-      <button data-page="register" style="margin-left:12px;padding:5px 14px;background:var(--gold);color:white;border:none;border-radius:12px;cursor:pointer;font-size:12px;font-family:'Noto Sans KR',sans-serif;">등록하러 가기 →</button>
+      💡 <strong style="color:var(--gold);" data-i18n="fortune.registerNotice">사주를 먼저 등록하면 자동으로 입력됩니다.</strong>
+      <button data-page="register" style="margin-left:12px;padding:5px 14px;background:var(--gold);color:white;border:none;border-radius:12px;cursor:pointer;font-size:12px;font-family:'Noto Sans KR',sans-serif;" data-i18n="fortune.registerBtn">등록하러 가기 →</button>
     </div>
-    <div class="birth-input-row">
-      <div style="flex:1;">
-        <label data-i18n="fortune.inputLabel">생년월일시 입력</label>
-        <input type="text" id="fortune-birth" placeholder="예: 1995년 5월 15일 오시" data-i18n-placeholder="fortune.inputPlaceholder" />
+
+    <!-- 구조화된 생년월일 입력 -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+      <!-- 양력/음력 선택 -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button id="cal-solar-btn" onclick="setFortuneCal('solar')"
+          style="padding:7px 18px;border:1px solid var(--gold);border-radius:20px;background:var(--gold);color:#0e0b14;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;"
+          data-i18n="fortune.solar">양력</button>
+        <button id="cal-lunar-btn" onclick="setFortuneCal('lunar')"
+          style="padding:7px 18px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;"
+          data-i18n="fortune.lunar">음력</button>
+        <label id="cal-leap-label" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;">
+          <input type="checkbox" id="fortune-leap" style="width:14px;height:14px;"/>
+          <span data-i18n="fortune.leapMonth">윤달</span>
+        </label>
       </div>
-      <button class="submit-btn" id="fortune-submit-btn" style="width:auto;padding:12px 24px;margin:0;" onclick="loadFortune()" data-i18n="fortune.btnToday">🌅 오늘의 운세 보기 ✦</button>
+
+      <!-- 년월일시 입력 -->
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr;gap:8px;margin-bottom:4px;">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;" data-i18n="fortune.labelYear">출생 연도</label>
+          <input type="number" id="fortune-year" placeholder="1990" min="1900" max="2024"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--bg2);color:var(--text);text-align:center;"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;" data-i18n="fortune.labelMonth">월</label>
+          <input type="number" id="fortune-month" placeholder="1" min="1" max="12"
+            style="width:100%;padding:10px 8px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--bg2);color:var(--text);text-align:center;"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;" data-i18n="fortune.labelDay">일</label>
+          <input type="number" id="fortune-day" placeholder="1" min="1" max="31"
+            style="width:100%;padding:10px 8px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--bg2);color:var(--text);text-align:center;"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;" data-i18n="fortune.labelTime">태어난 시간</label>
+          <select id="fortune-time-select"
+            style="width:100%;padding:10px 8px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--bg2);color:var(--text);">
+            <option value="모름">모름 / Unknown</option>
+            <option value="자시">子時 23-01</option>
+            <option value="축시">丑時 01-03</option>
+            <option value="인시">寅時 03-05</option>
+            <option value="묘시">卯時 05-07</option>
+            <option value="진시">辰時 07-09</option>
+            <option value="사시">巳時 09-11</option>
+            <option value="오시">午時 11-13</option>
+            <option value="미시">未時 13-15</option>
+            <option value="신시">申時 15-17</option>
+            <option value="유시">酉時 17-19</option>
+            <option value="술시">戌時 19-21</option>
+            <option value="해시">亥時 21-23</option>
+          </select>
+        </div>
+      </div>
     </div>
+
+    <button class="submit-btn" id="fortune-submit-btn" style="width:100%;padding:14px;margin-bottom:16px;" onclick="loadFortune()" data-i18n="fortune.btnToday">🌅 오늘의 운세 보기 ✦</button>
+
+    <!-- 기존 텍스트 입력 (하위 호환용, 숨김) -->
+    <input type="hidden" id="fortune-birth" />
 
     <div id="fortune-week-content" style="display:none;margin-top:16px;"></div>
     <div id="fortune-content" style="display:none;">
@@ -1218,8 +1271,22 @@ function autoFillFortune() {
     else if (_lang === 'ja') calLabel = '新暦';
     else calLabel = '양력';
   }
+  // 구조화 입력 채우기
+  var fyEl = document.getElementById('fortune-year');
+  var fmEl = document.getElementById('fortune-month');
+  var fdEl = document.getElementById('fortune-day');
+  var ftEl = document.getElementById('fortune-time-select');
+  if (fyEl) fyEl.value = year;
+  if (fmEl) fmEl.value = month;
+  if (fdEl) fdEl.value = day;
+  if (ftEl) ftEl.value = time;
+  // 양력/음력 설정
+  if (calType === '음력') setFortuneCal('lunar');
+  else setFortuneCal('solar');
+  if (isLeap) { var lp = document.getElementById('fortune-leap'); if(lp) lp.checked = true; }
+  // 기존 hidden input도 업데이트
   const fb = document.getElementById('fortune-birth');
-  if (fb) fb.value = year + '년 ' + month + '월 ' + day + '일 ' + time + ' (' + calLabel + ')';
+  if (fb) fb.value = year + '년 ' + month + '월 ' + day + '일 ' + time;
   const note = document.getElementById('fortune-autofill-note');
   if (note) {
     note.style.display = 'flex';
@@ -1241,6 +1308,26 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 let fortuneDay = 'today'; // 'today' or 'tomorrow'
+let fortuneCalType = 'solar'; // 'solar' or 'lunar'
+
+
+function setFortuneCal(type) {
+  fortuneCalType = type;
+  var solarBtn = document.getElementById('cal-solar-btn');
+  var lunarBtn = document.getElementById('cal-lunar-btn');
+  var leapLabel = document.getElementById('cal-leap-label');
+  if (solarBtn) {
+    solarBtn.style.background = type === 'solar' ? 'var(--gold)' : 'transparent';
+    solarBtn.style.color = type === 'solar' ? '#0e0b14' : 'var(--muted)';
+    solarBtn.style.borderColor = type === 'solar' ? 'var(--gold)' : 'var(--border)';
+  }
+  if (lunarBtn) {
+    lunarBtn.style.background = type === 'lunar' ? 'var(--gold)' : 'transparent';
+    lunarBtn.style.color = type === 'lunar' ? '#0e0b14' : 'var(--muted)';
+    lunarBtn.style.borderColor = type === 'lunar' ? 'var(--gold)' : 'var(--border)';
+  }
+  if (leapLabel) leapLabel.style.display = type === 'lunar' ? 'flex' : 'none';
+}
 
 async function setFortuneDay(day) {
   if (day === 'tomorrow' || day === 'week') {
@@ -1295,17 +1382,51 @@ async function setFortuneDay(day) {
 
 async function loadFortune() {
   if (fortuneDay === 'week') { await loadWeeklyFortune(); return; }
-  const birth = document.getElementById('fortune-birth').value.trim();
-  if (!birth) { showToast('생년월일을 입력해 주세요'); return; }
+  // 구조화 입력에서 값 읽기
+  const fy_raw = parseInt(document.getElementById('fortune-year')?.value);
+  const fm_raw = parseInt(document.getElementById('fortune-month')?.value);
+  const fd_raw = parseInt(document.getElementById('fortune-day')?.value);
+  const ftime_select = document.getElementById('fortune-time-select')?.value || '모름';
+
+  // 기존 텍스트 입력도 하위 호환
+  const birth_text = document.getElementById('fortune-birth').value.trim();
+
+  let fy, fm, fd, ftime;
+  if (fy_raw && fm_raw && fd_raw) {
+    fy = fy_raw; fm = fm_raw; fd = fd_raw; ftime = ftime_select;
+  } else if (birth_text) {
+    const bp = birth_text.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
+    if (!bp) { showToast('생년월일을 입력해 주세요'); return; }
+    fy = parseInt(bp[1]); fm = parseInt(bp[2]); fd = parseInt(bp[3]);
+    const tm = birth_text.match(/([가-힣]+시)/);
+    ftime = tm ? tm[1] : '모름';
+  } else {
+    var _lang2 = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+    var emptyMsg = _lang2 === 'zh-TW' ? '請輸入出生日期' : _lang2 === 'ja' ? '生年月日を入力してください' : '생년월일을 입력해 주세요';
+    showToast(emptyMsg); return;
+  }
+
+  // 음력 변환
+  if (typeof fortuneCalType !== 'undefined' && fortuneCalType === 'lunar') {
+    const isLeap = document.getElementById('fortune-leap')?.checked || false;
+    try {
+      const solar = await lunarToSolar(fy, fm, fd, isLeap);
+      fy = solar.year; fm = solar.month; fd = solar.day;
+    } catch(e) {}
+  }
 
   const baseDate = new Date();
   if (fortuneDay === 'tomorrow') baseDate.setDate(baseDate.getDate() + 1);
   const today = baseDate;
-  const days  = ['일','월','화','수','목','금','토'];
-  const todayStr = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+  var _li = typeof I18N !== 'undefined' ? I18N.getLang() : 'ko';
+  const days_ko = ['일','월','화','수','목','금','토'];
+  const days_tw = ['日','一','二','三','四','五','六'];
+  const days_ja = ['日','月','火','水','木','金','土'];
+  const daysArr = _li === 'zh-TW' ? days_tw : _li === 'ja' ? days_ja : days_ko;
+  const todayStr = today.getFullYear() + '년 ' + (today.getMonth()+1) + '월 ' + today.getDate() + '일';
   const isToday = fortuneDay === 'today';
 
-  document.getElementById('fortune-today-date').textContent = `${todayStr} (${days[today.getDay()]})`;
+  document.getElementById('fortune-today-date').textContent = todayStr + ' (' + daysArr[today.getDay()] + ')';
   var _ti = typeof I18N !== 'undefined' ? I18N : null;
   var _yearBorn = birth.split('년')[0];
   var _yearSuffix = _ti ? _ti.get('fortune.year') : '년생';
@@ -1316,15 +1437,7 @@ async function loadFortune() {
   fortuneContent.style.display = 'block';
   const shareDivFortune = document.getElementById('fortune-share'); if(shareDivFortune) shareDivFortune.style.display='flex';
 
-  // ── 사주 계산 ──
-  const birthParts = birth.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
-  if (!birthParts) { showToast('생년월일 형식이 올바르지 않습니다'); return; }
-
-  const fy = parseInt(birthParts[1]);
-  const fm = parseInt(birthParts[2]);
-  const fd = parseInt(birthParts[3]);
-  const ftimeMatch = birth.match(/([가-힣]+시)/);
-  const ftime = ftimeMatch ? ftimeMatch[1] : '모름';
+  // ── 사주 계산 (위에서 fy, fm, fd, ftime 이미 파싱됨) ──
   const fp = calcSaju(fy, fm, fd, ftime);
 
   const yp = `${fp.yp.heavenly}${fp.yp.earthly}`;
