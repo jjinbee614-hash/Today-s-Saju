@@ -1412,7 +1412,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 키
-  const cacheKey = 'fortune_week_v4_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  const cacheKey = 'fortune_week_v5_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1438,7 +1438,10 @@ async function loadWeeklyFortune() {
     });
   }
 
-  const weekPillarStr = weekDayPillars.map(function(d){ return d.name+'('+d.date+') '+d.pillar; }).join(', ');
+  // 각 요일 상세 일진 정보 (오늘/내일 운세와 동일한 형식)
+  const weekDetailStr = weekDayPillars.map(function(d) {
+    return d.name + '(' + d.date + ') 일주:' + d.pillar;
+  }).join('\n');
   const currentYear = new Date().getFullYear();
 
   const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 이번 주(${weekStr}) 운세를 요일별로 분석하세요.
@@ -1449,20 +1452,22 @@ async function loadWeeklyFortune() {
 - 일간: ${fp.dp.heavenly} (${fp.daymaster})
 - 오행: ${Object.entries(fp.elements).map(([k,v])=>k+' '+v+'%').join(', ')}
 
-【이번 주 일진】
-${weekPillarStr}
+【이번 주 일진 상세】
+${weekDetailStr}
 
 현재 연도: ${currentYear}년
 
-각 요일의 일진과 이 사람의 일간 관계를 분석하여 요일별 운세를 작성하세요.
+【핵심 지시사항】
+각 요일의 일진 일주와 이 사람의 일간 ${fp.dp.heavenly}의 관계를 오늘/내일 운세와 완전히 동일한 방식으로 분석하세요.
+특히 오늘(${new Date().toLocaleDateString('ko-KR',{weekday:'short'}).replace('요일','')})의 점수는
+오늘의 운세 종합점수와 반드시 일치하거나 ±3점 이내여야 합니다.
 
-【점수 산정 기준 - 오늘/내일 운세와 동일 기준 적용】
-- 일간과 해당 요일 일지가 상생(生) 관계: 기본 75~90점
-- 일간과 해당 요일 일지가 상극(克) 관계: 기본 45~65점
-- 일간과 해당 요일 일지가 비화(比) 관계: 기본 65~80점
-- 오행 분포 균형 여부에 따라 ±5점 조정
-- 요일별 점수는 반드시 서로 달라야 하며, 일진 분석에 근거해야 함
-- 이 기준은 오늘/내일 운세 점수와 동일한 척도 사용 (직접 비교 가능)
+【점수 산정 기준 - 오늘/내일 운세와 완전 동일】
+- 일간 ${fp.dp.heavenly}과 해당 요일 일지가 상생(生): 75~90점
+- 일간 ${fp.dp.heavenly}과 해당 요일 일지가 상극(克): 45~65점
+- 일간 ${fp.dp.heavenly}과 해당 요일 일지가 비화(比): 65~80점
+- 오행 분포 균형 여부 ±5점 조정
+- 요일별 점수 반드시 상이하게 산정
 
 순수 JSON만 출력하세요. 코드블록 없이.
 
