@@ -1412,7 +1412,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 키
-  const cacheKey = 'fortune_week_v5_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  const cacheKey = 'fortune_week_v6_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1462,12 +1462,17 @@ ${weekDetailStr}
 특히 오늘(${new Date().toLocaleDateString('ko-KR',{weekday:'short'}).replace('요일','')})의 점수는
 오늘의 운세 종합점수와 반드시 일치하거나 ±3점 이내여야 합니다.
 
-【점수 산정 기준 - 오늘/내일 운세와 완전 동일】
-- 일간 ${fp.dp.heavenly}과 해당 요일 일지가 상생(生): 75~90점
-- 일간 ${fp.dp.heavenly}과 해당 요일 일지가 상극(克): 45~65점
-- 일간 ${fp.dp.heavenly}과 해당 요일 일지가 비화(比): 65~80점
-- 오행 분포 균형 여부 ±5점 조정
-- 요일별 점수 반드시 상이하게 산정
+【점수 산정 기준 - 오늘/내일 운세와 완전 동일하게 적용】
+아래 각 요일의 일진과 일간 ${fp.dp.heavenly}(${fp.daymaster})의 관계를 분석하세요.
+
+점수 기준:
+- 일간과 일지 오행이 상생(生) 관계 → 75~90점
+- 일간과 일지 오행이 비화(比) 관계 → 65~80점  
+- 일간과 일지 오행이 상극(克) 관계 → 45~65점
+- 충(沖)/형(刑) 있으면 -10점 추가
+- 합(合) 있으면 +5점 추가
+
+중요: 각 요일 점수는 해당 일진의 일간과의 오행 관계로만 산정하며, 요일별로 반드시 달라야 합니다.
 
 순수 JSON만 출력하세요. 코드블록 없이.
 
@@ -1485,7 +1490,7 @@ ${weekDetailStr}
 function renderWeeklyFortune(r, weekStr) {
   const weekContent = document.getElementById('fortune-week-content');
   const today = new Date();
-  const todayDayIdx = today.getDay(); // 브라우저 로컬(KST) 기준 0=일,1=월,...,6=토
+  const todayDayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1; // r.days 월(0)~일(6) 기준
 
   const daysHTML = (r.days || []).map(function(d, i) {
     const score = d.score || 70;
