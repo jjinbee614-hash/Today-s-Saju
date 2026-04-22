@@ -1486,7 +1486,7 @@ async function loadWeeklyFortune() {
 function renderWeeklyFortune(r, weekStr) {
   const weekContent = document.getElementById('fortune-week-content');
   const today = new Date();
-  const todayDayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1; // r.days 월(0)~일(6) 기준
+  const todayDayIdx = today.getDay(); // 0=일,1=월,...,6=토 — dayResults와 동일 순서
 
   const daysHTML = (r.days || []).map(function(d, i) {
     const score = d.score || 70;
