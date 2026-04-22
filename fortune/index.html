@@ -1317,7 +1317,7 @@ async function loadFortune() {
 
   // ── 캐시 확인 (생년월일+오늘날짜 기준) ──
   // 캐시 키를 실제 분석 날짜 기준으로 통일 (어제의 내일 = 오늘의 오늘)
-  const cacheKey = `fortune_v5_${fy}_${fm}_${fd}_${ftime}_${today.getFullYear()}${today.getMonth()+1}${today.getDate()}`;
+  const cacheKey = `fortune_v6_${fy}_${fm}_${fd}_${ftime}_${today.getFullYear()}${today.getMonth()+1}${today.getDate()}`;
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try {
@@ -1412,7 +1412,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 키
-  const cacheKey = 'fortune_week_v6_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  const cacheKey = 'fortune_week_v7_'+fy+'_'+fm+'_'+fd+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1444,6 +1444,16 @@ async function loadWeeklyFortune() {
   }).join('\n');
   const currentYear = new Date().getFullYear();
 
+  // 오늘/내일 일진 기준점 계산
+  const todayForRef = new Date();
+  const tomorrowForRef = new Date(); tomorrowForRef.setDate(tomorrowForRef.getDate()+1);
+  const todayDP_ref = calcDayPillar(todayForRef.getFullYear(), todayForRef.getMonth()+1, todayForRef.getDate());
+  const tomDP_ref = calcDayPillar(tomorrowForRef.getFullYear(), tomorrowForRef.getMonth()+1, tomorrowForRef.getDate());
+  const todayPillarRef = HEAVENLY_STEMS[todayDP_ref.hs] + EARTHLY_BRANCHES[todayDP_ref.eb];
+  const tomPillarRef = HEAVENLY_STEMS[tomDP_ref.hs] + EARTHLY_BRANCHES[tomDP_ref.eb];
+  const todayDayName = ['일','월','화','수','목','금','토'][todayForRef.getDay()];
+  const tomDayName = ['일','월','화','수','목','금','토'][tomorrowForRef.getDay()];
+
   const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 이번 주(${weekStr}) 운세를 요일별로 분석하세요.
 
 【사주】
@@ -1456,23 +1466,26 @@ async function loadWeeklyFortune() {
 ${weekDetailStr}
 
 현재 연도: ${currentYear}년
+오늘: ${todayDayName}요일 (일진: ${todayPillarRef})
+내일: ${tomDayName}요일 (일진: ${tomPillarRef})
 
 【핵심 지시사항】
 각 요일의 일진 일주와 이 사람의 일간 ${fp.dp.heavenly}의 관계를 오늘/내일 운세와 완전히 동일한 방식으로 분석하세요.
 특히 오늘(${new Date().toLocaleDateString('ko-KR',{weekday:'short'}).replace('요일','')})의 점수는
 오늘의 운세 종합점수와 반드시 일치하거나 ±3점 이내여야 합니다.
 
-【점수 산정 기준 - 오늘/내일 운세와 완전 동일하게 적용】
-아래 각 요일의 일진과 일간 ${fp.dp.heavenly}(${fp.daymaster})의 관계를 분석하세요.
+【점수 산정 기준】
+각 요일 일진과 일간 ${fp.dp.heavenly}의 오행 관계로만 점수 산정:
+- 상생(生) 관계: 75~90점
+- 비화(比) 관계: 65~80점
+- 상극(克) 관계: 45~65점
+- 충(沖)/형(刑): -10점, 합(合): +5점
 
-점수 기준:
-- 일간과 일지 오행이 상생(生) 관계 → 75~90점
-- 일간과 일지 오행이 비화(比) 관계 → 65~80점  
-- 일간과 일지 오행이 상극(克) 관계 → 45~65점
-- 충(沖)/형(刑) 있으면 -10점 추가
-- 합(合) 있으면 +5점 추가
-
-중요: 각 요일 점수는 해당 일진의 일간과의 오행 관계로만 산정하며, 요일별로 반드시 달라야 합니다.
+【절대 준수 사항】
+오늘(${todayDayName})과 내일(${tomDayName})의 점수는 아래 기준으로 반드시 고정:
+- 오늘 ${todayDayName}요일 일진 ${todayPillarRef}: 이 일진과 일간 ${fp.dp.heavenly}의 관계로 정확히 산정
+- 내일 ${tomDayName}요일 일진 ${tomPillarRef}: 이 일진과 일간 ${fp.dp.heavenly}의 관계로 정확히 산정
+- 나머지 요일도 동일 기준 적용, 요일별 점수 반드시 상이
 
 순수 JSON만 출력하세요. 코드블록 없이.
 
