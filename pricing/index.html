@@ -59,6 +59,7 @@
     .charge-quick-btn { padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;cursor:pointer;transition:all 0.2s; }
     .charge-quick-btn:hover { border-color:var(--gold);color:var(--gold); }
   </style>
+<script src="https://www.paypal.com/sdk/js?client-id=AQ_TavvJt8x6GbbsQ7gk3ruqg8yvq7Syu03znuv2icSAB6VOWEi3vNInLHp8sUgf-bNXliEVbeDJXjL3&currency=USD&intent=capture"></script>
 </head>
 <body>
 <div id="stars-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;"></div>
@@ -79,7 +80,7 @@
       <div style="flex:1;text-align:center;background:var(--bg2);border-radius:10px;padding:12px 6px;">
         <div style="font-size:22px;margin-bottom:4px;">💰</div>
         <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">1단계</div>
-        <div style="font-size:10px;color:var(--text2);line-height:1.5;">캐시 충전<br><span style="color:var(--gold);">카카오페이·크립토</span></div>
+        <div style="font-size:10px;color:var(--text2);line-height:1.5;">캐시 충전<br><span style="color:var(--gold);">카카오페이·PayPal·크립토</span></div>
       </div>
       <div style="color:var(--text3);font-size:16px;padding:0 2px;">→</div>
       <div style="flex:1;text-align:center;background:var(--bg2);border-radius:10px;padding:12px 6px;">
@@ -404,14 +405,21 @@ function showPaymentModal(productName,amount,credits,isSubscription,merchantUid,
   kakaoBtn.innerHTML='<span style="font-size:22px;">💬</span> 카카오페이';
   var badge=document.createElement('span');badge.style.cssText='position:absolute;top:-8px;right:-8px;background:#e74c3c;color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;';badge.textContent='심사 중';
   kakaoWrap.appendChild(kakaoBtn);kakaoWrap.appendChild(badge);
+  // PayPal
+  var paypalWrap=document.createElement('div');paypalWrap.id='paypal-button-wrap';
+  paypalWrap.style.cssText='margin-bottom:12px;border-radius:12px;overflow:hidden;';
   // 크립토
   var cryptoBtn=document.createElement('button');
   cryptoBtn.style.cssText='width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:linear-gradient(135deg,#1a1628,#2d1f4e);border:1px solid rgba(201,168,76,0.3);border-radius:12px;font-size:15px;font-weight:700;color:#f0ead6;cursor:pointer;margin-bottom:12px;';
   cryptoBtn.innerHTML='<span style="font-size:22px;">💎</span> 크립토 결제 <span style="font-size:12px;color:#c9a84c;margin-left:4px;">(5% 할인)</span>';
   var cancelBtn=document.createElement('button');
   cancelBtn.style.cssText='width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;';cancelBtn.textContent='취소';
-  inner.appendChild(bar);inner.appendChild(title);inner.appendChild(price);inner.appendChild(sub);inner.appendChild(kakaoWrap);inner.appendChild(cryptoBtn);inner.appendChild(cancelBtn);
+  inner.appendChild(bar);inner.appendChild(title);inner.appendChild(price);inner.appendChild(sub);inner.appendChild(kakaoWrap);inner.appendChild(paypalWrap);inner.appendChild(cryptoBtn);inner.appendChild(cancelBtn);
   modal.appendChild(inner);document.body.appendChild(modal);
+  // PayPal 버튼 렌더링 (DOM에 추가된 후)
+  setTimeout(function(){
+    renderPaypalButton(amount, productName, cashAmount, credits, isSubscription, user);
+  }, 100);
   cryptoBtn.addEventListener('click',function(){modal.remove();showCryptoModal(productName,amount,credits,cashAmount);});
   cancelBtn.addEventListener('click',function(){modal.remove();});
   modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
@@ -590,5 +598,110 @@ function closeCryptoModal(){if(cryptoCheckInterval)clearInterval(cryptoCheckInte
 document.addEventListener('DOMContentLoaded',loadCashBalance);
 (function(){var btn=document.getElementById('more-btn');if(btn){btn.addEventListener('click',function(e){e.stopPropagation();var m=document.getElementById('nav-menu');if(m){m.style.display=m.style.display==='block'?'none':'block';m.style.zIndex='99999';}});}})();
 </script>
+
+// ─── PayPal 결제 ───
+var _paypalAmount = 0;
+var _paypalProductName = '';
+var _paypalCashAmount = 0;
+var _paypalCredits = 0;
+var _paypalIsSubscription = false;
+var _paypalUser = null;
+
+function renderPaypalButton(amount, productName, cashAmount, credits, isSubscription, user) {
+  _paypalAmount = amount;
+  _paypalProductName = productName;
+  _paypalCashAmount = cashAmount;
+  _paypalCredits = credits;
+  _paypalIsSubscription = isSubscription;
+  _paypalUser = user;
+
+  var wrap = document.getElementById('paypal-button-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // 원화 → USD 변환 (1USD = 약 1350원)
+  var usdAmount = (amount / 1350).toFixed(2);
+  if (parseFloat(usdAmount) < 0.01) usdAmount = '0.01';
+
+  paypal.Buttons({
+    style: {
+      layout: 'horizontal',
+      color: 'gold',
+      shape: 'rect',
+      label: 'paypal',
+      height: 50,
+      tagline: false
+    },
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: { value: usdAmount, currency_code: 'USD' },
+          description: productName
+        }]
+      });
+    },
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(async function(details) {
+        var modal = document.getElementById('payment-modal');
+        if (modal) modal.remove();
+        await processPaypalPayment(details);
+      });
+    },
+    onError: function(err) {
+      showToast('PayPal 결제 오류: ' + (err.message || '다시 시도해주세요'));
+    },
+    onCancel: function() {
+      showToast('결제가 취소됐어요');
+    }
+  }).render('#paypal-button-wrap');
+}
+
+async function processPaypalPayment(details) {
+  try {
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    var user = _paypalUser || getSajuUser();
+    if (!user) { showToast('로그인 후 이용해주세요'); return; }
+
+    // 캐시 충전 처리
+    var res = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+    var currentCash = (res.data && res.data.cash_balance) || 0;
+    var currentCredits = (res.data && res.data.credits) || 0;
+
+    var newCash = currentCash + _paypalCashAmount;
+    var newCredits = _paypalIsSubscription ? currentCredits + _paypalCredits : currentCredits;
+
+    await sb.from('user_credits').update({
+      cash_balance: newCash,
+      credits: newCredits,
+      updated_at: new Date().toISOString()
+    }).eq('user_id', user.id);
+
+    // 결제 내역 저장
+    await sb.from('payments').insert({
+      user_id: user.id,
+      product_name: _paypalProductName,
+      amount: _paypalAmount,
+      payment_method: 'paypal',
+      payment_id: details.id,
+      status: 'completed',
+      created_at: new Date().toISOString()
+    });
+
+    await sb.from('cash_transactions').insert({
+      user_id: user.id,
+      type: 'charge',
+      amount: _paypalCashAmount,
+      description: 'PayPal - ' + _paypalProductName,
+      created_at: new Date().toISOString()
+    });
+
+    showToast('✅ 결제 완료! ' + _paypalCashAmount.toLocaleString() + '캐시가 충전됐어요');
+    setTimeout(function(){ location.reload(); }, 1500);
+
+  } catch(e) {
+    showToast('결제 처리 오류: ' + e.message);
+  }
+}
+
 </body>
 </html>
