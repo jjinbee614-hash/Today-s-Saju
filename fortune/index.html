@@ -800,6 +800,65 @@
     .logo { font-size: 18px; }
     .nav-btn { padding: 7px 14px; font-size: 12px; }
   }
+
+<style>
+@keyframes bujeok-glow {
+  0%,100% { box-shadow: 0 0 10px rgba(201,168,76,0.3); }
+  50% { box-shadow: 0 0 30px rgba(201,168,76,0.8), 0 0 60px rgba(201,168,76,0.4); }
+}
+@keyframes bujeok-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes bujeok-float {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes bujeok-appear {
+  0% { opacity:0; transform:scale(0.8) translateY(20px); filter:brightness(3); }
+  50% { opacity:0.8; filter:brightness(2); }
+  100% { opacity:1; transform:scale(1) translateY(0); filter:brightness(1); }
+}
+@keyframes particle-float {
+  0% { opacity:1; transform:translateY(0) scale(1); }
+  100% { opacity:0; transform:translateY(-80px) scale(0); }
+}
+@keyframes light-ray {
+  0% { opacity:0; transform:scaleY(0); }
+  50% { opacity:0.6; }
+  100% { opacity:0; transform:scaleY(1); }
+}
+.bujeok-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px;
+  cursor:pointer;
+  transition:all 0.3s;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.bujeok-card:hover {
+  border-color:var(--gold);
+  transform:translateY(-4px);
+  animation:bujeok-glow 1.5s ease-in-out infinite;
+}
+.bujeok-card.recommended {
+  border-color:rgba(201,168,76,0.6);
+  background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(138,90,180,0.05));
+}
+.bujeok-price {
+  display:inline-block;
+  background:linear-gradient(135deg,#c9a84c,#8b6914);
+  color:#0e0b14;
+  font-size:12px;
+  font-weight:700;
+  padding:3px 10px;
+  border-radius:12px;
+  margin-top:6px;
+}
+</style>
 </style>
   <style>
     .menu-item { display:block; width:100%; padding:10px 16px; background:none; border:none; text-align:left; font-size:14px; font-family:'Noto Sans KR',sans-serif; color:var(--ink); cursor:pointer; border-radius:8px; text-decoration:none; }
@@ -1004,6 +1063,24 @@ function showCreditModal(serviceName) {
     🔗 결과 공유하기
   </button>
 </div>
+
+<div id="bujeok-section" style="display:none;max-width:700px;margin:0 auto;padding:0 24px 40px;">
+  <div style="text-align:center;margin-bottom:24px;">
+    <div style="font-size:32px;margin-bottom:8px;">🔮</div>
+    <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:22px;color:var(--gold);margin-bottom:8px;">이번 주 부적 만들기</h3>
+    <p style="font-size:13px;color:var(--muted);line-height:1.8;">운세 결과를 바탕으로 나만의 부적을 만들어보세요.<br>한 주 동안 배경화면으로 설정하면 좋은 기운이 함께해요 🙏</p>
+  </div>
+
+  <!-- 추천 부적 -->
+  <div id="bujeok-recommended" style="background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(138,90,180,0.1));border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:16px;margin-bottom:20px;display:none;">
+    <div style="font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;">✨ 오늘 운세 기반 추천</div>
+    <div id="bujeok-recommended-list" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- 전체 부적 목록 -->
+  <div id="bujeok-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+</div>
+
 
 <div style="max-width:800px;margin:0 auto;padding:40px 20px 60px;color:var(--ink);">
   <h2 style="font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;margin-bottom:14px;">오늘/내일의 운세란?</h2>
@@ -1344,6 +1421,7 @@ async function loadFortune() {
   const fortuneContent = document.getElementById('fortune-content');
   fortuneContent.style.display = 'block';
   const shareDivFortune = document.getElementById('fortune-share'); if(shareDivFortune) shareDivFortune.style.display='flex';
+  initBujeok(r);
 
   // ── 사주 계산 ──
   const birthParts = birth.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
@@ -2121,5 +2199,288 @@ async function shareResult(resultId, pageTitle) {
 
 
 </script>
+
+<script>
+
+const BUJEOK_LIST = [
+  { id:'money',      name:'재물운 부적',  desc:'금전운·투자운 상승',     icon:'💰', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-money.webp',      score:'money' },
+  { id:'health',     name:'건강운 부적',  desc:'심신 건강·활력 충전',     icon:'💚', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-health.webp',     score:'health' },
+  { id:'love',       name:'애정운 부적',  desc:'사랑·인연·관계 개선',     icon:'💕', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-love.webp',       score:'love' },
+  { id:'exam',       name:'합격운 부적',  desc:'시험·취업·자격증 합격',   icon:'📚', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-exam.webp',       score:'work' },
+  { id:'business',   name:'사업운 부적',  desc:'사업·창업·계약 성공',     icon:'🏢', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-business.webp',   score:'work' },
+  { id:'job',        name:'직장운 부적',  desc:'승진·취업·직장 안정',     icon:'💼', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-job.webp',        score:'work' },
+  { id:'luck',       name:'행운 부적',    desc:'전반적 행운·기회 상승',   icon:'⭐', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-luck.webp',       score:'overall' },
+  { id:'protection', name:'액막이 부적',  desc:'나쁜 기운 차단·보호',     icon:'🛡️', img:'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-protection.webp', score:'overall' },
+];
+
+
+function initBujeok(fortuneResult) {
+  const section = document.getElementById('bujeok-section');
+  if (!section) return;
+  section.style.display = 'block';
+
+  // 운세 점수 기반 추천 부적 결정
+  if (fortuneResult) {
+    const scores = {
+      overall: fortuneResult.overall || 70,
+      love: fortuneResult.love || 70,
+      money: fortuneResult.money || 70,
+      work: fortuneResult.work || 70,
+      health: fortuneResult.health || 70,
+    };
+    // 가장 낮은 점수 항목 2개 추천
+    const sorted = Object.entries(scores).sort((a,b) => a[1]-b[1]);
+    const weakScores = sorted.slice(0,2).map(s=>s[0]);
+    const recommended = BUJEOK_LIST.filter(b => weakScores.includes(b.score));
+
+    if (recommended.length > 0) {
+      const recDiv = document.getElementById('bujeok-recommended');
+      const recList = document.getElementById('bujeok-recommended-list');
+      recDiv.style.display = 'block';
+      recList.innerHTML = recommended.map(b => `
+        <button onclick="showBujeokDetail('${b.id}')"
+          style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:20px;cursor:pointer;font-size:13px;color:var(--gold);font-family:'Noto Sans KR',sans-serif;">
+          ${b.icon} ${b.name}
+        </button>`).join('');
+    }
+  }
+
+  // 전체 부적 그리드
+  const grid = document.getElementById('bujeok-grid');
+  grid.innerHTML = BUJEOK_LIST.map(b => `
+    <div class="bujeok-card" onclick="showBujeokDetail('${b.id}')">
+      <div style="font-size:28px;margin-bottom:6px;">${b.icon}</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${b.name}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${b.desc}</div>
+      <span class="bujeok-price">₩5,000</span>
+    </div>`).join('');
+}
+
+function showBujeokDetail(id) {
+  const b = BUJEOK_LIST.find(x => x.id === id);
+  if (!b) return;
+
+  // 모달 생성
+  const modal = document.createElement('div');
+  modal.id = 'bujeok-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+
+  modal.innerHTML = `
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);" onclick="closeBujeokModal()"></div>
+    <div style="position:relative;background:linear-gradient(180deg,#1a1008 0%,#0e0b14 100%);border-radius:24px 24px 0 0;padding:32px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.3);">
+
+      <!-- 미리보기 이미지 -->
+      <div style="text-align:center;margin-bottom:20px;position:relative;">
+        <div style="display:inline-block;position:relative;animation:bujeok-float 3s ease-in-out infinite;">
+          <img src="${b.img}" alt="${b.name}"
+            style="width:120px;height:auto;border-radius:12px;box-shadow:0 0 30px rgba(201,168,76,0.5);animation:bujeok-glow 2s ease-in-out infinite;"
+            onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <h3 style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:20px;color:var(--gold);text-align:center;margin-bottom:6px;">${b.name}</h3>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:6px;">${b.desc}</p>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.7;">한 주 동안 배경화면으로 설정하면<br>좋은 기운이 함께해요 🙏</p>
+
+      <button onclick="purchaseBujeok('${b.id}')"
+        style="width:100%;padding:16px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:12px;color:#0e0b14;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-bottom:10px;">
+        🔮 부적 만들기 · ₩5,000
+      </button>
+      <button onclick="closeBujeokModal()"
+        style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+        취소
+      </button>
+    </div>`;
+
+  document.body.appendChild(modal);
+}
+
+function closeBujeokModal() {
+  const m = document.getElementById('bujeok-modal');
+  if (m) m.remove();
+}
+
+async function purchaseBujeok(id) {
+  const b = BUJEOK_LIST.find(x => x.id === id);
+  if (!b) return;
+
+  const user = getSajuUser ? getSajuUser() : null;
+  if (!user) { showToast('로그인 후 이용할 수 있어요'); return; }
+
+  const sb = window.supabase.createClient('https://kuupemfzqkzinrauhpnd.supabase.co','sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx');
+  const r = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+  const credits = (r.data && r.data.credits) || 0;
+  const cash = (r.data && r.data.cash_balance) || 0;
+  const PRICE = 5000;
+
+  // 구독자는 무료
+  if (credits < 30 && cash < PRICE) {
+    closeBujeokModal();
+    showNeedCashModal(PRICE - cash);
+    return;
+  }
+
+  closeBujeokModal();
+  showBujeokAnimation(b, async () => {
+    // 결제 처리
+    if (credits < 30) {
+      await sb.from('user_credits').update({ cash_balance: cash - PRICE }).eq('user_id', user.id);
+      await sb.from('cash_transactions').insert({
+        user_id: user.id, type: 'use', amount: -PRICE,
+        description: b.name + ' 구매', created_at: new Date().toISOString()
+      });
+    }
+  });
+}
+
+function showNeedCashModal(shortfall) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);" onclick="this.parentElement.remove()"></div>
+    <div style="position:relative;background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);">
+      <div style="font-size:36px;text-align:center;margin-bottom:12px;">💰</div>
+      <h3 style="font-size:17px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:8px;">캐시가 부족해요</h3>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;">₩${shortfall.toLocaleString()} 더 필요해요</p>
+      <button onclick="location.href='https://saju-today.com/pricing'"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:12px;color:#0e0b14;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">
+        💎 캐시 충전하러 가기
+      </button>
+      <button onclick="this.closest('div').parentElement.remove()"
+        style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;">
+        취소
+      </button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function showBujeokAnimation(b, onComplete) {
+  const overlay = document.createElement('div');
+  overlay.id = 'bujeok-animation';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;';
+
+  overlay.innerHTML = `
+    <!-- 별빛 배경 -->
+    <div id="ba-stars" style="position:absolute;inset:0;pointer-events:none;"></div>
+
+    <!-- 회전 육각형 -->
+    <div id="ba-hex" style="position:absolute;width:300px;height:300px;border:2px solid rgba(201,168,76,0.3);transform:rotate(0deg);border-radius:50%;animation:bujeok-rotate 4s linear infinite;"></div>
+    <div style="position:absolute;width:260px;height:260px;border:1px solid rgba(201,168,76,0.2);animation:bujeok-rotate 6s linear infinite reverse;border-radius:50%;"></div>
+
+    <!-- 한자 파티클 -->
+    <div id="ba-hanja" style="position:absolute;inset:0;pointer-events:none;"></div>
+
+    <!-- 메인 부적 이미지 -->
+    <div id="ba-img" style="position:relative;z-index:10;text-align:center;opacity:0;transition:all 1s;">
+      <img src="${b.img}" style="width:160px;height:auto;border-radius:16px;box-shadow:0 0 60px rgba(201,168,76,0.8);" onerror="this.style.display='none'">
+    </div>
+
+    <!-- 텍스트 -->
+    <div id="ba-text" style="position:relative;z-index:10;margin-top:24px;text-align:center;">
+      <div id="ba-msg" style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:18px;color:#c9a84c;margin-bottom:8px;">부적에 기운을 불어넣는 중...</div>
+      <div style="display:flex;justify-content:center;gap:6px;" id="ba-dots">
+        <div style="width:6px;height:6px;border-radius:50%;background:#c9a84c;animation:particle-float 1s ease-in-out infinite;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#c9a84c;animation:particle-float 1s ease-in-out 0.3s infinite;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#c9a84c;animation:particle-float 1s ease-in-out 0.6s infinite;"></div>
+      </div>
+    </div>
+
+    <!-- 다운로드 버튼 (처음엔 숨김) -->
+    <div id="ba-download" style="display:none;position:relative;z-index:10;margin-top:24px;text-align:center;padding:0 24px;width:100%;max-width:360px;">
+      <p style="font-size:13px;color:#a89c80;margin-bottom:16px;line-height:1.8;">이번 주 배경화면으로 설정하면<br>좋은 기운이 함께해요 🙏</p>
+      <button onclick="downloadBujeok('${b.img}','${b.name}')"
+        style="width:100%;padding:16px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:12px;color:#0e0b14;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-bottom:10px;">
+        📲 배경화면 저장하기
+      </button>
+      <button onclick="document.getElementById('bujeok-animation').remove()"
+        style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:12px;color:#a89c80;font-size:14px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+        닫기
+      </button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // 별빛 생성
+  const stars = document.getElementById('ba-stars');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    const size = Math.random() * 3 + 1;
+    star.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:white;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*0.8};animation:twinkle ${2+Math.random()*3}s ease-in-out infinite ${Math.random()*3}s;`;
+    stars.appendChild(star);
+  }
+
+  // 한자 파티클
+  const hanjas = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸','子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥','福','運','吉','祥'];
+  const hanjaDiv = document.getElementById('ba-hanja');
+  for (let i = 0; i < 15; i++) {
+    const h = document.createElement('div');
+    const x = Math.random() * 100;
+    const delay = Math.random() * 3;
+    h.style.cssText = `position:absolute;left:${x}%;top:${20+Math.random()*60}%;font-family:'Noto Serif SC',serif;font-size:${14+Math.random()*10}px;color:rgba(201,168,76,${0.2+Math.random()*0.4});animation:particle-float ${2+Math.random()*3}s ease-in-out ${delay}s infinite;pointer-events:none;`;
+    h.textContent = hanjas[Math.floor(Math.random()*hanjas.length)];
+    hanjaDiv.appendChild(h);
+  }
+
+  // 애니메이션 시퀀스
+  setTimeout(async () => {
+    // 결제 처리
+    if (onComplete) await onComplete();
+
+    // 파티클 폭죽
+    createParticles(overlay);
+
+    // 부적 등장
+    const img = document.getElementById('ba-img');
+    img.style.opacity = '1';
+    img.style.animation = 'bujeok-appear 1.5s ease-out, bujeok-float 3s ease-in-out 1.5s infinite';
+
+    // 텍스트 변경
+    const msg = document.getElementById('ba-msg');
+    msg.textContent = '✨ ' + b.name + '이 완성됐습니다!';
+    document.getElementById('ba-dots').style.display = 'none';
+
+    // 다운로드 버튼 표시
+    setTimeout(() => {
+      document.getElementById('ba-download').style.display = 'block';
+    }, 800);
+
+  }, 3000);
+}
+
+function createParticles(container) {
+  const colors = ['#c9a84c','#e8c96a','#fff7d6','#f5c97a','#8b6914'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    const size = Math.random() * 8 + 3;
+    const x = 30 + Math.random() * 40;
+    const delay = Math.random() * 0.8;
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    p.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:${color};left:${x}%;top:50%;animation:particle-float ${1+Math.random()*1.5}s ease-out ${delay}s forwards;pointer-events:none;z-index:20;`;
+    container.appendChild(p);
+  }
+}
+
+async function downloadBujeok(imgUrl, name) {
+  try {
+    showToast('다운로드 중...');
+    const response = await fetch(imgUrl);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name + '.webp';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('저장됐어요! 배경화면으로 설정해보세요 🙏');
+  } catch(e) {
+    // 모바일 fallback
+    window.open(imgUrl, '_blank');
+    showToast('이미지를 길게 눌러 저장해주세요 🙏');
+  }
+}
+</script>
+
 </body>
 </html>
