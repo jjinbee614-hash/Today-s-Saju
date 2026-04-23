@@ -848,6 +848,15 @@
   border-color:rgba(201,168,76,0.6);
   background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(138,90,180,0.05));
 }
+#bujeok-section img, #bujeok-modal img, #bujeok-animation img {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  pointer-events: none;
+}
+#bujeok-animation img {
+  pointer-events: auto; /* 다운로드 버튼은 작동해야 하므로 */
+}
 .bujeok-price {
   display:inline-block;
   background:linear-gradient(135deg,#c9a84c,#8b6914);
@@ -2253,7 +2262,7 @@ function initBujeok(fortuneResult) {
       <div style="font-size:28px;margin-bottom:6px;">${b.icon}</div>
       <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${b.name}</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${b.desc}</div>
-      <span class="bujeok-price">₩5,000</span>
+      <span class="bujeok-price">🔮 구매하기</span>
     </div>`).join('');
 }
 
@@ -2273,9 +2282,15 @@ function showBujeokDetail(id) {
       <!-- 미리보기 이미지 -->
       <div style="text-align:center;margin-bottom:20px;position:relative;">
         <div style="display:inline-block;position:relative;animation:bujeok-float 3s ease-in-out infinite;">
-          <img src="${b.img}" alt="${b.name}"
-            style="width:120px;height:auto;border-radius:12px;box-shadow:0 0 30px rgba(201,168,76,0.5);animation:bujeok-glow 2s ease-in-out infinite;"
-            onerror="this.style.display='none'">
+          <div style="position:relative;width:120px;margin:0 auto;">
+            <img src="${b.img}" alt="${b.name}"
+              style="width:120px;height:auto;border-radius:12px;box-shadow:0 0 30px rgba(201,168,76,0.5);animation:bujeok-glow 2s ease-in-out infinite;filter:blur(6px);-webkit-filter:blur(6px);user-select:none;-webkit-user-select:none;pointer-events:none;"
+              oncontextmenu="return false;" draggable="false"
+              onerror="this.style.display='none'">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(0,0,0,0.3);">
+              <span style="font-size:11px;color:rgba(255,255,255,0.8);text-align:center;line-height:1.6;padding:4px;">🔒 구매 후<br>확인 가능</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2285,7 +2300,7 @@ function showBujeokDetail(id) {
 
       <button onclick="purchaseBujeok('${b.id}')"
         style="width:100%;padding:16px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:12px;color:#0e0b14;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-bottom:10px;">
-        🔮 부적 만들기 · ₩5,000
+        🔮 부적 만들기 · 5,000캐시
       </button>
       <button onclick="closeBujeokModal()"
         style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
@@ -2342,7 +2357,7 @@ function showNeedCashModal(shortfall) {
     <div style="position:relative;background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);">
       <div style="font-size:36px;text-align:center;margin-bottom:12px;">💰</div>
       <h3 style="font-size:17px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:8px;">캐시가 부족해요</h3>
-      <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;">₩${shortfall.toLocaleString()} 더 필요해요</p>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;">${shortfall.toLocaleString()}캐시 더 필요해요</p>
       <button onclick="location.href='https://saju-today.com/pricing'"
         style="width:100%;padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:12px;color:#0e0b14;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">
         💎 캐시 충전하러 가기
@@ -2373,7 +2388,7 @@ function showBujeokAnimation(b, onComplete) {
 
     <!-- 메인 부적 이미지 -->
     <div id="ba-img" style="position:relative;z-index:10;text-align:center;opacity:0;transition:all 1s;">
-      <img src="${b.img}" style="width:160px;height:auto;border-radius:16px;box-shadow:0 0 60px rgba(201,168,76,0.8);" onerror="this.style.display='none'">
+      <img src="${b.img}" style="width:160px;height:auto;border-radius:16px;box-shadow:0 0 60px rgba(201,168,76,0.8);" onerror="this.style.display='none'" oncontextmenu="return false;" draggable="false" style="user-select:none;-webkit-user-select:none;">
     </div>
 
     <!-- 텍스트 -->
