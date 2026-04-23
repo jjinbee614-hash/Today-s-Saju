@@ -608,6 +608,7 @@ document.addEventListener('DOMContentLoaded',loadCashBalance);
 (function(){var btn=document.getElementById('more-btn');if(btn){btn.addEventListener('click',function(e){e.stopPropagation();var m=document.getElementById('nav-menu');if(m){m.style.display=m.style.display==='block'?'none':'block';m.style.zIndex='99999';}});}})();
 </script>
 
+<script>
 // ─── PayPal 결제 ───
 var _paypalAmount = 0;
 var _paypalProductName = '';
@@ -711,6 +712,7 @@ async function processPaypalPayment(details) {
     showToast('결제 처리 오류: ' + e.message);
   }
 }
+</script>
 
 </body>
 </html>
