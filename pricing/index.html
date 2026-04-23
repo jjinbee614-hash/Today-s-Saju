@@ -416,10 +416,19 @@ function showPaymentModal(productName,amount,credits,isSubscription,merchantUid,
   cancelBtn.style.cssText='width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;';cancelBtn.textContent='취소';
   inner.appendChild(bar);inner.appendChild(title);inner.appendChild(price);inner.appendChild(sub);inner.appendChild(kakaoWrap);inner.appendChild(paypalWrap);inner.appendChild(cryptoBtn);inner.appendChild(cancelBtn);
   modal.appendChild(inner);document.body.appendChild(modal);
-  // PayPal 버튼 렌더링 (DOM에 추가된 후)
-  setTimeout(function(){
-    renderPaypalButton(amount, productName, cashAmount, credits, isSubscription, user);
-  }, 100);
+  // PayPal 버튼 렌더링 (SDK 로드 확인 후)
+  var _ppRetry = 0;
+  var _ppInterval = setInterval(function(){
+    _ppRetry++;
+    if (typeof paypal !== 'undefined') {
+      clearInterval(_ppInterval);
+      renderPaypalButton(amount, productName, cashAmount, credits, isSubscription, user);
+    } else if (_ppRetry > 20) {
+      clearInterval(_ppInterval);
+      var wrap = document.getElementById('paypal-button-wrap');
+      if (wrap) wrap.innerHTML = '<p style="text-align:center;color:#a89c80;font-size:12px;padding:8px;">PayPal 로드 실패. 새로고침 후 시도해주세요.</p>';
+    }
+  }, 200);
   cryptoBtn.addEventListener('click',function(){modal.remove();showCryptoModal(productName,amount,credits,cashAmount);});
   cancelBtn.addEventListener('click',function(){modal.remove();});
   modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
