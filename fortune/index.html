@@ -2467,10 +2467,12 @@ async function purchaseBujeok(id) {
   // 결제 먼저 처리 후 애니메이션
   try {
     if (credits < 30) {
+      console.log('차감 전 캐시:', cash, '차감 금액:', PRICE);
       const updateRes = await sb.from('user_credits')
         .update({ cash_balance: cash - PRICE, updated_at: new Date().toISOString() })
         .eq('user_id', user.id);
-      if (updateRes.error) throw updateRes.error;
+      console.log('업데이트 결과:', updateRes);
+      if (updateRes.error) throw new Error('캐시 차감 실패: ' + updateRes.error.message);
 
       await sb.from('cash_transactions').insert({
         user_id: user.id,
