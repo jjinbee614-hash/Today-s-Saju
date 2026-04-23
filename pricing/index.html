@@ -406,15 +406,18 @@ function showPaymentModal(productName,amount,credits,isSubscription,merchantUid,
   var badge=document.createElement('span');badge.style.cssText='position:absolute;top:-8px;right:-8px;background:#e74c3c;color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;';badge.textContent='심사 중';
   kakaoWrap.appendChild(kakaoBtn);kakaoWrap.appendChild(badge);
   // PayPal
+  var paypalLabel=document.createElement('div');
+  paypalLabel.style.cssText='font-size:11px;color:#a89c80;margin-bottom:6px;text-align:center;';
+  paypalLabel.innerHTML='🌏 해외 유저 전용 (Overseas users only)';
   var paypalWrap=document.createElement('div');paypalWrap.id='paypal-button-wrap';
-  paypalWrap.style.cssText='margin-bottom:12px;border-radius:12px;overflow:hidden;';
+  paypalWrap.style.cssText='margin-bottom:4px;border-radius:12px;overflow:hidden;';
   // 크립토
   var cryptoBtn=document.createElement('button');
   cryptoBtn.style.cssText='width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:linear-gradient(135deg,#1a1628,#2d1f4e);border:1px solid rgba(201,168,76,0.3);border-radius:12px;font-size:15px;font-weight:700;color:#f0ead6;cursor:pointer;margin-bottom:12px;';
   cryptoBtn.innerHTML='<span style="font-size:22px;">💎</span> 크립토 결제 <span style="font-size:12px;color:#c9a84c;margin-left:4px;">(5% 할인)</span>';
   var cancelBtn=document.createElement('button');
   cancelBtn.style.cssText='width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:10px;color:#a89c80;font-size:14px;cursor:pointer;';cancelBtn.textContent='취소';
-  inner.appendChild(bar);inner.appendChild(title);inner.appendChild(price);inner.appendChild(sub);inner.appendChild(kakaoWrap);inner.appendChild(paypalWrap);inner.appendChild(cryptoBtn);inner.appendChild(cancelBtn);
+  inner.appendChild(bar);inner.appendChild(title);inner.appendChild(price);inner.appendChild(sub);inner.appendChild(kakaoWrap);inner.appendChild(paypalLabel);inner.appendChild(paypalWrap);inner.appendChild(cryptoBtn);inner.appendChild(cancelBtn);
   modal.appendChild(inner);document.body.appendChild(modal);
   // PayPal 버튼 렌더링 (SDK 로드 확인 후)
   var _ppRetry = 0;
