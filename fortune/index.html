@@ -2455,8 +2455,8 @@ async function purchaseBujeok(id) {
   const cash = (r.data && r.data.cash_balance) || 0;
   const PRICE = 5000;
 
-  // 캐시 부족
-  if (credits < 30 && cash < PRICE) {
+  // 구독자 포함 모두 캐시로 구매 (부적은 이용권/구독과 별개)
+  if (cash < PRICE) {
     closeBujeokModal();
     showNeedCashModal(PRICE - cash);
     return;
@@ -2464,24 +2464,21 @@ async function purchaseBujeok(id) {
 
   closeBujeokModal();
 
-  // 결제 먼저 처리 후 애니메이션
+  // 결제 처리 후 애니메이션
   try {
-    if (credits < 30) {
-      console.log('차감 전 캐시:', cash, '차감 금액:', PRICE);
-      const updateRes = await sb.from('user_credits')
-        .update({ cash_balance: cash - PRICE, updated_at: new Date().toISOString() })
-        .eq('user_id', user.id);
-      console.log('업데이트 결과:', updateRes);
-      if (updateRes.error) throw new Error('캐시 차감 실패: ' + updateRes.error.message);
+    const updateRes = await sb.from('user_credits')
+      .update({ cash_balance: cash - PRICE, updated_at: new Date().toISOString() })
+      .eq('user_id', user.id);
+    if (updateRes.error) throw new Error('캐시 차감 실패: ' + updateRes.error.message);
 
-      await sb.from('cash_transactions').insert({
-        user_id: user.id,
-        type: 'use',
-        amount: -PRICE,
-        description: b.name + ' 구매',
-        created_at: new Date().toISOString()
-      });
-    }
+    await sb.from('cash_transactions').insert({
+      user_id: user.id,
+      type: 'use',
+      amount: -PRICE,
+      description: b.name + ' 구매',
+      created_at: new Date().toISOString()
+    });
+
     // 결제 성공 후 애니메이션 시작
     showBujeokAnimation(b, null);
   } catch(e) {
