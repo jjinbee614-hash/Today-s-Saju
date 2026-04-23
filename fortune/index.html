@@ -2316,6 +2316,132 @@ function closeBujeokModal() {
   if (m) m.remove();
 }
 
+
+function showNeedCashModal(shortfall) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.7);" onclick="this.parentElement.remove()"></div>
+    <div style="position:relative;background:#13101c;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;border-top:1px solid rgba(201,168,76,0.2);">
+      <div style="font-size:36px;text-align:center;margin-bottom:12px;">💰</div>
+      <h3 style="font-size:17px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:8px;">캐시가 부족해요</h3>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;">${shortfall.toLocaleString()}캐시 더 필요해요</p>
+      <button onclick="location.href='https://saju-today.com/pricing'"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:12px;color:#0e0b14;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">
+        💎 캐시 충전하러 가기
+      </button>
+      <button onclick="this.closest('div').parentElement.remove()"
+        style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;">
+        취소
+      </button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function showBujeokAnimation(b, onComplete) {
+  const overlay = document.createElement('div');
+  overlay.id = 'bujeok-animation';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;';
+
+  overlay.innerHTML = `
+    <div id="ba-stars" style="position:absolute;inset:0;pointer-events:none;"></div>
+    <div style="position:absolute;width:300px;height:300px;border:2px solid rgba(201,168,76,0.3);animation:bujeok-rotate 4s linear infinite;border-radius:50%;"></div>
+    <div style="position:absolute;width:260px;height:260px;border:1px solid rgba(201,168,76,0.2);animation:bujeok-rotate 6s linear infinite reverse;border-radius:50%;"></div>
+    <div id="ba-hanja" style="position:absolute;inset:0;pointer-events:none;"></div>
+    <div id="ba-img" style="position:relative;z-index:10;text-align:center;opacity:0;transition:all 1s;">
+      <img src="${b.img}" style="width:160px;height:auto;border-radius:16px;box-shadow:0 0 60px rgba(201,168,76,0.8);" onerror="this.style.display='none'" oncontextmenu="return false;" draggable="false">
+    </div>
+    <div id="ba-text" style="position:relative;z-index:10;margin-top:24px;text-align:center;">
+      <div id="ba-msg" style="font-family:'Noto Serif SC','Noto Serif KR',serif;font-size:18px;color:#c9a84c;margin-bottom:8px;">부적에 기운을 불어넣는 중...</div>
+      <div style="display:flex;justify-content:center;gap:6px;" id="ba-dots">
+        <div style="width:6px;height:6px;border-radius:50%;background:#c9a84c;animation:particle-float 1s ease-in-out infinite;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#c9a84c;animation:particle-float 1s ease-in-out 0.3s infinite;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#c9a84c;animation:particle-float 1s ease-in-out 0.6s infinite;"></div>
+      </div>
+    </div>
+    <div id="ba-download" style="display:none;position:relative;z-index:10;margin-top:24px;text-align:center;padding:0 24px;width:100%;max-width:360px;">
+      <p style="font-size:13px;color:#a89c80;margin-bottom:16px;line-height:1.8;">이번 주 배경화면으로 설정하면<br>좋은 기운이 함께해요 🙏</p>
+      <button onclick="downloadBujeok('${b.img}','${b.name}')"
+        style="width:100%;padding:16px;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:12px;color:#0e0b14;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-bottom:10px;">
+        📲 배경화면 저장하기
+      </button>
+      <button onclick="document.getElementById('bujeok-animation').remove()"
+        style="width:100%;padding:13px;background:rgba(255,255,255,0.06);border:none;border-radius:12px;color:#a89c80;font-size:14px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+        닫기
+      </button>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  // 별빛 생성
+  const stars = document.getElementById('ba-stars');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    const size = Math.random() * 3 + 1;
+    star.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:white;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*0.8};animation:twinkle ${2+Math.random()*3}s ease-in-out infinite ${Math.random()*3}s;`;
+    stars.appendChild(star);
+  }
+
+  // 한자 파티클
+  const hanjas = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸','福','運','吉','祥','財','壽','愛','健'];
+  const hanjaDiv = document.getElementById('ba-hanja');
+  for (let i = 0; i < 15; i++) {
+    const h = document.createElement('div');
+    h.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${20+Math.random()*60}%;font-family:'Noto Serif SC',serif;font-size:${14+Math.random()*10}px;color:rgba(201,168,76,${0.2+Math.random()*0.4});animation:particle-float ${2+Math.random()*3}s ease-in-out ${Math.random()*3}s infinite;pointer-events:none;`;
+    h.textContent = hanjas[Math.floor(Math.random()*hanjas.length)];
+    hanjaDiv.appendChild(h);
+  }
+
+  // 3초 후 완성
+  setTimeout(async () => {
+    if (onComplete) await onComplete();
+    createParticles(overlay);
+    const img = document.getElementById('ba-img');
+    if (img) { img.style.opacity = '1'; img.style.animation = 'bujeok-appear 1.5s ease-out, bujeok-float 3s ease-in-out 1.5s infinite'; }
+    const msg = document.getElementById('ba-msg');
+    if (msg) msg.textContent = '✨ ' + b.name + '이 완성됐습니다!';
+    const dots = document.getElementById('ba-dots');
+    if (dots) dots.style.display = 'none';
+    setTimeout(() => {
+      const dl = document.getElementById('ba-download');
+      if (dl) dl.style.display = 'block';
+    }, 800);
+  }, 3000);
+}
+
+function createParticles(container) {
+  const colors = ['#c9a84c','#e8c96a','#fff7d6','#f5c97a','#8b6914'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    const size = Math.random() * 8 + 3;
+    const x = 30 + Math.random() * 40;
+    const delay = Math.random() * 0.8;
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    p.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:${color};left:${x}%;top:50%;animation:particle-float ${1+Math.random()*1.5}s ease-out ${delay}s forwards;pointer-events:none;z-index:20;`;
+    container.appendChild(p);
+  }
+}
+
+async function downloadBujeok(imgUrl, name) {
+  try {
+    showToast('다운로드 중...');
+    const response = await fetch(imgUrl);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name + '.webp';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('저장됐어요! 배경화면으로 설정해보세요 🙏');
+  } catch(e) {
+    window.open(imgUrl, '_blank');
+    showToast('이미지를 길게 눌러 저장해주세요 🙏');
+  }
+}
+
 async function purchaseBujeok(id) {
   const b = BUJEOK_LIST.find(x => x.id === id);
   if (!b) return;
