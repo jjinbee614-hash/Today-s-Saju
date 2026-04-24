@@ -367,24 +367,24 @@ async function loadMembership(userId) {
       badgeEl.className = 'badge ' + (isSubscriber || credits > 0 ? 'badge-paid' : 'badge-free');
     }
 
-    el.innerHTML = \`
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>
-          <div style="font-size:13px;font-weight:700;color:\${isSubscriber ? 'var(--gold)' : 'var(--text2)'};">\${isSubscriber ? '💎 멤버십' : '무료'}</div>
-        </div>
-        <div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">이용권</div>
-          <div style="font-size:18px;font-weight:800;color:var(--gold);">\${ticketLabel}</div>
-        </div>
-        <div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">캐시</div>
-          <div style="font-size:15px;font-weight:800;color:var(--gold);">\${cash.toLocaleString()}</div>
-        </div>
-      </div>
-      <a href="https://saju-today.com/pricing" class="btn-gold" style="width:100%;display:block;text-align:center;padding:12px;">
-        💎 이용권 · 캐시 충전
-      </a>\`;
+    var planColor = isSubscriber ? 'var(--gold)' : 'var(--text2)';
+    var planText = isSubscriber ? '💎 멤버십' : '무료';
+    el.innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">' +
+        '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>' +
+          '<div style="font-size:13px;font-weight:700;color:' + planColor + ';">' + planText + '</div>' +
+        '</div>' +
+        '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">이용권</div>' +
+          '<div style="font-size:18px;font-weight:800;color:var(--gold);">' + ticketLabel + '</div>' +
+        '</div>' +
+        '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">캐시</div>' +
+          '<div style="font-size:15px;font-weight:800;color:var(--gold);">' + cash.toLocaleString() + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<a href="https://saju-today.com/pricing" class="btn-gold" style="width:100%;display:block;text-align:center;padding:12px;">💎 이용권 · 캐시 충전</a>';
   } catch(e) {
     el.innerHTML = '<div class="member-free"><div><div class="member-label">현재 이용 중</div><div class="member-value">무료 플랜</div></div><a href="https://saju-today.com/pricing" class="btn-gold" style="font-size:12px;padding:8px 16px;">이용권 구매하기</a></div>';
   }
