@@ -350,7 +350,7 @@ async function buyWithCash(productName,cashRequired,credits){
     if(credits>=30){
       var months=credits>=365?12:credits>=180?6:credits>=90?3:1;
       var expiry=new Date();expiry.setMonth(expiry.getMonth()+months);
-      await sb.from('users').update({membership:productName,membership_expires_at:expiry.toISOString(),updated_at:new Date().toISOString()}).eq('id',user.id);
+      await sb.from('users').upsert({id:user.id,membership:productName,membership_expires_at:expiry.toISOString(),updated_at:new Date().toISOString()},{onConflict:'id'});
     }
     showToast('✅ '+productName+' 구매 완료!');
     loadCashBalance();
