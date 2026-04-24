@@ -633,6 +633,10 @@ async function sendGift() {
 const SB_ATT_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
 const SB_ATT_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
 
+function getSajuUser() {
+  try { var u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
+}
+
 function getToday() {
   const now = new Date();
   const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
