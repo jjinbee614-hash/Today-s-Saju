@@ -844,7 +844,7 @@ async function loadBujeokHistory(userId) {
 
       html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2);">';
       if (imgUrl) {
-        html += '<img src="' + imgUrl + '" style="width:48px;height:auto;border-radius:8px;flex-shrink:0;' + (isValid ? '' : 'filter:grayscale(1);opacity:0.5;') + '" onerror="this.style.display='none'">';
+        html += '<img src="' + imgUrl + '" style="width:48px;height:auto;border-radius:8px;flex-shrink:0;' + (isValid ? '' : 'filter:grayscale(1);opacity:0.5;') + '" onerror="this.style.display=\'none\'">';
       }
       html += '<div style="flex:1;">';
       html += '<div style="font-size:14px;font-weight:700;margin-bottom:3px;">' + name + '</div>';
