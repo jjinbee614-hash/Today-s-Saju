@@ -351,7 +351,7 @@ function loadSajuInfo() {
 }
 
 // Load membership + credits + cash
-async async function loadMembership(userId) {
+async function loadMembership(userId) {
   var el = document.getElementById('membership-content');
   try {
     var { data: uc } = await sb.from('user_credits').select('credits, cash_balance').eq('user_id', userId).single();
