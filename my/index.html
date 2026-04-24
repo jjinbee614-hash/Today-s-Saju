@@ -357,41 +357,47 @@ async function loadMembership(userId) {
     var { data: uc } = await sb.from('user_credits').select('credits, cash_balance').eq('user_id', userId).single();
     var credits = (uc && uc.credits) || 0;
     var cash = (uc && uc.cash_balance) || 0;
-    var isSubscriber = credits >= 30;
-
-    // 멤버십 유효기간
+    // 멤버십 유효기간 확인
     var expireText = '';
+    var isMembership = false;
+    var daysLeftNum = 0;
     try {
       var { data: mu } = await sb.from('users').select('membership_expires_at').eq('id', userId).single();
       if (mu && mu.membership_expires_at) {
         var expDate = new Date(mu.membership_expires_at);
-        var daysLeft = Math.ceil((expDate - new Date()) / (24*60*60*1000));
-        if (daysLeft > 0) expireText = 'D-' + daysLeft;
-        else expireText = '만료됨';
+        daysLeftNum = Math.ceil((expDate - new Date()) / (24*60*60*1000));
+        if (daysLeftNum > 0) {
+          isMembership = true;
+          expireText = daysLeftNum + '일 남음';
+        } else {
+          expireText = '만료됨';
+        }
       }
     } catch(e2) {}
 
+    var isSubscriber = isMembership;
     var badgeEl = document.getElementById('user-badge');
     if (badgeEl) {
-      badgeEl.textContent = isSubscriber ? '멤버십' : credits > 0 ? '이용권 ' + credits + '회' : '무료';
-      badgeEl.className = 'badge ' + (isSubscriber || credits > 0 ? 'badge-paid' : 'badge-free');
+      badgeEl.textContent = isMembership ? '멤버십' : credits > 0 ? '이용권 ' + credits + '회' : '무료';
+      badgeEl.className = 'badge ' + (isMembership || credits > 0 ? 'badge-paid' : 'badge-free');
     }
 
-    var planColor = isSubscriber ? 'var(--gold)' : 'var(--text2)';
-    var planText = isSubscriber ? '멤버십' : '기본';
-    // 이용권은 항상 실제 credits 개수로 표시
-    var ticketText = credits + '회';
-    var ticketColor = credits > 0 ? 'var(--gold)' : 'var(--text3)';
+    var planColor = isMembership ? 'var(--gold)' : 'var(--text2)';
+    var planText = isMembership ? '멤버십' : '기본';
+    // 멤버십이면 남은 기간, 낱개이면 이용권 개수
+    var ticketText = isMembership ? expireText : credits + '회';
+    var ticketLabel = isMembership ? '남은 기간' : '이용권';
+    var ticketColor = (isMembership || credits > 0) ? 'var(--gold)' : 'var(--text3)';
 
     el.innerHTML =
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>' +
           '<div style="font-size:16px;font-weight:800;color:' + planColor + ';">' + planText + '</div>' +
-          (expireText ? '<div style="font-size:11px;color:' + (expireText==='만료됨'?'#e74c3c':'var(--gold)') + ';margin-top:4px;font-weight:700;">' + expireText + '</div>' : '') +
+          '' +
         '</div>' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">이용권</div>' +
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">' + ticketLabel + '</div>' +
           '<div style="font-size:16px;font-weight:800;color:' + ticketColor + ';">' + ticketText + '</div>' +
         '</div>' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
