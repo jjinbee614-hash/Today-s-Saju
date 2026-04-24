@@ -359,8 +359,18 @@ async function loadMembership(userId) {
     var cash = (uc && uc.cash_balance) || 0;
     var isSubscriber = credits >= 30;
 
-    var planLabel = isSubscriber ? '💎 멤버십 구독 중' : '무료 플랜';
-    var ticketLabel = isSubscriber ? '무제한' : credits + '회';
+    // 멤버십 유효기간
+    var expireText = '';
+    try {
+      var { data: mu } = await sb.from('users').select('membership_expires_at').eq('id', userId).single();
+      if (mu && mu.membership_expires_at) {
+        var expDate = new Date(mu.membership_expires_at);
+        var daysLeft = Math.ceil((expDate - new Date()) / (24*60*60*1000));
+        if (daysLeft > 0) expireText = 'D-' + daysLeft;
+        else expireText = '만료됨';
+      }
+    } catch(e2) {}
+
     var badgeEl = document.getElementById('user-badge');
     if (badgeEl) {
       badgeEl.textContent = isSubscriber ? '멤버십' : credits > 0 ? '이용권 ' + credits + '회' : '무료';
@@ -368,20 +378,24 @@ async function loadMembership(userId) {
     }
 
     var planColor = isSubscriber ? 'var(--gold)' : 'var(--text2)';
-    var planText = isSubscriber ? '💎 멤버십' : '무료';
+    var planText = isSubscriber ? '💎' : '기본';
+    var planSub = isSubscriber && expireText ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">' + expireText + '</div>' : '';
+    var ticketText = credits + '회';
+
     el.innerHTML =
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>' +
-          '<div style="font-size:13px;font-weight:700;color:' + planColor + ';">' + planText + '</div>' +
+          '<div style="font-size:16px;font-weight:800;color:' + planColor + ';">' + planText + '</div>' +
+          planSub +
         '</div>' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">이용권</div>' +
-          '<div style="font-size:18px;font-weight:800;color:var(--gold);">' + ticketLabel + '</div>' +
+          '<div style="font-size:16px;font-weight:800;color:var(--gold);">' + ticketText + '</div>' +
         '</div>' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">캐시</div>' +
-          '<div style="font-size:15px;font-weight:800;color:var(--gold);">' + cash.toLocaleString() + '</div>' +
+          '<div style="font-size:16px;font-weight:800;color:var(--gold);">' + cash.toLocaleString() + '</div>' +
         '</div>' +
       '</div>' +
       '<a href="https://saju-today.com/pricing" class="btn-gold" style="width:100%;display:block;text-align:center;padding:12px;">💎 이용권 · 캐시 충전</a>';
@@ -485,7 +499,7 @@ async function sendGift() {
     return;
   }
 
-  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const { data: cd } = await sb.from('user_credits').select('cash_balance').eq('user_id', user.id).single();
   const myCash = cd?.cash_balance || 0;
 
@@ -792,7 +806,7 @@ async function doAttendance() {
 async function loadMyCashBalance() {
   const user = getSajuUser ? getSajuUser() : null;
   if (!user) return;
-  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
   const el = document.getElementById('my-credits-display');
   if (el) el.textContent = (cd?.cash_balance || 0).toLocaleString();
