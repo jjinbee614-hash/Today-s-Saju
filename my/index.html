@@ -149,6 +149,14 @@
       </div>
     </div>
 
+    <!-- 구매한 부적 -->
+    <div class="section-card">
+      <div class="section-title">🔮 내 부적</div>
+      <div id="bujeok-history-content">
+        <div class="spinner" style="width:24px;height:24px;margin:8px auto;"></div>
+      </div>
+    </div>
+
     
 <!-- 출석체크 섹션 -->
 <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
@@ -275,6 +283,10 @@ const SUPABASE_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+function getSajuUser() {
+  try { var u = localStorage.getItem('saju_user'); return u ? JSON.parse(u) : null; } catch(e) { return null; }
+}
+
 // Stars
 (function(){
   var wrap=document.getElementById('stars-bg');
@@ -338,17 +350,41 @@ function loadSajuInfo() {
   }
 }
 
-// Load membership
+// Load membership + credits + cash
 async function loadMembership(userId) {
   var el = document.getElementById('membership-content');
   try {
-    var { data, error } = await sb.from('users').select('membership, membership_expires_at').eq('id', userId).single();
-    if (error || !data || !data.membership || data.membership === 'free') {
-      el.innerHTML = '<div class="member-free"><div><div class="member-label">현재 이용 중</div><div class="member-value">무료 플랜</div></div><a href="https://saju-today.com/pricing" class="btn-gold" style="font-size:12px;padding:8px 16px;">이용권 구매하기</a></div>';
-    } else {
-      var exp = data.membership_expires_at ? ' (만료: ' + formatDate(data.membership_expires_at) + ')' : '';
-      el.innerHTML = '<div class="member-paid"><div class="member-label">현재 이용 중</div><div class="member-value">💎 ' + data.membership + exp + '</div></div>';
+    var { data: uc } = await sb.from('user_credits').select('credits, cash_balance').eq('user_id', userId).single();
+    var credits = (uc && uc.credits) || 0;
+    var cash = (uc && uc.cash_balance) || 0;
+    var isSubscriber = credits >= 30;
+
+    var planLabel = isSubscriber ? '💎 멤버십 구독 중' : '무료 플랜';
+    var ticketLabel = isSubscriber ? '무제한' : credits + '회';
+    var badgeEl = document.getElementById('user-badge');
+    if (badgeEl) {
+      badgeEl.textContent = isSubscriber ? '멤버십' : credits > 0 ? '이용권 ' + credits + '회' : '무료';
+      badgeEl.className = 'badge ' + (isSubscriber || credits > 0 ? 'badge-paid' : 'badge-free');
     }
+
+    el.innerHTML = \`
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>
+          <div style="font-size:13px;font-weight:700;color:\${isSubscriber ? 'var(--gold)' : 'var(--text2)'};">\${isSubscriber ? '💎 멤버십' : '무료'}</div>
+        </div>
+        <div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">이용권</div>
+          <div style="font-size:18px;font-weight:800;color:var(--gold);">\${ticketLabel}</div>
+        </div>
+        <div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">캐시</div>
+          <div style="font-size:15px;font-weight:800;color:var(--gold);">\${cash.toLocaleString()}</div>
+        </div>
+      </div>
+      <a href="https://saju-today.com/pricing" class="btn-gold" style="width:100%;display:block;text-align:center;padding:12px;">
+        💎 이용권 · 캐시 충전
+      </a>\`;
   } catch(e) {
     el.innerHTML = '<div class="member-free"><div><div class="member-label">현재 이용 중</div><div class="member-value">무료 플랜</div></div><a href="https://saju-today.com/pricing" class="btn-gold" style="font-size:12px;padding:8px 16px;">이용권 구매하기</a></div>';
   }
@@ -529,9 +565,10 @@ async function sendGift() {
   // Saju info
   loadSajuInfo();
 
-  // Membership, shares & referral (async)
+  // Membership, shares, bujeok & referral (async)
   loadMembership(user.id);
   loadShares(user.id);
+  loadBujeokHistory(user.id);
   loadReferralData(user.id, user.email);
 })();
 </script>
@@ -765,6 +802,88 @@ document.addEventListener('DOMContentLoaded', function() {
   if (typeof loadAttendance === 'function') loadAttendance();
   loadMyCashBalance();
 });
+</script>
+<script>
+// 부적 구매 내역
+async function loadBujeokHistory(userId) {
+  var el = document.getElementById('bujeok-history-content');
+  try {
+    var { data, error } = await sb.from('cash_transactions')
+      .select('description, created_at, amount')
+      .eq('user_id', userId)
+      .eq('type', 'use')
+      .like('description', '%부적%')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error || !data || data.length === 0) {
+      el.innerHTML = '<div class="empty-msg">구매한 부적이 없습니다</div><a href="https://saju-today.com/fortune" class="btn-gold" style="display:block;text-align:center;margin-top:12px;padding:11px;">🔮 부적 만들러 가기</a>';
+      return;
+    }
+
+    var BUJEOK_IMG = {
+      '재물운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-money.webp',
+      '건강운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-health.webp',
+      '애정운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-love.webp',
+      '합격운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-exam.webp',
+      '사업운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-business.webp',
+      '직장운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-job.webp',
+      '행운 부적':   'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-luck.webp',
+      '액막이 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-protection.webp',
+    };
+
+    var now = new Date();
+    var html = '';
+    data.forEach(function(item) {
+      var purchaseDate = new Date(item.created_at);
+      var expireDate = new Date(purchaseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+      var isValid = now < expireDate;
+      var daysLeft = Math.ceil((expireDate - now) / (24 * 60 * 60 * 1000));
+      var name = item.description.replace(' 구매', '');
+      var imgUrl = BUJEOK_IMG[name] || '';
+
+      html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2);">';
+      if (imgUrl) {
+        html += '<img src="' + imgUrl + '" style="width:48px;height:auto;border-radius:8px;flex-shrink:0;' + (isValid ? '' : 'filter:grayscale(1);opacity:0.5;') + '" onerror="this.style.display='none'">';
+      }
+      html += '<div style="flex:1;">';
+      html += '<div style="font-size:14px;font-weight:700;margin-bottom:3px;">' + name + '</div>';
+      html += '<div style="font-size:11px;color:var(--text3);">구매: ' + formatDate(item.created_at) + '</div>';
+      html += '</div>';
+      if (isValid) {
+        html += '<div style="text-align:right;">';
+        html += '<div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:4px;">D-' + daysLeft + '</div>';
+        html += '<button onclick="downloadBujeokFromHistory('' + imgUrl + '','' + name + '')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:6px;color:#0e0b14;font-weight:700;cursor:pointer;">📲 저장</button>';
+        html += '</div>';
+      } else {
+        html += '<div style="font-size:11px;color:var(--text3);">만료됨</div>';
+      }
+      html += '</div>';
+    });
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="empty-msg">내역을 불러올 수 없습니다</div>';
+  }
+}
+
+async function downloadBujeokFromHistory(imgUrl, name) {
+  try {
+    showToast('다운로드 중...');
+    var response = await fetch(imgUrl);
+    var blob = await response.blob();
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name + '.webp';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('저장됐어요! 배경화면으로 설정해보세요 🙏');
+  } catch(e) {
+    window.open(imgUrl, '_blank');
+    showToast('이미지를 길게 눌러 저장해주세요 🙏');
+  }
+}
 </script>
 </body>
 </html>
