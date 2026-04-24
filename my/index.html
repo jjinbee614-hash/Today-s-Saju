@@ -378,7 +378,7 @@ async function loadMembership(userId) {
     }
 
     var planColor = isSubscriber ? 'var(--gold)' : 'var(--text2)';
-    var planText = isSubscriber ? '💎' : '기본';
+    var planText = isSubscriber ? '멤버십' : '기본';
     var planSub = isSubscriber && expireText ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">' + expireText + '</div>' : '';
     var ticketText = credits + '회';
 
@@ -408,7 +408,7 @@ async function loadMembership(userId) {
 async function loadShares(userId) {
   var el = document.getElementById('shares-content');
   try {
-    var { data, error } = await sb.from('shares').select('id,title,created_at').eq('user_id', userId).order('created_at', {ascending:false}).limit(5);
+    var { data, error } = await sb.from('shares').select('id,title,created_at,user_id').eq('user_id', userId).order('created_at', {ascending:false}).limit(5);
     if (error || !data || data.length === 0) {
       el.innerHTML = '<div class="empty-msg">공유한 내역이 없습니다</div>';
       return;
@@ -867,7 +867,7 @@ async function loadBujeokHistory(userId) {
       if (isValid) {
         html += '<div style="text-align:right;">';
         html += '<div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:4px;">D-' + daysLeft + '</div>';
-        html += '<button onclick="downloadBujeokFromHistory('' + imgUrl + '','' + name + '')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:6px;color:#0e0b14;font-weight:700;cursor:pointer;">📲 저장</button>';
+        html += '<button onclick="downloadBujeokFromHistory(\'' + imgUrl + '\',\'' + name + '\')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:6px;color:#0e0b14;font-weight:700;cursor:pointer;">📲 저장</button>';
         html += '</div>';
       } else {
         html += '<div style="font-size:11px;color:var(--text3);">만료됨</div>';
