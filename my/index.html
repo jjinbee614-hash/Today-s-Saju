@@ -358,7 +358,7 @@ async function loadBujeokHistory(userId) {
       html += '<div style="font-size:11px;color:var(--text3);">구매: '+formatDate(item.created_at)+'</div>';
       html += '<div style="font-size:11px;color:'+(isValid?'var(--gold)':'var(--text3)')+';margin-top:2px;">⏰ '+timeLabel+'</div>';
       html += '</div>';
-      if (isValid) html += '<button onclick="downloadBujeokMy(''+imgUrl+'',''+name+'')" style="font-size:11px;padding:8px 12px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:8px;color:#0e0b14;font-weight:700;cursor:pointer;flex-shrink:0;">📲 저장</button>';
+      if (isValid) html += '<button onclick="downloadBujeokMy(\''+imgUrl+'\',\''+name+'\')"  style="font-size:11px;padding:8px 12px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:8px;color:#0e0b14;font-weight:700;cursor:pointer;flex-shrink:0;">📲 저장</button>';
       html += '</div>';
     });
     el.innerHTML = html;
