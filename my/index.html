@@ -766,67 +766,7 @@ function loadSajuInfo() {
 }
 
 // Load membership + credits + cash
-async function loadMembership(userId) {
-  var el = document.getElementById('membership-content');
-  try {
-    var { data: uc } = await sb.from('user_credits').select('credits, cash_balance').eq('user_id', userId).single();
-    var credits = (uc && uc.credits) || 0;
-    var cash = (uc && uc.cash_balance) || 0;
-    // 플랜 판별
-    var PLAN_MAP = { 30:'1개월', 90:'3개월', 180:'6개월', 365:'12개월' };
-    var isMembership = credits >= 30;
-    var planName = isMembership ? (PLAN_MAP[credits] || credits+'회') : '기본';
 
-    // 멤버십 유효기간
-    var expireText = '';
-    var daysLeftNum = 0;
-    try {
-      var { data: mu } = await sb.from('users').select('membership_expires_at').eq('id', userId).single();
-      if (mu && mu.membership_expires_at) {
-        var expDate = new Date(mu.membership_expires_at);
-        daysLeftNum = Math.ceil((expDate - new Date()) / (24*60*60*1000));
-        expireText = daysLeftNum > 0 ? daysLeftNum + '일 남음' : '만료됨';
-      }
-    } catch(e2) {}
-
-    var badgeEl = document.getElementById('user-badge');
-    if (badgeEl) {
-      badgeEl.textContent = isMembership ? planName + ' 멤버십' : credits > 0 ? '이용권 ' + credits + '회' : '무료';
-      badgeEl.className = 'badge ' + (isMembership || credits > 0 ? 'badge-paid' : 'badge-free');
-    }
-
-    // 플랜 박스: 1개월/3개월/6개월/12개월 or 기본
-    var planColor = isMembership ? 'var(--gold)' : 'var(--text2)';
-    var planText = planName;
-
-    // 이용권 박스: 멤버십=남은기간, 낱개=개수
-    var ticketText = isMembership ? expireText : credits + '회';
-    var ticketLabel = isMembership ? '남은 기간' : '이용권';
-    var ticketColor = (isMembership && daysLeftNum > 0) || credits > 0 ? 'var(--gold)' : 'var(--text3)';
-
-    el.innerHTML =
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">' +
-        '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>' +
-          '<div style="font-size:16px;font-weight:800;color:' + planColor + ';">' + planText + '</div>' +
-          '' +
-        '</div>' +
-        '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">' + ticketLabel + '</div>' +
-          '<div style="font-size:16px;font-weight:800;color:' + ticketColor + ';">' + ticketText + '</div>' +
-        '</div>' +
-        '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">캐시</div>' +
-          '<div style="font-size:16px;font-weight:800;color:var(--gold);">' + cash.toLocaleString() + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<a href="https://saju-today.com/pricing" class="btn-gold" style="width:100%;display:block;text-align:center;padding:12px;">💎 이용권 · 캐시 충전</a>';
-  } catch(e) {
-    el.innerHTML = '<div class="member-free"><div><div class="member-label">현재 이용 중</div><div class="member-value">무료 플랜</div></div><a href="https://saju-today.com/pricing" class="btn-gold" style="font-size:12px;padding:8px 16px;">이용권 구매하기</a></div>';
-  }
-}
-
-// Load share history
 async function loadShares(userId) {
   var el = document.getElementById('shares-content');
   try {
