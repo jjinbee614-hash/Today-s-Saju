@@ -158,11 +158,7 @@
     </div>
 
     <!-- 구매한 부적 -->
-    <div class="section-card">
-      <div class="section-title">🔮 내 부적</div>
-      <div id="bujeok-history-content">
-        <div class="spinner" style="width:24px;height:24px;margin:8px auto;"></div>
-      </div>
+    
     </div>
 
     
@@ -914,68 +910,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 // 부적 구매 내역
-async function loadBujeokHistory(userId) {
-  var el = document.getElementById('bujeok-history-content');
-  try {
-    var { data, error } = await sb.from('cash_transactions')
-      .select('description, created_at, amount')
-      .eq('user_id', userId)
-      .eq('type', 'use')
-      .like('description', '%부적%')
-      .order('created_at', { ascending: false })
-      .limit(10);
-
-    if (error || !data || data.length === 0) {
-      el.innerHTML = '<div class="empty-msg">구매한 부적이 없습니다</div><a href="https://saju-today.com/fortune" class="btn-gold" style="display:block;text-align:center;margin-top:12px;padding:11px;">🔮 부적 만들러 가기</a>';
-      return;
-    }
-
-    var BUJEOK_IMG = {
-      '재물운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-money.webp',
-      '건강운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-health.webp',
-      '애정운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-love.webp',
-      '합격운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-exam.webp',
-      '사업운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-business.webp',
-      '직장운 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-job.webp',
-      '행운 부적':   'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-luck.webp',
-      '액막이 부적': 'https://raw.githubusercontent.com/jjinbee614-hash/Today-s-Saju/main/images/bujeok/bujeok-protection.webp',
-    };
-
-    var now = new Date();
-    var html = '';
-    data.forEach(function(item) {
-      var purchaseDate = new Date(item.created_at);
-      var expireDate = new Date(purchaseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-      var isValid = now < expireDate;
-      var daysLeft = Math.ceil((expireDate - now) / (24 * 60 * 60 * 1000));
-      var name = item.description.replace(' 구매', '');
-      var imgUrl = BUJEOK_IMG[name] || '';
-
-      html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2);">';
-      if (imgUrl) {
-        html += '<img src="' + imgUrl + '" style="width:48px;height:auto;border-radius:8px;flex-shrink:0;' + (isValid ? '' : 'filter:grayscale(1);opacity:0.5;') + '" onerror="this.style.display=\'none\'">';
-      }
-      html += '<div style="flex:1;">';
-      html += '<div style="font-size:14px;font-weight:700;margin-bottom:3px;">' + name + '</div>';
-      html += '<div style="font-size:11px;color:var(--text3);">구매: ' + formatDate(item.created_at) + '</div>';
-      html += '</div>';
-      if (isValid) {
-        html += '<div style="text-align:right;">';
-        html += '<div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:4px;">D-' + daysLeft + '</div>';
-        html += '<button onclick="downloadBujeokMy(\''+imgUrl+'\',\''+name+'\')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:6px;color:#0e0b14;font-weight:700;cursor:pointer;">📲 저장</button>';
-        html += '</div>';
-      } else {
-        html += '<div style="font-size:11px;color:var(--text3);">만료됨</div>';
-      }
-      html += '</div>';
-    });
-
-    el.innerHTML = html;
-  } catch(e) {
-    el.innerHTML = '<div class="empty-msg">내역을 불러올 수 없습니다</div>';
-  }
-}
-
 async function downloadBujeokFromHistory(imgUrl, name) {
   try {
     showToast('다운로드 중...');
