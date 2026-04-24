@@ -357,37 +357,37 @@ async function loadMembership(userId) {
     var { data: uc } = await sb.from('user_credits').select('credits, cash_balance').eq('user_id', userId).single();
     var credits = (uc && uc.credits) || 0;
     var cash = (uc && uc.cash_balance) || 0;
-    // 멤버십 유효기간 확인
+    // 플랜 판별
+    var PLAN_MAP = { 30:'1개월', 90:'3개월', 180:'6개월', 365:'12개월' };
+    var isMembership = credits >= 30;
+    var planName = isMembership ? (PLAN_MAP[credits] || credits+'회') : '기본';
+
+    // 멤버십 유효기간
     var expireText = '';
-    var isMembership = false;
     var daysLeftNum = 0;
     try {
       var { data: mu } = await sb.from('users').select('membership_expires_at').eq('id', userId).single();
       if (mu && mu.membership_expires_at) {
         var expDate = new Date(mu.membership_expires_at);
         daysLeftNum = Math.ceil((expDate - new Date()) / (24*60*60*1000));
-        if (daysLeftNum > 0) {
-          isMembership = true;
-          expireText = daysLeftNum + '일 남음';
-        } else {
-          expireText = '만료됨';
-        }
+        expireText = daysLeftNum > 0 ? daysLeftNum + '일 남음' : '만료됨';
       }
     } catch(e2) {}
 
-    var isSubscriber = isMembership;
     var badgeEl = document.getElementById('user-badge');
     if (badgeEl) {
-      badgeEl.textContent = isMembership ? '멤버십' : credits > 0 ? '이용권 ' + credits + '회' : '무료';
+      badgeEl.textContent = isMembership ? planName + ' 멤버십' : credits > 0 ? '이용권 ' + credits + '회' : '무료';
       badgeEl.className = 'badge ' + (isMembership || credits > 0 ? 'badge-paid' : 'badge-free');
     }
 
+    // 플랜 박스: 1개월/3개월/6개월/12개월 or 기본
     var planColor = isMembership ? 'var(--gold)' : 'var(--text2)';
-    var planText = isMembership ? '멤버십' : '기본';
-    // 멤버십이면 남은 기간, 낱개이면 이용권 개수
+    var planText = planName;
+
+    // 이용권 박스: 멤버십=남은기간, 낱개=개수
     var ticketText = isMembership ? expireText : credits + '회';
     var ticketLabel = isMembership ? '남은 기간' : '이용권';
-    var ticketColor = (isMembership || credits > 0) ? 'var(--gold)' : 'var(--text3)';
+    var ticketColor = (isMembership && daysLeftNum > 0) || credits > 0 ? 'var(--gold)' : 'var(--text3)';
 
     el.innerHTML =
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">' +
