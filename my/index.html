@@ -379,19 +379,16 @@ async async function loadMembership(userId) {
 
     var planColor = isSubscriber ? 'var(--gold)' : 'var(--text2)';
     var planText = isSubscriber ? '멤버십' : '기본';
-    var planSub = isSubscriber && expireText
-      ? '<div style="font-size:11px;color:var(--gold);margin-top:4px;font-weight:700;">' + expireText + '</div>'
-      : '';
-    // 멤버십이면 이용권란에 멤버십 기간 표시, 아니면 실제 이용권 개수
-    var ticketText = isSubscriber ? (expireText || '구독중') : credits + '회';
-    var ticketColor = isSubscriber ? 'var(--gold)' : (credits > 0 ? 'var(--gold)' : 'var(--text3)');
+    // 이용권은 항상 실제 credits 개수로 표시
+    var ticketText = credits + '회';
+    var ticketColor = credits > 0 ? 'var(--gold)' : 'var(--text3)';
 
     el.innerHTML =
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>' +
           '<div style="font-size:16px;font-weight:800;color:' + planColor + ';">' + planText + '</div>' +
-          (isSubscriber && expireText ? '<div style="font-size:11px;color:var(--gold);margin-top:4px;font-weight:700;">' + expireText + '</div>' : '') +
+          (expireText ? '<div style="font-size:11px;color:' + (expireText==='만료됨'?'#e74c3c':'var(--gold)') + ';margin-top:4px;font-weight:700;">' + expireText + '</div>' : '') +
         '</div>' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">이용권</div>' +
