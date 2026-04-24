@@ -352,7 +352,7 @@ async function loadBujeokHistory(userId) {
       var timeLabel = daysLeft > 1 ? 'D-'+daysLeft : daysLeft===1 ? '오늘 만료' : '만료됨';
 
       html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2);">';
-      if (imgUrl) html += '<img src="'+imgUrl+'" style="width:48px;height:auto;border-radius:8px;flex-shrink:0;'+(isValid?'':'filter:grayscale(1);opacity:0.5;')+'" onerror="this.style.display='none'">';
+      if (imgUrl) html += '<img src="'+imgUrl+'" style="width:48px;height:auto;border-radius:8px;flex-shrink:0;'+(isValid?'':'filter:grayscale(1);opacity:0.5;')+'" onerror=\"this.style.display=\'none\'">';
       html += '<div style="flex:1;">';
       html += '<div style="font-size:14px;font-weight:700;margin-bottom:3px;">'+name+'</div>';
       html += '<div style="font-size:11px;color:var(--text3);">구매: '+formatDate(item.created_at)+'</div>';
@@ -723,6 +723,8 @@ async function sendGift() {
 // ─── 출석체크 ───
 const SB_ATT_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
 const SB_ATT_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
+const SUPABASE_URL = SB_ATT_URL;
+const SUPABASE_KEY = SB_ATT_KEY;
 function getSajuUser(){try{var u=localStorage.getItem('saju_user');return u?JSON.parse(u):null;}catch(e){return null;}}
 
 function getToday() {
@@ -960,7 +962,7 @@ async function loadBujeokHistory(userId) {
       if (isValid) {
         html += '<div style="text-align:right;">';
         html += '<div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:4px;">D-' + daysLeft + '</div>';
-        html += '<button onclick="downloadBujeokFromHistory('' + imgUrl + '','' + name + '')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:6px;color:#0e0b14;font-weight:700;cursor:pointer;">📲 저장</button>';
+        html += '<button onclick="downloadBujeokMy(\''+imgUrl+'\',\''+name+'\')" style="font-size:11px;padding:5px 10px;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:6px;color:#0e0b14;font-weight:700;cursor:pointer;">📲 저장</button>';
         html += '</div>';
       } else {
         html += '<div style="font-size:11px;color:var(--text3);">만료됨</div>';
