@@ -351,7 +351,7 @@ function loadSajuInfo() {
 }
 
 // Load membership + credits + cash
-async function loadMembership(userId) {
+async async function loadMembership(userId) {
   var el = document.getElementById('membership-content');
   try {
     var { data: uc } = await sb.from('user_credits').select('credits, cash_balance').eq('user_id', userId).single();
@@ -379,19 +379,23 @@ async function loadMembership(userId) {
 
     var planColor = isSubscriber ? 'var(--gold)' : 'var(--text2)';
     var planText = isSubscriber ? '멤버십' : '기본';
-    var planSub = isSubscriber && expireText ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">' + expireText + '</div>' : '';
-    var ticketText = credits + '회';
+    var planSub = isSubscriber && expireText
+      ? '<div style="font-size:11px;color:var(--gold);margin-top:4px;font-weight:700;">' + expireText + '</div>'
+      : '';
+    // 멤버십이면 이용권란에 멤버십 기간 표시, 아니면 실제 이용권 개수
+    var ticketText = isSubscriber ? (expireText || '구독중') : credits + '회';
+    var ticketColor = isSubscriber ? 'var(--gold)' : (credits > 0 ? 'var(--gold)' : 'var(--text3)');
 
     el.innerHTML =
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">플랜</div>' +
           '<div style="font-size:16px;font-weight:800;color:' + planColor + ';">' + planText + '</div>' +
-          planSub +
+          (isSubscriber && expireText ? '<div style="font-size:11px;color:var(--gold);margin-top:4px;font-weight:700;">' + expireText + '</div>' : '') +
         '</div>' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">이용권</div>' +
-          '<div style="font-size:16px;font-weight:800;color:var(--gold);">' + ticketText + '</div>' +
+          '<div style="font-size:16px;font-weight:800;color:' + ticketColor + ';">' + ticketText + '</div>' +
         '</div>' +
         '<div style="text-align:center;background:var(--bg3);border-radius:10px;padding:14px 8px;border:1px solid var(--border);">' +
           '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">캐시</div>' +
