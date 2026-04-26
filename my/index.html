@@ -724,15 +724,13 @@ function getSajuUser(){try{var u=localStorage.getItem('saju_user');return u?JSON
 
 function getToday() {
   var now = new Date();
-  var kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return kst.toISOString().split('T')[0];
+  return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
 }
 
 function getPrevDay() {
   var now = new Date();
-  var kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  kst.setDate(kst.getDate() - 1);
-  return kst.toISOString().split('T')[0];
+  now.setDate(now.getDate() - 1);
+  return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
 }
 
 function calcReward(streak) {
@@ -797,10 +795,10 @@ function renderAttendanceCalendar(streak, lastDate) {
 
   let html = '';
   for (let i = 6; i >= 0; i--) {
-    var d = new Date();
-    var kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+    var kst = new Date();
     kst.setDate(kst.getDate() - i);
-    var dateStr = kst.toISOString().split('T')[0];
+    kst.setHours(0,0,0,0);
+    var dateStr = kst.getFullYear() + '-' + String(kst.getMonth()+1).padStart(2,'0') + '-' + String(kst.getDate()).padStart(2,'0');
     var dayName = days[kst.getDay()];
     var isToday = dateStr === today;
     var isChecked = alreadyChecked ? dateStr <= today && streak > i : dateStr < today && streak > i;
