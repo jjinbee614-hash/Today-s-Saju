@@ -1557,7 +1557,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 확인
-  const cacheKey = 'fortune_week_v12_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  const cacheKey = 'fortune_week_v13_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1632,6 +1632,16 @@ async function loadWeeklyFortune() {
 
 
 
+  // 캐시 저장 전 오늘/내일 점수 동기화
+  var _syncToday = new Date();
+  var _syncTom = new Date(); _syncTom.setDate(_syncToday.getDate()+1);
+  [_syncToday, _syncTom].forEach(function(d) {
+    var idx = d.getDay();
+    if (result.days && result.days[idx]) {
+      var sc = getOrCalcScore(d, fp);
+      result.days[idx].score = sc.overall;
+    }
+  });
   try { localStorage.setItem(cacheKey, JSON.stringify(result)); } catch(e) {}
   renderWeeklyFortune(result, weekStr);
 }
