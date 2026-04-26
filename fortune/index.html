@@ -1442,6 +1442,7 @@ async function loadFortune() {
   const ftime = ftimeMatch ? ftimeMatch[1] : '모름';
   const fp = calcSaju(fy, fm, fd, ftime);
   fp._fy=fy; fp._fm=fm; fp._fd=fd; fp._ftime=ftime;
+  window._currentFp = fp; // 전역 저장 - 이번주 동기화용
 
   const yp = `${fp.yp.heavenly}${fp.yp.earthly}`;
   const mp = `${fp.mp.heavenly}${fp.mp.earthly}`;
@@ -1532,6 +1533,7 @@ async function loadWeeklyFortune() {
   const ftime = ftimeMatch ? ftimeMatch[1] : '모름';
   const fp = calcSaju(fy, fm, fd, ftime);
   fp._fy=fy; fp._fm=fm; fp._fd=fd; fp._ftime=ftime;
+  window._currentFp = fp; // 전역 저장 - 이번주 동기화용
 
   const now = new Date();
   const dayOfWeek = now.getDay();
@@ -1555,7 +1557,7 @@ async function loadWeeklyFortune() {
     </div>`;
 
   // 캐시 확인
-  const cacheKey = 'fortune_week_v11_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
+  const cacheKey = 'fortune_week_v12_'+fy+'_'+fm+'_'+fd+'_'+ftime+'_'+thisWeekSunday.getFullYear()+(thisWeekSunday.getMonth()+1)+thisWeekSunday.getDate();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try { renderWeeklyFortune(JSON.parse(cached), weekStr); return; } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1638,6 +1640,19 @@ function renderWeeklyFortune(r, weekStr) {
   const weekContent = document.getElementById('fortune-week-content');
   const today = new Date();
   const todayDayIdx = today.getDay(); // 0=일,1=월,...,6=토 — dayResults와 동일 순서
+
+  // 오늘/내일 점수를 JS 직접 계산으로 강제 동기화
+  if (r.days && window._currentFp) {
+    var tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    [today, tomorrow].forEach(function(d) {
+      var idx = d.getDay();
+      if (r.days[idx]) {
+        var sc = getOrCalcScore(d, window._currentFp);
+        r.days[idx].score = sc.overall;
+      }
+    });
+  }
 
   const daysHTML = (r.days || []).map(function(d, i) {
     const score = d.score || 70;
