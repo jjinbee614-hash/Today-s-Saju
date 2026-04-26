@@ -1597,8 +1597,8 @@ async function loadWeeklyFortune() {
     const dMPstr = dMP.heavenly + dMP.earthly;
     const dName = dayNames[d.getDay()];
 
-    // JS 계산 점수 미리 계산 (프롬프트에 포함)
-    const _preCalcScores = getOrCalcScore(today, fp);
+    // JS 계산 점수 미리 계산 (프롬프트에 포함) - 이번주는 d(해당날짜) 사용
+    const _preCalcScores = getOrCalcScore(d, fp);
     const prompt = `당신은 사주명리학 전문가입니다. 아래 사람의 사주팔자와 이날 일진을 바탕으로 하루 운세를 분석하세요.
 
 【이 사람의 사주】
