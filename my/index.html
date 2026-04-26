@@ -717,21 +717,21 @@ async function sendGift() {
 </script>
 <script>
 // ─── 출석체크 ───
-const SB_ATT_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
-const SB_ATT_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
-const SUPABASE_URL = SB_ATT_URL;
-const SUPABASE_KEY = SB_ATT_KEY;
+var SB_ATT_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
+var SB_ATT_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
+var SUPABASE_URL = SB_ATT_URL;
+var SUPABASE_KEY = SB_ATT_KEY;
 function getSajuUser(){try{var u=localStorage.getItem('saju_user');return u?JSON.parse(u):null;}catch(e){return null;}}
 
 function getToday() {
-  const now = new Date();
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  var now = new Date();
+  var kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   return kst.toISOString().split('T')[0];
 }
 
 function getPrevDay() {
-  const now = new Date();
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  var now = new Date();
+  var kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   kst.setDate(kst.getDate() - 1);
   return kst.toISOString().split('T')[0];
 }
@@ -741,24 +741,24 @@ function calcReward(streak) {
 }
 
 async function loadAttendance() {
-  const user = getSajuUser ? getSajuUser() : null;
+  var user = getSajuUser ? getSajuUser() : null;
   if (!user) return;
 
-  const sb = window.supabase.createClient(SB_ATT_URL, SB_ATT_KEY);
-  const { data } = await sb.from('attendance').select('*').eq('user_id', user.id).single();
+  var sb = window.supabase.createClient(SB_ATT_URL, SB_ATT_KEY);
+  var { data } = await sb.from('attendance').select('*').eq('user_id', user.id).single();
 
-  const today = getToday();
-  const streak = data?.streak || 0;
-  const lastDate = data?.last_check_date;
-  const alreadyChecked = lastDate === today;
-  const nextStreak = alreadyChecked ? streak : (lastDate === getPrevDay() ? streak + 1 : 1);
-  const todayReward = calcReward(alreadyChecked ? streak : nextStreak);
+  var today = getToday();
+  var streak = data?.streak || 0;
+  var lastDate = data?.last_check_date;
+  var alreadyChecked = lastDate === today;
+  var nextStreak = alreadyChecked ? streak : (lastDate === getPrevDay() ? streak + 1 : 1);
+  var todayReward = calcReward(alreadyChecked ? streak : nextStreak);
 
-  const streakEl = document.getElementById('streak-count');
-  const streakEl2 = document.getElementById('streak-count2');
-  const rewardEl = document.getElementById('today-reward');
-  const progressEl = document.getElementById('streak-progress');
-  const btn = document.getElementById('attendance-btn');
+  var streakEl = document.getElementById('streak-count');
+  var streakEl2 = document.getElementById('streak-count2');
+  var rewardEl = document.getElementById('today-reward');
+  var progressEl = document.getElementById('streak-progress');
+  var btn = document.getElementById('attendance-btn');
 
   if (streakEl) streakEl.textContent = streak;
   if (streakEl2) streakEl2.textContent = streak;
@@ -766,7 +766,7 @@ async function loadAttendance() {
   if (progressEl) progressEl.style.width = Math.min(streak / 30 * 100, 100) + '%';
 
   document.querySelectorAll('.milestone-badge').forEach(function(badge) {
-    const day = parseInt(badge.dataset.day);
+    var day = parseInt(badge.dataset.day);
     if (streak >= day) {
       badge.style.borderColor = 'var(--gold)';
       badge.style.background = 'rgba(201,168,76,0.1)';
@@ -779,7 +779,7 @@ async function loadAttendance() {
       btn.disabled = true;
       btn.style.opacity = '0.6';
       btn.style.cursor = 'not-allowed';
-      const resultEl = document.getElementById('attendance-result');
+      var resultEl = document.getElementById('attendance-result');
       if (resultEl) resultEl.innerHTML = '<span style="color:var(--muted);">내일 00:00에 다시 출석할 수 있어요</span>';
     } else {
       btn.textContent = '✅ 오늘 출석하기 (+' + todayReward + ' 캐시)';
@@ -790,21 +790,21 @@ async function loadAttendance() {
 }
 
 function renderAttendanceCalendar(streak, lastDate) {
-  const cal = document.getElementById('attendance-calendar');
+  var cal = document.getElementById('attendance-calendar');
   if (!cal) return;
-  const today = getToday();
-  const alreadyChecked = lastDate === today;
-  const days = ['일','월','화','수','목','금','토'];
+  var today = getToday();
+  var alreadyChecked = lastDate === today;
+  var days = ['일','월','화','수','목','금','토'];
 
   let html = '';
   for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+    var d = new Date();
+    var kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
     kst.setDate(kst.getDate() - i);
-    const dateStr = kst.toISOString().split('T')[0];
-    const dayName = days[kst.getDay()];
-    const isToday = dateStr === today;
-    const isChecked = alreadyChecked ? dateStr <= today && streak > i : dateStr < today && streak > i;
+    var dateStr = kst.toISOString().split('T')[0];
+    var dayName = days[kst.getDay()];
+    var isToday = dateStr === today;
+    var isChecked = alreadyChecked ? dateStr <= today && streak > i : dateStr < today && streak > i;
 
     html += '<div style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid ' + (isToday ? 'var(--gold)' : 'var(--border)') + ';background:' + (isChecked ? 'rgba(201,168,76,0.15)' : 'var(--bg3)') + ';">'
       + '<div style="font-size:10px;color:var(--muted);">' + dayName + '</div>'
@@ -816,20 +816,20 @@ function renderAttendanceCalendar(streak, lastDate) {
 }
 
 async function doAttendance() {
-  const user = getSajuUser ? getSajuUser() : null;
+  var user = getSajuUser ? getSajuUser() : null;
   if (!user) { showToast('로그인이 필요해요'); return; }
 
-  const btn = document.getElementById('attendance-btn');
-  const resultEl = document.getElementById('attendance-result');
+  var btn = document.getElementById('attendance-btn');
+  var resultEl = document.getElementById('attendance-result');
   btn.disabled = true;
   btn.textContent = '처리 중...';
 
-  const sb = window.supabase.createClient(SB_ATT_URL, SB_ATT_KEY);
-  const today = getToday();
-  const prevDay = getPrevDay();
+  var sb = window.supabase.createClient(SB_ATT_URL, SB_ATT_KEY);
+  var today = getToday();
+  var prevDay = getPrevDay();
 
   try {
-    const { data: att } = await sb.from('attendance').select('*').eq('user_id', user.id).single();
+    var { data: att } = await sb.from('attendance').select('*').eq('user_id', user.id).single();
 
     if (att && att.last_check_date === today) {
       btn.textContent = '✅ 오늘 출석 완료!';
@@ -842,7 +842,7 @@ async function doAttendance() {
       newStreak = Math.min((att.streak || 0) + 1, 30);
     }
 
-    const reward = calcReward(newStreak);
+    var reward = calcReward(newStreak);
 
     if (att) {
       await sb.from('attendance').update({
@@ -860,8 +860,8 @@ async function doAttendance() {
       });
     }
 
-    const { data: cd } = await sb.from('user_credits').select('cash_balance').eq('user_id', user.id).single();
-    const currentCash = cd ? (cd.cash_balance || 0) : 0;
+    var { data: cd } = await sb.from('user_credits').select('cash_balance').eq('user_id', user.id).single();
+    var currentCash = cd ? (cd.cash_balance || 0) : 0;
     if (cd) {
       await sb.from('user_credits').update({ cash_balance: currentCash + reward }).eq('user_id', user.id);
     } else {
@@ -877,8 +877,8 @@ async function doAttendance() {
       description: newStreak + '일 연속 출석 보상'
     });
 
-    const isMilestone = [7,14,21,30].includes(newStreak);
-    const msg = (isMilestone ? '🎉 ' : '') + '+' + reward + ' 캐시 적립! (' + newStreak + '일 연속)';
+    var isMilestone = [7,14,21,30].includes(newStreak);
+    var msg = (isMilestone ? '🎉 ' : '') + '+' + reward + ' 캐시 적립! (' + newStreak + '일 연속)';
     resultEl.innerHTML = '<span style="color:#27ae60;font-size:15px;font-weight:700;">' + msg + '</span>';
     btn.textContent = '✅ 출석 완료!';
     btn.style.opacity = '0.6';
@@ -895,11 +895,11 @@ async function doAttendance() {
 
 
 async function loadMyCashBalance() {
-  const user = getSajuUser ? getSajuUser() : null;
+  var user = getSajuUser ? getSajuUser() : null;
   if (!user) return;
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
-  const el = document.getElementById('my-credits-display');
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var { data: cd } = await sb.from('user_credits').select('cash_balance,credits').eq('user_id', user.id).single();
+  var el = document.getElementById('my-credits-display');
   if (el) el.textContent = (cd?.cash_balance || 0).toLocaleString();
 }
 
