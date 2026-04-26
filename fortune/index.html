@@ -1461,7 +1461,15 @@ async function loadFortune() {
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try {
-      renderFortune(JSON.parse(cached));
+      const _cached = JSON.parse(cached);
+      // 캐시 히트시에도 JS 점수로 덮어쓰기
+      const _cSc = getOrCalcScore(today, fp);
+      _cached.overall = _cSc.overall;
+      _cached.love    = _cSc.love;
+      _cached.money   = _cSc.money;
+      _cached.work    = _cSc.work;
+      _cached.health  = _cSc.health;
+      renderFortune(_cached);
       return;
     } catch(e) { localStorage.removeItem(cacheKey); }
   }
@@ -1500,16 +1508,15 @@ async function loadFortune() {
 
     const r = await callAPI(prompt);
 
-    // 캐시 저장
-    try { localStorage.setItem(cacheKey, JSON.stringify(r)); } catch(e) {}
-
-    // JS 직접 계산 점수 (전역 캐시 사용 - 이번주와 완전 동일)
+    // JS 직접 계산 점수로 먼저 교체 (이번주와 완전 동일)
     const _sc = getOrCalcScore(today, fp);
     r.overall = _sc.overall;
     r.love    = _sc.love;
     r.money   = _sc.money;
     r.work    = _sc.work;
     r.health  = _sc.health;
+    // JS 점수로 교체 후 캐시 저장
+    try { localStorage.setItem(cacheKey, JSON.stringify(r)); } catch(e) {}
     renderFortune(r);
 
   } catch(err) {
