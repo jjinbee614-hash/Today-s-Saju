@@ -1,397 +1,2892 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘의 사주 - 무료 사주, 타로, 운세 보기</title>
-    <meta name="description" content="오늘의 사주에서 무료로 사주팔자, 타로, 운세, 관상, 꿈해몽을 확인해보세요. 정확한 사주 분석과 운세 상담을 제공합니다.">
-    <meta name="keywords" content="사주, 타로, 운세, 관상, 꿈해몽, 작명, 택일, 무료사주">
-    <meta property="og:title" content="오늘의 사주 - 무료 사주, 타로, 운세 보기">
-    <meta property="og:description" content="오늘의 사주에서 무료로 사주팔자, 타로, 운세, 관상, 꿈해몽을 확인해보세요.">
-    <meta property="og:url" content="https://saju-today.com">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://saju-today.com/og-image.jpg">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0e0b14;
-            --bg2: #13101c;
-            --bg3: #1a1628;
-            --gold: #c9a84c;
-            --gold-light: #e8c96a;
-            --gold-dim: rgba(201,168,76,0.15);
-            --text: #f0ead6;
-            --text2: #a89c80;
-            --text3: #5c5445;
-            --border: rgba(201,168,76,0.12);
-            --border2: rgba(255,255,255,0.06);
-            --shadow: rgba(0,0,0,0.6);
-            --r: 16px;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Noto Sans KR', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.6;
-            padding-bottom: 60px;
-        }
-        @keyframes twinkle {
-            0%,100% { opacity:0.2; transform:scale(1); }
-            50% { opacity:0.8; transform:scale(1.3); }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CharaMaker — AI Character Studio for Viral Content</title>
 
-        /* ── NAV ── */
-        nav {
-            position: fixed; top:0; left:0; right:0; z-index:100;
-            padding: 10px 20px;
-            display: flex; align-items:center; justify-content:space-between;
-            background: rgba(14,11,20,0.88);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-        .nav-logo {
-            font-family: 'Noto Serif KR', serif;
-            font-size: 20px; font-weight:700; color:var(--text);
-            text-decoration:none; cursor:pointer;
-        }
-        .nav-logo span { color:var(--gold); }
-        .nav-actions { display:flex; align-items:center; gap:8px; }
-        .nav-login-btn {
-            font-size:12px; padding:6px 14px;
-            background:var(--gold); color:#0e0b14;
-            border:none; border-radius:20px;
-            text-decoration:none; font-weight:700; cursor:pointer;
-            font-family:'Noto Sans KR',sans-serif;
-        }
-        .nav-user-name { font-size:12px; font-weight:600; color:var(--text2); }
-        .nav-logout-btn {
-            font-size:11px; padding:4px 10px;
-            background:none; border:1px solid var(--border);
-            border-radius:12px; cursor:pointer;
-            color:var(--text2); font-family:'Noto Sans KR',sans-serif;
-        }
-        .nav-logout-btn:hover { border-color:var(--gold); color:var(--gold); }
+<!-- ── SEO ── -->
+<meta name="description" content="Create unique AI characters and turn any video into viral social media content. Design personas, generate magazine-quality images, and produce motion-transfer videos — no camera, no editing.">
+<meta name="keywords" content="AI character generator, AI influencer, AI avatar maker, viral video generator, AI image generator, character creator, AI persona, motion transfer, social media content creator">
+<meta name="author" content="CharaMaker">
+<meta name="theme-color" content="#a78bfa">
+<link rel="canonical" href="https://charamaker.app/">
 
-        /* ── CONTAINER ── */
-        .container {
-            max-width: 680px;
-            margin: 0 auto;
-            padding: 80px 16px 40px;
-            position: relative; z-index:1;
-        }
+<!-- ── Open Graph (Facebook, KakaoTalk, Slack, LinkedIn) ── -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CharaMaker">
+<meta property="og:title" content="CharaMaker — AI Character Studio for Viral Content">
+<meta property="og:description" content="Create unique AI characters and turn any video into viral social media content. Design personas, generate stunning images, and produce motion-transfer videos.">
+<meta property="og:url" content="https://charamaker.app/">
+<meta property="og:image" content="https://charamaker.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CharaMaker — AI Character Studio">
+<meta property="og:locale" content="en_US">
 
-        /* ── HEADER ── */
-        .site-header {
-            text-align: center;
-            padding: 32px 0 28px;
-        }
-        .logo-text {
-            font-family: 'Noto Serif KR', serif;
-            font-size: 2.4rem; font-weight:700;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            -webkit-background-clip: text; -webkit-text-fill-color:transparent; background-clip:text;
-            margin-bottom: 8px;
-        }
-        .subtitle { font-size:14px; color:var(--text2); }
+<!-- ── Twitter / X ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CharaMaker — AI Character Studio">
+<meta name="twitter:description" content="Create unique AI characters and produce viral motion-transfer videos for social media.">
+<meta name="twitter:image" content="https://charamaker.app/og-image.png">
+<meta name="twitter:image:alt" content="CharaMaker — AI Character Studio">
 
-        /* ── CTA REGISTER BUTTON ── */
-        .cta-register {
-            display: block; text-decoration:none;
-            background: linear-gradient(135deg, var(--gold), #8b6914);
-            border-radius: var(--r);
-            padding: 18px 20px;
-            margin-bottom: 12px;
-            position: relative; overflow:hidden;
-            transition: opacity 0.2s;
-        }
-        .cta-register:hover { opacity: 0.92; }
-        .cta-register-hint { font-size:13px; color:rgba(26,16,0,0.7); font-weight:600; margin-bottom:4px; }
-        .cta-register-title { font-size:18px; font-weight:800; color:#1a1000; }
-        .cta-register-sub { font-size:12px; color:rgba(26,16,0,0.6); margin-top:4px; }
-        .cta-register-kanji {
-            position:absolute; right:16px; top:50%; transform:translateY(-50%);
-            font-size:48px; opacity:0.15; font-family:serif;
-        }
+<!-- ── Favicon & App icons ── -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060a; --s1:#0e0e14; --s2:#16161e; --s3:#1d1d27;
+  --white:#ede9ff; --muted:#5c596e; --border:rgba(255,255,255,0.08);
+  --v:#a78bfa; --p:#f472b6; --c:#22d3ee; --g:#4ade80; --r:#f87171;
+  --grad:linear-gradient(135deg,#a78bfa 0%,#f472b6 100%);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden}
 
-        /* ── SERVICE GRID ── */
-        .services-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-        .service-card {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: var(--r);
-            padding: 20px 16px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--text);
-            transition: all 0.25s;
-            display: flex; flex-direction:column; align-items:center;
-        }
-        .service-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--gold);
-            box-shadow: 0 8px 24px rgba(201,168,76,0.15);
-        }
-        .service-icon { font-size: 2.2rem; margin-bottom:10px; display:block; }
-        .service-title { font-size:15px; font-weight:700; color:var(--gold); margin-bottom:5px; }
-        .service-desc { font-size:11px; color:var(--text2); line-height:1.45; }
+/* ── AMBIENT ── */
+.amb{position:fixed;border-radius:50%;filter:blur(140px);pointer-events:none;z-index:0}
+.amb1{width:600px;height:600px;background:rgba(167,139,250,.1);top:-200px;left:-100px}
+.amb2{width:500px;height:500px;background:rgba(244,114,182,.08);bottom:-100px;right:-100px}
 
-        /* ── FEATURES ── */
-        .features {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: var(--r);
-            padding: 28px;
-            margin-bottom: 32px;
-        }
-        .features h2 {
-            text-align:center; font-size:17px; font-weight:700;
-            margin-bottom:20px; color:var(--gold);
-        }
-        .feature-list {
-            display: grid; grid-template-columns:1fr 1fr; gap:14px;
-        }
-        .feature-item {
-            display:flex; align-items:center; gap:10px;
-            font-size:13px; color:var(--text2);
-        }
-        .feature-icon { font-size:1.3rem; }
+/* ══════════════════════════════════════════════
+   HOME PAGE
+   ══════════════════════════════════════════════ */
+.home{min-height:100vh;position:relative;z-index:1;padding:0}
+.home.hidden{display:none}
 
-        /* ── FOOTER ── */
-        footer {
-            text-align:center; padding:28px 20px;
-            border-top:1px solid var(--border);
-            color:var(--text2); font-size:13px;
-        }
-        .footer-links { margin-bottom:12px; }
-        .footer-links a {
-            color:var(--text2); text-decoration:none;
-            margin:0 12px; transition:color 0.2s;
-        }
-        .footer-links a:hover { color:var(--gold); }
+/* Top bar with logo + sign in */
+.home-topbar{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 2rem;max-width:1280px;margin:0 auto}
+.home-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.02em;cursor:pointer}
+.home-topbar-actions{display:flex;align-items:center;gap:.6rem}
+.home-topbar-link{color:var(--muted);font-size:.85rem;font-weight:500;text-decoration:none;cursor:pointer;padding:.5rem .9rem;border-radius:8px;transition:all .15s}
+.home-topbar-link:hover{color:var(--white)}
+.home-topbar-cta{background:var(--grad);color:#fff;padding:.55rem 1.2rem;border-radius:100px;border:none;font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:transform .15s}
+.home-topbar-cta:hover{transform:translateY(-1px)}
 
-        @media (max-width: 480px) {
-            .logo-text { font-size:2rem; }
-            .services-grid { grid-template-columns:1fr 1fr; gap:8px; }
-            .service-card { padding:16px 10px; }
-            .service-icon { font-size:1.8rem; }
-            .service-title { font-size:13px; }
-            .service-desc { display:none; }
-            .feature-list { grid-template-columns:1fr; }
-        }
-    </style>
+/* Hero */
+.home-hero{padding:5rem 2rem 4rem;text-align:center;position:relative;max-width:1280px;margin:0 auto}
+.home-pill{display:inline-flex;align-items:center;gap:.5rem;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:var(--v);padding:.35rem 1.1rem;border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.8rem}
+.home-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--v);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.home-h1{font-family:'Syne',sans-serif;font-size:clamp(2.6rem,7vw,5.5rem);font-weight:800;line-height:.95;letter-spacing:-.04em;margin-bottom:1.4rem;max-width:880px;margin-left:auto;margin-right:auto}
+.home-h1 .gr{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home-sub{font-size:clamp(1rem,1.5vw,1.18rem);color:var(--muted);max-width:620px;line-height:1.65;margin:0 auto 2.5rem;font-weight:300}
+.home-sub b{color:var(--white);font-weight:500}
+.home-cta-row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.home-cta{background:var(--grad);border:none;padding:1rem 2.4rem;border-radius:100px;font-weight:700;font-size:.98rem;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s;letter-spacing:.02em;box-shadow:0 8px 30px rgba(167,139,250,.25)}
+.home-cta:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(167,139,250,.4)}
+.home-cta-ghost{background:transparent;border:1px solid var(--border);padding:1rem 2rem;border-radius:100px;font-weight:600;font-size:.95rem;color:var(--white);cursor:pointer;font-family:inherit;transition:all .2s}
+.home-cta-ghost:hover{border-color:var(--v);color:var(--v)}
+
+/* Hero scroll hint */
+.home-scroll-hint{margin-top:3rem;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;display:flex;justify-content:center;gap:.5rem;opacity:.5;animation:bounceY 2.5s infinite}
+@keyframes bounceY{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* Section frame */
+.home-section{padding:5rem 2rem;max-width:1280px;margin:0 auto;position:relative}
+.home-section-h{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.03em;text-align:center;margin-bottom:.6rem}
+.home-section-sub{text-align:center;color:var(--muted);font-size:1rem;line-height:1.6;max-width:560px;margin:0 auto 3rem;font-weight:300}
+
+/* Showcase strip on landing — uses gallery-grid styling */
+.home-showcase{margin-bottom:1.5rem}
+.home-showcase .gallery-grid{column-count:4}
+@media (max-width:1100px){.home-showcase .gallery-grid{column-count:3}}
+@media (max-width:780px){.home-showcase .gallery-grid{column-count:2}}
+
+/* How it works (3 steps) */
+.home-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1100px;margin:0 auto}
+@media (max-width:780px){.home-steps{grid-template-columns:1fr}}
+.home-step{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:2rem 1.7rem;position:relative;transition:all .25s}
+.home-step:hover{border-color:rgba(167,139,250,.35);transform:translateY(-3px)}
+.home-step-num{font-family:'Syne',sans-serif;font-size:3.5rem;font-weight:800;line-height:1;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.3rem;letter-spacing:-.05em}
+.home-step-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.6rem;color:var(--white);letter-spacing:-.01em}
+.home-step-desc{font-size:.88rem;color:var(--muted);line-height:1.6}
+
+/* Features 4-grid (refreshed) */
+.home-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;max-width:1100px;margin:0 auto;width:100%}
+.feat{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.7rem 1.5rem;text-align:left;transition:all .3s}
+.feat:hover{border-color:rgba(167,139,250,.25);transform:translateY(-2px)}
+.feat-icon{width:44px;height:44px;border-radius:10px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25);display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1.1rem}
+.feat-title{font-weight:700;font-size:1rem;margin-bottom:.5rem;color:var(--white);letter-spacing:-.01em}
+.feat-desc{font-size:.84rem;color:var(--muted);line-height:1.6}
+
+/* Final CTA section */
+.home-final{padding:5rem 2rem;text-align:center;max-width:900px;margin:0 auto}
+.home-final-card{background:linear-gradient(135deg,rgba(167,139,250,.08) 0%,rgba(244,114,182,.06) 100%);border:1px solid rgba(167,139,250,.25);border-radius:24px;padding:3.5rem 2rem;backdrop-filter:blur(10px)}
+.home-final-h{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.8rem;line-height:1.1}
+.home-final-sub{color:var(--muted);font-size:1rem;line-height:1.6;margin-bottom:2rem;max-width:520px;margin-left:auto;margin-right:auto}
+
+/* Footer */
+.home-footer{padding:2.5rem 2rem;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:.78rem;max-width:1280px;margin:0 auto}
+.home-footer-row{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.7rem;flex-wrap:wrap}
+.home-footer-row span{cursor:pointer;transition:color .15s}
+.home-footer-row span:hover{color:var(--white)}
+
+/* Reveal-on-scroll */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ══════════════════════════════════════════════
+   STUDIO PAGE (sidebar layout)
+   ══════════════════════════════════════════════ */
+.studio{display:none;min-height:100vh;position:relative;z-index:1}
+.studio.active{display:grid;grid-template-columns:240px 1fr}
+
+/* Sidebar */
+.sidebar{background:var(--s1);border-right:1px solid var(--border);padding:1.5rem 1rem;display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer;padding:0 .5rem;margin-bottom:2rem;letter-spacing:-.02em}
+.sb-tabs{display:flex;flex-direction:column;gap:.3rem}
+.sb-tab{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:8px;background:transparent;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;transition:all .2s;text-align:left;font-weight:500}
+.sb-tab:hover{background:var(--s2);color:var(--white)}
+.sb-tab.active{background:rgba(167,139,250,.1);color:var(--v);font-weight:600}
+.sb-tab-icon{font-size:1.05rem;width:18px;text-align:center;flex-shrink:0}
+.sb-bottom{margin-top:auto;padding:.5rem;font-size:.7rem;color:var(--muted);border-top:1px solid var(--border);padding-top:1rem}
+
+/* Main */
+.main{padding:2rem 2.5rem;min-height:100vh;overflow-y:auto}
+.page{display:none}
+.page.active{display:block}
+.page-h1{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,4vw,2rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.4rem}
+.page-sub{font-size:.9rem;color:var(--muted);margin-bottom:2rem;line-height:1.6;max-width:600px}
+
+/* Layout helpers */
+.row{display:grid;gap:1.5rem}
+.row-2{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.row-2{grid-template-columns:1fr}}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.card-title{font-weight:700;font-size:.95rem;margin-bottom:1rem;color:var(--white);display:flex;align-items:center;gap:.5rem}
+
+/* Form */
+.fld{margin-bottom:1.1rem}
+.fld-label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem}
+input[type=text],textarea,select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:rgba(167,139,250,.5)}
+
+/* Prompt presets — clickable chips above the prompt textarea */
+.prompt-presets{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem}
+.prompt-preset{background:var(--s2);border:1px solid var(--border);color:var(--muted);padding:.35rem .8rem;border-radius:100px;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap}
+.prompt-preset:hover{border-color:rgba(167,139,250,.5);color:var(--white);background:var(--s3);transform:translateY(-1px)}
+.prompt-preset:active{transform:translateY(0)}
+
+/* Buttons */
+.btn{padding:.7rem 1.3rem;border-radius:8px;font-weight:700;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;letter-spacing:.02em}
+.btn-grad{background:var(--grad);color:#fff}
+.btn-grad:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+.btn-grad:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--white)}
+.btn-ghost:hover{border-color:rgba(167,139,250,.35)}
+.btn-full{width:100%}
+
+/* Upload zone */
+.upload{border:2px dashed var(--border);border-radius:10px;padding:1.4rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2)}
+.upload:hover{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.04)}
+.upload input{display:none}
+.upload-icon{font-size:1.4rem;opacity:.4;margin-bottom:.4rem}
+.upload-text{font-size:.83rem;color:var(--muted)}
+.upload-hint{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+.upload.has-file{border-style:solid;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.04)}
+.upload.has-file .upload-text{color:var(--g);font-weight:600}
+
+/* Image preview */
+.img-preview{width:100%;min-height:200px;background:var(--s2);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.85rem}
+.img-preview img{width:100%;height:auto;display:block;cursor:pointer}
+.img-preview:has(img){min-height:0}
+/* When empty (placeholder text), keep a square shape; when populated, follow image natural ratio */
+.img-preview:not(:has(img)){aspect-ratio:1/1}
+
+.vid-preview{width:100%;min-height:200px;background:var(--s2);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.85rem}
+.vid-preview video{width:100%;height:auto;display:block;max-height:80vh}
+.vid-preview:has(video){min-height:0}
+.vid-preview:not(:has(video)){aspect-ratio:9/16;max-height:400px}
+
+/* Profile picker (grid of saved characters) */
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.7rem;max-height:280px;overflow-y:auto;padding:.3rem}
+.profile-card{background:var(--s2);border:2px solid var(--border);border-radius:10px;padding:.5rem;cursor:pointer;transition:all .2s;text-align:center}
+.profile-card:hover{border-color:rgba(167,139,250,.3)}
+.profile-card.selected{border-color:var(--v);background:rgba(167,139,250,.08)}
+.profile-card-img{width:100%;aspect-ratio:1/1;background:var(--s3);border-radius:6px;overflow:hidden;margin-bottom:.4rem}
+.profile-card-img img{width:100%;height:100%;object-fit:cover}
+.profile-card-name{font-size:.72rem;font-weight:700;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:.85rem;padding:2rem 1rem}
+
+/* Character info display */
+.char-info{display:grid;grid-template-columns:120px 1fr;gap:1rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.char-info-img{width:120px;height:120px;border-radius:12px;background:var(--s2);overflow:hidden;border:1px solid var(--border)}
+.char-info-img img{width:100%;height:100%;object-fit:cover}
+.char-info-text{display:flex;flex-direction:column;gap:.4rem}
+.char-info-name{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--white)}
+.char-info-niche{font-size:.75rem;color:var(--v);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.char-info-persona{font-size:.85rem;color:var(--muted);line-height:1.55}
+
+/* History tab */
+.history-section{margin-bottom:2.5rem}
+.history-h{font-weight:700;font-size:1rem;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem}
+.history-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .25s}
+.history-card:hover{border-color:rgba(167,139,250,.3);transform:translateY(-3px)}
+.history-thumb{width:100%;aspect-ratio:1/1;background:var(--s3);overflow:hidden}
+.history-thumb img,.history-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.history-info{padding:.7rem .85rem}
+.history-name{font-size:.78rem;font-weight:700;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-time{font-size:.66rem;color:var(--muted);margin-top:.15rem}
+.history-empty{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:.88rem;background:var(--s1);border:1px solid var(--border);border-radius:12px}
+
+/* Progress / loading */
+.prog{display:none;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem;font-size:.82rem;color:var(--v);align-items:center;gap:.7rem}
+.prog.show{display:flex}
+.spin{width:14px;height:14px;border:2px solid rgba(167,139,250,.3);border-top-color:var(--v);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:.85rem 1.3rem;font-size:.84rem;transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;max-width:300px}
+@media(max-width:480px){.toast{left:1rem;right:1rem;bottom:1rem;max-width:none}}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(74,222,128,.3);color:var(--g)}
+.toast.err{border-color:rgba(248,113,113,.3);color:var(--r)}
+.toast.info{border-color:rgba(167,139,250,.3);color:var(--v)}
+
+/* Character info card */
+.char-card{background:linear-gradient(135deg,rgba(167,139,250,.08) 0%,rgba(244,114,182,.04) 100%);border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:1.2rem 1.3rem}
+.char-card-name{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-.02em;color:var(--white);line-height:1}
+.char-card-niche{display:inline-block;font-size:.7rem;color:var(--v);font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(167,139,250,.12);padding:.25rem .7rem;border-radius:100px;margin-top:.5rem}
+.char-card-persona{font-size:.88rem;color:var(--white);line-height:1.6;margin-top:.85rem;opacity:.85}
+
+/* Character traits below image */
+.traits-box{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem}
+.traits-title{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
+.trait-row{display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.5rem;font-size:.83rem;line-height:1.5}
+.trait-row:last-child{margin-bottom:0}
+.trait-row-label{font-weight:700;color:var(--v);min-width:70px;flex-shrink:0;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding-top:.05rem}
+.trait-row-value{color:var(--white);opacity:.85;flex:1}
+
+/* Auth */
+.auth-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px)}
+.auth-modal-bg.show{display:flex}
+.auth-modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:2.2rem 2rem;max-width:380px;width:90%;text-align:center}
+.auth-modal-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:.4rem;letter-spacing:-.02em}
+.auth-modal-sub{color:var(--muted);font-size:.88rem;margin-bottom:1.5rem;line-height:1.5}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;padding:.85rem 1rem;background:#fff;color:#1f1f1f;border:none;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:600;font-size:.95rem;transition:transform .15s}
+.btn-google:hover{transform:translateY(-1px)}
+.btn-google svg{width:18px;height:18px}
+.auth-modal-close{margin-top:1rem;background:transparent;border:none;color:var(--muted);font-size:.78rem;cursor:pointer;font-family:inherit}
+.auth-modal-close:hover{color:var(--white)}
+
+/* Sidebar credits badge */
+.sb-credits{margin-top:1rem;padding:.7rem .9rem;display:flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(244,114,182,.08));border:1px solid rgba(167,139,250,.25);border-radius:10px}
+.sb-credits .cb-icon{font-size:1.2rem}
+.sb-credits .cb-amt{font-weight:700;font-size:.9rem;color:var(--white);font-family:'Syne',sans-serif;letter-spacing:-.01em}
+.sb-credits .cb-plan{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* Out-of-credits modal */
+.credits-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px)}
+.credits-modal.show{display:flex}
+.credits-modal-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:2.5rem 2rem;max-width:420px;width:90%;text-align:center}
+.credits-modal-icon{font-size:3rem;margin-bottom:.7rem}
+.credits-modal-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.6rem}
+.credits-modal-msg{color:var(--muted);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem}
+.credits-modal-msg b{color:var(--white);font-weight:700}
+.credits-modal-actions{display:flex;flex-direction:column;gap:.6rem}
+.btn-upgrade{background:var(--grad);color:#fff;border:none;padding:.85rem 1.5rem;border-radius:10px;font-family:inherit;font-weight:700;font-size:.95rem;cursor:pointer;transition:transform .15s}
+.btn-upgrade:hover{transform:translateY(-1px)}
+.btn-upgrade-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.7rem 1.2rem;border-radius:8px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .15s}
+.btn-upgrade-ghost:hover{color:var(--white);border-color:var(--v)}
+
+/* Sidebar user widget */
+.sb-user{margin-top:auto;padding:.7rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.6rem;cursor:pointer;border-radius:8px;transition:background .15s}
+.sb-user:hover{background:var(--s2)}
+.sb-user-avatar{width:32px;height:32px;border-radius:50%;background:var(--s3);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--muted)}
+.sb-user-avatar img{width:100%;height:100%;object-fit:cover}
+.sb-user-meta{flex:1;min-width:0}
+.sb-user-name{font-size:.82rem;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-action{font-size:.7rem;color:var(--muted)}
+.sb-signin{margin-top:auto;padding:.7rem .9rem;border:1px solid var(--border);background:transparent;color:var(--white);border-radius:8px;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:600;transition:all .15s}
+.sb-signin:hover{border-color:var(--v);color:var(--v)}
+
+/* Aspect ratio selector */
+.ratio-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+.ratio-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;padding:.7rem .3rem;background:var(--s2);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;color:var(--white);font-family:'DM Sans',sans-serif;transition:all .15s}
+.ratio-btn:hover{border-color:rgba(167,139,250,.5)}
+.ratio-btn.active{border-color:var(--v);background:rgba(167,139,250,.08)}
+.ratio-btn.active .ratio-icon{border-color:var(--v);background:rgba(167,139,250,.15)}
+.ratio-icon{display:block;border:1.5px solid var(--muted);border-radius:3px;background:transparent;flex-shrink:0;transition:all .15s}
+.ratio-1-1{width:18px;height:18px}
+.ratio-9-16{width:13px;height:23px}
+.ratio-16-9{width:23px;height:13px}
+.ratio-auto{width:18px;height:18px;background:linear-gradient(135deg,var(--v),var(--p));border:none;opacity:.7;border-radius:3px}
+.ratio-label{font-size:.78rem;font-weight:700;letter-spacing:.02em}
+.ratio-hint{font-size:.62rem;color:var(--muted);font-weight:400}
+
+/* Gallery / Showcase */
+.gallery-section{margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.gallery-h{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--white);letter-spacing:-.02em;margin-bottom:.4rem}
+.gallery-sub{font-size:.88rem;color:var(--muted);margin-bottom:1.4rem}
+.gallery-grid{column-count:4;column-gap:.8rem}
+@media (max-width:1100px){.gallery-grid{column-count:3}}
+@media (max-width:780px){.gallery-grid{column-count:2}}
+@media (max-width:480px){.gallery-grid{column-count:1}}
+.gallery-item{position:relative;background:var(--s2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .25s, border-color .25s;break-inside:avoid;margin-bottom:.8rem;display:block}
+.gallery-item:hover{transform:translateY(-2px);border-color:rgba(167,139,250,.35)}
+.gallery-item img,.gallery-item video{width:100%;height:auto;display:block;background:var(--s3)}
+/* Loading skeleton — placeholder height until image loads */
+.gallery-item img:not(.loaded),.gallery-item video:not(.loaded){min-height:200px;aspect-ratio:1/1}
+.gallery-item img.loaded,.gallery-item video.loaded{aspect-ratio:auto}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.gallery-item img:not(.loaded),.gallery-item video:not(.loaded){background:linear-gradient(90deg,var(--s2) 0%,var(--s3) 50%,var(--s2) 100%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite}
+.gallery-item-caption{position:absolute;bottom:0;left:0;right:0;padding:.6rem .7rem;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.45) 60%,transparent 100%);color:#fff;font-size:.75rem;font-weight:600;line-height:1.3;opacity:0;transition:opacity .2s;pointer-events:none}
+.gallery-item:hover .gallery-item-caption{opacity:1}
+.gallery-badge{position:absolute;top:.5rem;left:.5rem;font-size:.65rem;font-weight:700;padding:.2rem .5rem;border-radius:100px;background:rgba(0,0,0,.65);color:#fff;backdrop-filter:blur(8px);letter-spacing:.04em;text-transform:uppercase}
+.gallery-empty{padding:2rem;text-align:center;color:var(--muted);font-size:.88rem;background:var(--s1);border:1px dashed var(--border);border-radius:12px}
+
+/* History delete button */
+.history-card{position:relative}
+.history-del{position:absolute;top:.5rem;right:.5rem;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.65);border:none;color:#fff;font-size:.85rem;cursor:pointer;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:all .15s;z-index:2;line-height:1}
+.history-card:hover .history-del{display:flex}
+.history-del:hover{background:var(--r);transform:scale(1.1)}
+
+/* Grouped character section */
+.char-group{margin-bottom:1.5rem;padding:1rem;background:var(--s1);border:1px solid var(--border);border-radius:14px}
+.char-group-h{display:flex;align-items:center;gap:.7rem;cursor:pointer;padding:.4rem;border-radius:8px;transition:background .15s}
+.char-group-h:hover{background:rgba(167,139,250,.05)}
+.char-group-avatar{width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--s2)}
+.char-group-avatar img{width:100%;height:100%;object-fit:cover}
+.char-group-meta{flex:1;min-width:0}
+.char-group-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--white)}
+.char-group-stats{font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.char-group-toggle{font-size:.85rem;color:var(--muted);transition:transform .2s}
+.char-group.expanded .char-group-toggle{transform:rotate(180deg)}
+.char-group-content{display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.char-group.expanded .char-group-content{display:block}
+.char-group-section{margin-bottom:1.2rem}
+.char-group-section:last-child{margin-bottom:0}
+.char-group-section-title{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem}
+.char-group-empty{font-size:.78rem;color:var(--muted);padding:.5rem 0}
+.char-group-actions{display:flex;gap:.4rem}
+.char-group-del{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.7rem;padding:.3rem .65rem;border-radius:6px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.char-group-del:hover{border-color:var(--r);color:var(--r)}
+
+/* Profile upload tile */
+.profile-upload-tile{cursor:pointer}
+.profile-upload-tile:hover .profile-upload-img{border-color:var(--v);color:var(--v);background:rgba(167,139,250,.08)}
+.profile-upload-img{display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--border);background:transparent;color:var(--muted);font-weight:300;transition:all .2s}
+
+/* Caption box */
+.caption-box{margin-top:1rem;padding:1.2rem;background:var(--s2);border:1px solid var(--border);border-radius:12px}
+.caption-box-title{font-size:.78rem;font-weight:700;color:var(--v);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.7rem}
+.caption-style{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.caption-style:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.caption-style-label{display:inline-block;font-size:.65rem;font-weight:800;background:rgba(167,139,250,.15);color:var(--v);padding:.2rem .6rem;border-radius:100px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+.caption-text{font-size:.88rem;color:var(--white);line-height:1.55;margin-bottom:.5rem;white-space:pre-wrap}
+.caption-tags{font-size:.78rem;color:var(--c);line-height:1.6;margin-bottom:.6rem}
+.caption-copy-btn{font-size:.72rem;padding:.35rem .8rem;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.caption-copy-btn:hover{border-color:rgba(167,139,250,.4);color:var(--white)}
+.caption-platform-row{display:flex;gap:.5rem;margin-bottom:.8rem;flex-wrap:wrap}
+.caption-platform-btn{flex:1;min-width:80px;padding:.5rem .7rem;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:.78rem;font-family:'DM Sans',sans-serif;transition:all .2s;font-weight:600}
+.caption-platform-btn:hover{border-color:rgba(167,139,250,.3);color:var(--white)}
+.caption-platform-btn.selected{background:rgba(167,139,250,.1);border-color:var(--v);color:var(--v)}
+
+/* Modal (full-size image/video viewer) */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9998;align-items:center;justify-content:center;padding:2rem;backdrop-filter:blur(8px)}
+.modal.show{display:flex}
+.modal-content{max-width:90vw;max-height:90vh;border-radius:14px;overflow:hidden}
+.modal-content img,.modal-content video{max-width:90vw;max-height:90vh;display:block;border-radius:14px}
+.modal-close{position:absolute;top:1.5rem;right:1.5rem;width:36px;height:36px;border-radius:50%;background:var(--s2);border:1px solid var(--border);color:var(--white);cursor:pointer;font-size:1.1rem}
+
+/* Responsive sidebar */
+@media(max-width:780px){
+  .studio.active{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:-260px;width:240px;z-index:100;transition:left .3s;height:100vh}
+  .sidebar.open{left:0}
+  .main{padding:4rem 1.5rem 2rem}
+  .menu-toggle{display:block}
+}
+.menu-toggle{display:none;position:fixed;top:1rem;left:1rem;background:var(--s2);border:1px solid var(--border);color:var(--white);width:36px;height:36px;border-radius:8px;cursor:pointer;z-index:99;font-size:1rem}
+@media(max-width:780px){.menu-toggle{display:flex;align-items:center;justify-content:center}}
+</style>
 </head>
 <body>
 
-<!-- Stars -->
-<div id="stars-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;"></div>
+<div class="amb amb1"></div>
+<div class="amb amb2"></div>
+<div class="toast" id="toast"></div>
 
-<!-- Nav -->
-<nav>
-    <a class="nav-logo" href="https://saju-today.com">오늘의<span>사주</span></a>
-    <div class="nav-actions" id="nav-actions">
-        <a href="https://saju-today.com/login" class="nav-login-btn">로그인</a>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="site-header">
-        <h1 class="logo-text">오늘의 사주</h1>
-        <p class="subtitle">AI와 함께하는 스마트한 운세 상담</p>
-    </div>
-
-    <!-- 사주등록 CTA -->
-    <a href="https://saju-today.com/register" class="cta-register">
-        <div class="cta-register-hint">✨ 처음이라면 여기서 시작!</div>
-        <div class="cta-register-title">📋 내 사주 등록하기</div>
-        <div class="cta-register-sub">생년월일시 등록 → 모든 서비스 자동 입력</div>
-        <div class="cta-register-kanji">命</div>
-    </a>
-
-    <!-- 서비스 카드 -->
-    <div class="services-grid">
-        <a href="https://saju-today.com/saju" class="service-card">
-            <span class="service-icon">☯️</span>
-            <h3 class="service-title">사주팔자</h3>
-            <p class="service-desc">생년월일시로 보는 정확한 사주 분석</p>
-        </a>
-        <a href="https://saju-today.com/fortune" class="service-card">
-            <span class="service-icon">🌅</span>
-            <h3 class="service-title">오늘/내일의 운세</h3>
-            <p class="service-desc">매일 업데이트되는 오늘과 내일의 운세</p>
-        </a>
-        <a href="https://saju-today.com/compat" class="service-card">
-            <span class="service-icon">💑</span>
-            <h3 class="service-title">궁합</h3>
-            <p class="service-desc">두 사람의 사주로 보는 궁합 분석</p>
-        </a>
-        <a href="https://saju-today.com/naming" class="service-card">
-            <span class="service-icon">✍️</span>
-            <h3 class="service-title">작명/이름감정</h3>
-            <p class="service-desc">좋은 이름으로 운명을 바꿔보세요</p>
-        </a>
-        <a href="https://saju-today.com/dream" class="service-card">
-            <span class="service-icon">💭</span>
-            <h3 class="service-title">꿈해몽</h3>
-            <p class="service-desc">간밤에 꾼 꿈의 의미를 풀어드립니다</p>
-        </a>
-        <a href="https://saju-today.com/tarot" class="service-card">
-            <span class="service-icon">🃏</span>
-            <h3 class="service-title">타로카드</h3>
-            <p class="service-desc">직관적인 타로 리딩으로 미래를 엿보세요</p>
-        </a>
-        <a href="https://saju-today.com/face" class="service-card">
-            <span class="service-icon">👁️</span>
-            <h3 class="service-title">관상 분석</h3>
-            <p class="service-desc">얼굴로 보는 성격과 운명 분석</p>
-        </a>
-        <a href="https://saju-today.com/date" class="service-card">
-            <span class="service-icon">📅</span>
-            <h3 class="service-title">택일</h3>
-            <p class="service-desc">중요한 일정의 최적 날짜 선택</p>
-        </a>
-    </div>
-
-    <!-- 특징 -->
-    <div class="features">
-        <h2>오늘의 사주 특징</h2>
-        <div class="feature-list">
-            <div class="feature-item">
-                <span class="feature-icon">🎯</span>
-                <span>정확한 사주 분석</span>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">🆓</span>
-                <span>부분 무료 서비스</span>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">🔒</span>
-                <span>개인정보 보호</span>
-            </div>
-        </div>
-    </div>
+<!-- Modal viewer -->
+<div class="modal" id="modal" onclick="closeModal()">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <div class="modal-content" id="modal-content" onclick="event.stopPropagation()"></div>
 </div>
 
-<footer>
-    <div class="footer-links">
-        <a href="https://saju-today.com/terms-view">이용약관</a>
-        <a href="https://saju-today.com/my">마이페이지</a>
-        <a href="https://saju-today.com/pricing">이용권</a>
-        <a href="mailto:contact@saju-today.com">문의</a>
-    </div>
-    <p>&copy; 2025 오늘의 사주. All rights reserved.</p>
-</footer>
-
-<script>
-// Stars
-(function(){
-    var wrap = document.getElementById('stars-bg');
-    for(var i=0;i<80;i++){
-        var s=document.createElement('div');
-        var sz=Math.random()*2+0.5;
-        s.style.cssText='position:absolute;border-radius:50%;background:white;width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;animation:twinkle '+(2+Math.random()*4)+'s ease-in-out infinite '+(Math.random()*4)+'s;opacity:0.18;';
-        wrap.appendChild(s);
-    }
-})();
-
-// Auth state
-const SUPABASE_URL = 'https://kuupemfzqkzinrauhpnd.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_4KkeyDEpIaQywyNfD1Eksw_FHJ6zIIx';
-
-function getSajuUser() {
-    try {
-        var raw = localStorage.getItem('saju_user') || sessionStorage.getItem('saju_user');
-        return raw ? JSON.parse(raw) : null;
-    } catch(e) { return null; }
-}
-
-function updateNavAuth() {
-    var navActions = document.getElementById('nav-actions');
-    var user = getSajuUser();
-    if (user) {
-        navActions.innerHTML =
-            '<span style="font-size:12px;font-weight:600;color:var(--text);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (user.name || '회원') + '</span>' +
-            '<a href="https://saju-today.com/my" style="font-size:11px;padding:4px 10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:12px;text-decoration:none;color:#c9a84c;font-weight:600;">MY</a>' +
-            '<button class="nav-logout-btn" onclick="doLogout()">로그아웃</button>';
-    } else {
-        navActions.innerHTML = '<a href="https://saju-today.com/login" class="nav-login-btn">로그인</a>';
-    }
-}
-
-function doLogout() {
-    try {
-        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        sb.auth.signOut();
-    } catch(e) {}
-    localStorage.removeItem('saju_user');
-    sessionStorage.removeItem('saju_user');
-    updateNavAuth();
-}
-
-// Also check Supabase session
-(async function() {
-    updateNavAuth(); // fast render from localStorage
-    try {
-        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        var { data: { session } } = await sb.auth.getSession();
-        if (session && session.user) {
-            var u = { id: session.user.id, email: session.user.email, name: session.user.user_metadata?.full_name || session.user.email.split('@')[0] };
-            localStorage.setItem('saju_user', JSON.stringify(u));
-        } else {
-            localStorage.removeItem('saju_user');
-        }
-        updateNavAuth();
-    } catch(e) {}
-})();
-</script>
-
-<div style="background:#0a0810;border-top:1px solid rgba(201,168,76,0.1);padding:28px 20px;text-align:center;color:#5c5445;font-size:11px;line-height:2.2;">
-  <div style="margin-bottom:10px;">
-    <a href="https://saju-today.com/terms-view" style="color:#5c5445;text-decoration:none;margin:0 8px;">이용약관</a> ·
-    <a href="https://saju-today.com/terms-view" style="color:#5c5445;text-decoration:none;margin:0 8px;">개인정보처리방침</a> ·
-    <a href="mailto:contact@saju-today.com" style="color:#5c5445;text-decoration:none;margin:0 8px;">문의하기</a>
+<!-- ════════ AUTH MODAL ════════ -->
+<div class="auth-modal-bg" id="auth-modal" onclick="closeAuthModal()">
+  <div class="auth-modal" onclick="event.stopPropagation()">
+    <div class="auth-modal-title">Sign in to continue</div>
+    <div class="auth-modal-sub" id="auth-modal-sub">Create your AI character with a free account.<br>You can keep your work in one place.</div>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 12.7 4.5 3.5 13.7 3.5 25S12.7 45.5 24 45.5 44.5 36.3 44.5 25c0-1.7-.2-3.3-.5-4.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 16.3 4.5 9.7 8.7 6.3 14.7z"/><path fill="#4CAF50" d="M24 45.5c5.4 0 10.3-2.1 14-5.4l-6.5-5.5C29.6 36 26.9 37 24 37c-5.3 0-9.8-3.4-11.4-8L6 33.7C9.4 39.8 16.2 45.5 24 45.5z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.6l6.5 5.5c-.5.4 6.7-4.9 6.7-14.1 0-1.7-.2-3.3-.5-4.9z"/></svg>
+      Continue with Google
+    </button>
+    <button class="auth-modal-close" onclick="closeAuthModal()">Maybe later</button>
   </div>
-  <div>상호: 비즈글로벌 · 대표자: 정지훈 · 사업자등록번호: 760-40-01387</div>
-  <div>사업장 소재지: 경기도 용인시 수지구 수지로78번길 20, 103-801 · 대표전화: 010-4348-4389 · 이메일: contact@saju-today.com</div>
-  <div>통신판매업신고번호: 신고 준비 중</div>
-  <div style="margin-top:8px;">© 2025 비즈글로벌 All rights reserved.</div>
 </div>
-<div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(14,11,20,0.96);backdrop-filter:blur(20px);border-top:1px solid rgba(201,168,76,0.12);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);">
-  <a href="https://saju-today.com" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">🏠</span><span style="font-size:10px;font-weight:600;">홈</span>
-  </a>
-  <a href="https://saju-today.com/saju" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">✨</span><span style="font-size:10px;font-weight:600;">사주</span>
-  </a>
-  <a href="https://saju-today.com/fortune" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#a89c80;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">🌅</span><span style="font-size:10px;font-weight:600;">운세</span>
-  </a>
-  <a href="https://saju-today.com/pricing" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:#c9a84c;padding:8px 4px;">
-    <span style="font-size:22px;line-height:1;">💎</span><span style="font-size:10px;font-weight:600;">이용권</span>
-  </a>
-  <button id="more-btn" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:#a89c80;padding:8px 4px;-webkit-tap-highlight-color:transparent;">
-    <span style="font-size:22px;line-height:1;">☰</span><span style="font-size:10px;font-weight:600;">더보기</span>
-  </button>
+
+<!-- ════════ OUT OF CREDITS MODAL ════════ -->
+<div class="credits-modal" id="credits-modal" onclick="closeCreditsModal()">
+  <div class="credits-modal-card" onclick="event.stopPropagation()">
+    <div class="credits-modal-icon">⚡</div>
+    <div class="credits-modal-title">Out of credits</div>
+    <div class="credits-modal-msg" id="credits-modal-msg"></div>
+    <div class="credits-modal-actions">
+      <button class="btn-upgrade" onclick="window.location.href='/pricing'">View Plans</button>
+      <button class="btn-upgrade-ghost" onclick="closeCreditsModal()">Close</button>
+    </div>
+  </div>
 </div>
+
+<!-- ════════ HOME ════════ -->
+<section class="home" id="home-page">
+
+  <!-- Top bar -->
+  <div class="home-topbar">
+    <div class="home-logo">CharaMaker</div>
+    <div class="home-topbar-actions">
+      <span class="home-topbar-link" onclick="document.getElementById('home-showcase-section').scrollIntoView({behavior:'smooth'})">Gallery</span>
+      <a class="home-topbar-link" href="/guide" style="text-decoration:none">Guide</a>
+      <a class="home-topbar-link" href="/pricing" style="text-decoration:none">Pricing</a>
+      <button class="home-topbar-cta" onclick="openStudio()">Open Studio →</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="home-hero">
+    <div class="home-pill">AI Character Studio · Beta</div>
+    <h1 class="home-h1">Build Your <span class="gr">AI Character.</span><br>Make It Go Viral.</h1>
+    <p class="home-sub">
+      Design a <b>unique AI persona</b>, generate magazine-quality images,<br>
+      and turn any video into a <b>viral content piece</b> — no camera, no editing.
+    </p>
+    <div class="home-cta-row">
+      <button class="home-cta" onclick="openStudio()">✦ Create My Character</button>
+      <button class="home-cta-ghost" onclick="document.getElementById('home-showcase-section').scrollIntoView({behavior:'smooth'})">See examples</button>
+    </div>
+    <div class="home-scroll-hint">Scroll ↓</div>
+  </div>
+
+  <!-- Live showcase strip -->
+  <div class="home-section reveal" id="home-showcase-section">
+    <h2 class="home-section-h">Made with CharaMaker</h2>
+    <p class="home-section-sub">Real characters, images, and videos from our community. Hover videos to play.</p>
+    <div class="home-showcase">
+      <div class="gallery-grid" id="home-landing-gallery"></div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="home-section reveal" id="home-how-section">
+    <h2 class="home-section-h">Three Steps to Going Viral</h2>
+    <p class="home-section-sub">From idea to social-ready content in under 10 minutes.</p>
+    <div class="home-steps">
+      <div class="home-step">
+        <div class="home-step-num">01</div>
+        <div class="home-step-title">Design a character</div>
+        <div class="home-step-desc">Pick a niche, vibe, and look. Our AI builds a complete persona — name, story, and a face that stays consistent across every image.</div>
+      </div>
+      <div class="home-step">
+        <div class="home-step-num">02</div>
+        <div class="home-step-title">Generate scenes</div>
+        <div class="home-step-desc">Describe any setting or upload a reference photo. Your character appears in it — same face, new world. Pick 1:1, 9:16, or 16:9 for any platform.</div>
+      </div>
+      <div class="home-step">
+        <div class="home-step-num">03</div>
+        <div class="home-step-title">Animate with any video</div>
+        <div class="home-step-desc">Upload a 15s reference clip. Your character performs every motion — dancing, walking, gesturing — in perfect sync.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features grid -->
+  <div class="home-section reveal">
+    <h2 class="home-section-h">Built for Content Creators</h2>
+    <p class="home-section-sub">Everything you need to launch a virtual creator persona.</p>
+    <div class="home-features">
+      <div class="feat">
+        <div class="feat-icon">🎭</div>
+        <div class="feat-title">Persona Builder</div>
+        <div class="feat-desc">Complete characters with name, niche, story arc, and consistent visual identity. Let the AI design or steer it yourself.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🖼️</div>
+        <div class="feat-title">Magazine Quality</div>
+        <div class="feat-desc">Photorealistic gravure-style images with natural skin tones, professional lighting, and zero-uncanny detail.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🎬</div>
+        <div class="feat-title">Motion Transfer</div>
+        <div class="feat-desc">Upload any reference video and your character performs that exact motion — perfect for trends and challenges.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">✨</div>
+        <div class="feat-title">SNS Captions</div>
+        <div class="feat-desc">Auto-generated captions for Instagram, TikTok, X, and YouTube — three styles per platform, ready to post.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final CTA -->
+  <div class="home-final reveal">
+    <div class="home-final-card">
+      <h2 class="home-final-h">Your AI character is waiting.</h2>
+      <p class="home-final-sub">Free to start. Keep your characters, images, and videos in one place. Sign in with Google.</p>
+      <button class="home-cta" onclick="openStudio()">✦ Start Creating Now</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="home-footer">
+    <div class="home-footer-row">
+      <span onclick="openStudio()">Studio</span>
+      <span onclick="document.getElementById('home-showcase-section').scrollIntoView({behavior:'smooth'})">Gallery</span>
+      <a href="/guide" style="text-decoration:none;color:inherit;cursor:pointer">Guide</a>
+      <a href="/pricing" style="text-decoration:none;color:inherit;cursor:pointer">Pricing</a>
+      <a href="/terms" style="text-decoration:none;color:inherit;cursor:pointer">Terms</a>
+      <a href="/privacy" style="text-decoration:none;color:inherit;cursor:pointer">Privacy</a>
+    </div>
+    <div>© 2026 CharaMaker. All rights reserved.</div>
+  </div>
+
+</section>
+
+<!-- ════════ STUDIO ════════ -->
+<button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="studio" id="studio-page">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo" onclick="goHome()">CharaMaker</div>
+    <div class="sb-tabs">
+      <button class="sb-tab active" data-tab="character" onclick="setTab('character')">
+        <span class="sb-tab-icon">🎭</span>Create Character
+      </button>
+      <button class="sb-tab" data-tab="image" onclick="setTab('image')">
+        <span class="sb-tab-icon">🖼️</span>Generate Image
+      </button>
+      <button class="sb-tab" data-tab="video" onclick="setTab('video')">
+        <span class="sb-tab-icon">🎬</span>Generate Video
+      </button>
+      <button class="sb-tab" data-tab="history" onclick="setTab('history')">
+        <span class="sb-tab-icon">📚</span>History
+      </button>
+    </div>
+    <div id="sb-credits" class="sb-credits" style="display:none"></div>
+    <div id="sb-user-area"></div>
+    <div class="sb-bottom">v2 · CharaMaker</div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- ── CHARACTER TAB ── -->
+    <div class="page active" id="page-character">
+      <h1 class="page-h1">Create Character</h1>
+      <p class="page-sub">Describe your character. Our AI builds a complete persona and generates a profile image.</p>
+
+      <div class="row row-2">
+        <!-- Input -->
+        <div class="card">
+          <div class="card-title">📝 Character Details</div>
+
+          <div class="fld">
+            <label class="fld-label">Name <span style="color:var(--muted);text-transform:none;font-weight:400">(or let AI suggest)</span></label>
+            <input type="text" id="cc-name" placeholder="e.g. Luna, Aria, Zero...">
+          </div>
+
+          <div class="fld">
+            <label class="fld-label">Appearance</label>
+            <div class="prompt-presets" id="cc-presets"></div>
+            <textarea id="cc-appearance" rows="3" placeholder="e.g. early 20s Korean woman, shoulder-length silver hair, edgy streetwear, confident expression..."></textarea>
+          </div>
+
+          <div class="fld">
+            <label class="fld-label">Target Niche / Platform</label>
+            <input type="text" id="cc-niche" placeholder="e.g. K-beauty, fitness, gaming, fashion...">
+          </div>
+
+          <div class="fld">
+            <label class="fld-label">Personality</label>
+            <textarea id="cc-persona" rows="2" placeholder="e.g. mysterious and witty, loves coffee, into philosophy..."></textarea>
+          </div>
+
+          <div class="fld">
+            <label class="fld-label">Reference Image <span style="color:var(--muted);text-transform:none;font-weight:400">(optional)</span></label>
+            <div class="upload" id="cc-ref-zone" onclick="document.getElementById('cc-ref-input').click()">
+              <input type="file" id="cc-ref-input" accept="image/*" onchange="handleRefImage(event,'cc')">
+              <div id="cc-ref-display">
+                <div class="upload-icon">🖼️</div>
+                <div class="upload-text">Upload reference style</div>
+                <div class="upload-hint">PNG, JPG · for visual style guidance</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-grad btn-full" id="cc-btn" onclick="createCharacter()">✦ Design My Character · 100 credits</button>
+        </div>
+
+        <!-- Output -->
+        <div class="card">
+          <div class="card-title">🎭 Your Character</div>
+          <div class="prog" id="cc-prog"><span class="spin"></span><span id="cc-prog-msg">Working...</span><button onclick="cancelCurrentJob()" style="margin-left:1rem;background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-size:.78rem;font-family:inherit">Cancel</button></div>
+          <div id="cc-result">
+            <div id="cc-info" style="display:none;margin-bottom:1rem"></div>
+            <div class="img-preview" id="cc-img-preview" style="margin-bottom:1rem">
+              <div style="text-align:center;color:var(--muted);padding:2rem 1rem">
+                <div style="font-size:2.5rem;margin-bottom:.6rem">🎭</div>
+                <div style="font-weight:700;color:var(--white);margin-bottom:.3rem;font-size:.95rem">Your character will appear here</div>
+                <div style="font-size:.82rem">Fill in some details (or leave blank) and tap Design.</div>
+              </div>
+            </div>
+            <div id="cc-traits" style="display:none;margin-bottom:1rem"></div>
+            <div id="cc-actions" style="display:none;margin-top:1.2rem;gap:.6rem;flex-wrap:wrap">
+              <button class="btn btn-grad" onclick="goToImageTab()">→ Generate Image</button>
+              <button class="btn btn-grad" onclick="goToVideoTab()" style="background:linear-gradient(135deg,#f472b6 0%,#a78bfa 100%)">→ Generate Video</button>
+              <button class="btn btn-ghost" id="cc-share-btn" onclick="shareCharacter()" style="display:none">🌟 Share to gallery</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gallery: example characters -->
+      <div class="gallery-section">
+        <div class="gallery-h">✨ Character Inspiration</div>
+        <div class="gallery-sub">Examples of characters you can create with CharaMaker.</div>
+        <div class="gallery-grid" id="gallery-home"></div>
+      </div>
+    </div>
+
+    <!-- ── IMAGE TAB ── -->
+    <div class="page" id="page-image">
+      <h1 class="page-h1">Generate Image</h1>
+      <p class="page-sub">Pick a saved character profile, then describe a scene or upload a reference image.</p>
+
+      <div class="row row-2">
+        <!-- Input -->
+        <div class="card">
+          <div class="card-title">🎯 Select Profile</div>
+          <div class="profile-grid" id="img-profile-grid"></div>
+
+          <div class="card-title" style="margin-top:1.5rem">📝 Image Settings</div>
+          <div class="fld">
+            <label class="fld-label">Prompt</label>
+            <div class="prompt-presets" id="img-presets"></div>
+            <textarea id="img-prompt" rows="3" placeholder="e.g. Walking through a neon-lit Tokyo street at night, leather jacket, looking back at the camera..."></textarea>
+          </div>
+          <div class="fld">
+            <label class="fld-label">Reference Image <span style="color:var(--muted);text-transform:none;font-weight:400">(optional)</span></label>
+            <div class="upload" id="img-ref-zone" onclick="document.getElementById('img-ref-input').click()">
+              <input type="file" id="img-ref-input" accept="image/*" onchange="handleRefImage(event,'img')">
+              <div id="img-ref-display">
+                <div class="upload-icon">🖼️</div>
+                <div class="upload-text">Upload reference style</div>
+                <div class="upload-hint">AI will analyze it & extract a prompt</div>
+              </div>
+            </div>
+          </div>
+          <div class="fld">
+            <label class="fld-label">Aspect Ratio</label>
+            <div class="ratio-row">
+              <button type="button" class="ratio-btn active" data-ratio="" onclick="selectRatio(this)">
+                <span class="ratio-icon ratio-auto"></span>
+                <span class="ratio-label">Auto</span>
+                <span class="ratio-hint">From reference</span>
+              </button>
+              <button type="button" class="ratio-btn" data-ratio="1:1" onclick="selectRatio(this)">
+                <span class="ratio-icon ratio-1-1"></span>
+                <span class="ratio-label">1:1</span>
+                <span class="ratio-hint">Square</span>
+              </button>
+              <button type="button" class="ratio-btn" data-ratio="9:16" onclick="selectRatio(this)">
+                <span class="ratio-icon ratio-9-16"></span>
+                <span class="ratio-label">9:16</span>
+                <span class="ratio-hint">Vertical</span>
+              </button>
+              <button type="button" class="ratio-btn" data-ratio="16:9" onclick="selectRatio(this)">
+                <span class="ratio-icon ratio-16-9"></span>
+                <span class="ratio-label">16:9</span>
+                <span class="ratio-hint">Horizontal</span>
+              </button>
+            </div>
+          </div>
+          <button class="btn btn-grad btn-full" id="img-btn" onclick="generateImage()">✦ Generate Image · 100 credits</button>
+        </div>
+
+        <!-- Output -->
+        <div class="card">
+          <div class="card-title">🖼️ Generated Image</div>
+          <div class="prog" id="img-prog"><span class="spin"></span><span id="img-prog-msg">Working...</span><button onclick="cancelCurrentJob()" style="margin-left:1rem;background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-size:.78rem;font-family:inherit">Cancel</button></div>
+          <div class="img-preview" id="img-result">
+            <div style="text-align:center;color:var(--muted);padding:2rem 1rem">
+              <div style="font-size:2.5rem;margin-bottom:.6rem">🖼️</div>
+              <div style="font-weight:700;color:var(--white);margin-bottom:.3rem;font-size:.95rem">Your image will appear here</div>
+              <div style="font-size:.82rem">Pick a profile, write a scene, and tap Generate.</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-full" id="img-dl-btn" onclick="downloadImage()" style="margin-top:1rem;display:none">⬇ Download</button>
+          <button class="btn btn-grad btn-full" id="img-caption-btn" onclick="generateCaption('image')" style="margin-top:.6rem;display:none">✨ Create SNS Caption</button>
+          <button class="btn btn-ghost btn-full" id="img-share-btn" onclick="shareToGallery('image')" style="margin-top:.6rem;display:none"></button>
+          <div id="img-caption-result"></div>
+        </div>
+      </div>
+
+      <!-- Gallery: image showcase -->
+      <div class="gallery-section">
+        <div class="gallery-h">✨ Image Inspiration</div>
+        <div class="gallery-sub">Examples created with CharaMaker.</div>
+        <div class="gallery-grid" id="gallery-image"></div>
+      </div>
+    </div>
+
+    <!-- ── VIDEO TAB ── -->
+    <div class="page" id="page-video">
+      <h1 class="page-h1">Generate Video</h1>
+      <p class="page-sub">Pick a profile and upload a reference video. Your character will perform that motion.</p>
+
+      <div class="row row-2">
+        <!-- Input -->
+        <div class="card">
+          <div class="card-title">🎯 Select Profile</div>
+          <div class="profile-grid" id="vid-profile-grid"></div>
+
+          <div class="card-title" style="margin-top:1.5rem">📹 Reference Video</div>
+          <div class="upload" id="vid-ref-zone" onclick="document.getElementById('vid-ref-input').click()">
+            <input type="file" id="vid-ref-input" accept="video/*" onchange="handleRefVideo(event)">
+            <div id="vid-ref-display">
+              <div class="upload-icon">🎬</div>
+              <div class="upload-text">Upload reference motion video</div>
+              <div class="upload-hint">MP4, MOV · max 15 seconds · person facing camera works best</div>
+            </div>
+          </div>
+
+          <button class="btn btn-grad btn-full" id="vid-btn" onclick="generateVideo()" style="margin-top:1rem">✦ Generate Video · 500 credits</button>
+        </div>
+
+        <!-- Output -->
+        <div class="card">
+          <div class="card-title">🎬 Generated Video</div>
+          <div class="prog" id="vid-prog"><span class="spin"></span><span id="vid-prog-msg">Working...</span><button onclick="cancelCurrentJob()" style="margin-left:1rem;background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-size:.78rem;font-family:inherit">Cancel</button></div>
+          <div class="vid-preview" id="vid-result">
+            <div style="text-align:center;color:var(--muted);padding:2rem 1rem">
+              <div style="font-size:2.5rem;margin-bottom:.6rem">🎬</div>
+              <div style="font-weight:700;color:var(--white);margin-bottom:.3rem;font-size:.95rem">Your video will appear here</div>
+              <div style="font-size:.82rem">Pick a profile + reference video, then tap Generate.</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-full" id="vid-dl-btn" onclick="downloadVideo()" style="margin-top:1rem;display:none">⬇ Download</button>
+          <button class="btn btn-grad btn-full" id="vid-caption-btn" onclick="generateCaption('video')" style="margin-top:.6rem;display:none">✨ Create SNS Caption</button>
+          <button class="btn btn-ghost btn-full" id="vid-share-btn" onclick="shareToGallery('video')" style="margin-top:.6rem;display:none"></button>
+          <div id="vid-caption-result"></div>
+        </div>
+      </div>
+
+      <!-- Gallery: video showcase -->
+      <div class="gallery-section">
+        <div class="gallery-h">✨ Video Inspiration</div>
+        <div class="gallery-sub">Hover any video to preview the motion.</div>
+        <div class="gallery-grid" id="gallery-video"></div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY TAB ── -->
+    <div class="page" id="page-history">
+      <h1 class="page-h1">History</h1>
+      <p class="page-sub">Your characters and their creations. Click a character to expand.</p>
+
+      <div id="hist-grouped"></div>
+    </div>
+  </main>
+</div>
+
 <script>
-(function(){
-  var btn = document.getElementById('more-btn');
-  if(btn){
-    btn.addEventListener('click', function(e){
-      e.stopPropagation();
-      var m = document.getElementById('nav-menu');
-      if(m){ m.style.display = m.style.display==='block'?'none':'block'; m.style.zIndex='99999'; }
-    });
+// ═══════════════════════════════════════════════════════════
+// CONFIG — values loaded from config.js (kept out of git)
+// ═══════════════════════════════════════════════════════════
+if (!window.CONFIG) {
+  alert('config.js not found. Please create it next to index.html — see config.example.js');
+  throw new Error('config missing');
+}
+const API = window.CONFIG.API;
+const SUPABASE_URL = window.CONFIG.SUPABASE_URL;
+const SUPABASE_KEY = window.CONFIG.SUPABASE_KEY;
+
+const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const S = {
+  tab: 'character',
+  user: null,       // current authenticated user (null when signed out)
+  characters: [],   // all loaded characters
+  ccCharacter: null,    // currently designed character (not yet saved)
+  ccRefImageUrl: null,  // reference for character creation
+  imgRefImageUrl: null,
+  imgAspectRatio: '',  // '', '1:1', '9:16', '16:9' — empty means auto // reference for image generation
+  imgRefImageDataUrl: null, // base64 for analysis
+  vidRefVideoUrl: null,
+  vidRefVideoDuration: 0,  // seconds — used for video credit cost calculation
+  imgSelectedProfileId: null,
+  vidSelectedProfileId: null,
+  lastImage: null,
+  lastVideo: null,
+};
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+
+// Open the auth modal. Optional `reason` shows what action triggered the prompt.
+function openAuthModal(reason) {
+  const sub = document.getElementById('auth-modal-sub');
+  if (sub) {
+    sub.innerHTML = reason
+      ? `${reason}<br><span style="font-size:.8rem;opacity:.7">Sign in to continue.</span>`
+      : 'Create your AI character with a free account.<br>You can keep your work in one place.';
   }
-})();
+  document.getElementById('auth-modal').classList.add('show');
+}
+function closeAuthModal() {
+  document.getElementById('auth-modal').classList.remove('show');
+}
+
+async function signInWithGoogle() {
+  try {
+    const { error } = await supa.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname },
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.error('[auth] sign in failed:', e);
+    toastError(e, 'Sign in failed');
+  }
+}
+
+async function signOut() {
+  try {
+    await supa.auth.signOut();
+    S.user = null;
+    S.characters = [];
+    renderUserWidget();
+    goHome();
+    toast('Signed out');
+  } catch (e) {
+    console.error('[auth] sign out failed:', e);
+  }
+}
+
+// Require login before running an action. Returns true if logged in,
+// otherwise opens the auth modal and returns false.
+function requireAuth(reason) {
+  if (S.user) return true;
+  openAuthModal(reason);
+  return false;
+}
+
+// Render the bottom-of-sidebar user widget based on auth state.
+function renderUserWidget() {
+  const el = document.getElementById('sb-user-area');
+  if (!el) return;
+  if (S.user) {
+    const meta = S.user.user_metadata || {};
+    const name = meta.full_name || meta.name || S.user.email || 'You';
+    const avatar = meta.avatar_url || meta.picture;
+    const initial = (name[0] || '?').toUpperCase();
+    el.innerHTML = `
+      <div class="sb-user" onclick="signOut()" title="Click to sign out">
+        <div class="sb-user-avatar">${avatar ? `<img src="${avatar}" alt="">` : initial}</div>
+        <div class="sb-user-meta">
+          <div class="sb-user-name">${escapeHtmlOrReturn(name)}</div>
+          <div class="sb-user-action">Sign out</div>
+        </div>
+      </div>
+    `;
+  } else {
+    el.innerHTML = `<button class="sb-signin" onclick="openAuthModal()">Sign in with Google</button>`;
+  }
+}
+
+// Tiny escape (escapeHtml is defined later for the gallery)
+function escapeHtmlOrReturn(s) {
+  return String(s || '').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// On boot: pull the current session and listen for changes.
+async function initAuth() {
+  const { data: { session } } = await supa.auth.getSession();
+  S.user = session?.user || null;
+  renderUserWidget();
+  if (S.user) {
+    loadCredits(); // load balance on app boot
+    resumePendingJobs(); // resume any in-flight image/video generation from previous session
+  }
+
+  supa.auth.onAuthStateChange((event, sess) => {
+    const wasSignedIn = !!S.user;
+    S.user = sess?.user || null;
+    renderUserWidget();
+    if (!wasSignedIn && S.user) {
+      // User just signed in — close any open auth modal and reload data
+      closeAuthModal();
+      toast(`Welcome, ${S.user.user_metadata?.name || 'friend'}! ✓`);
+      loadCharacters();
+      loadCredits();
+      resumePendingJobs();
+    } else if (wasSignedIn && !S.user) {
+      // Signed out
+      S.characters = [];
+      S.credits = null;
+      renderCreditsBadge();
+    }
+  });
+}
+initAuth();
+
+// Render presets for the default-active character tab on boot
+window.addEventListener('DOMContentLoaded', () => {
+  if (typeof renderPromptPresets === 'function') {
+    renderPromptPresets('cc-presets', 'cc-appearance', CHARACTER_PRESETS);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// CREDITS SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+// Credit costs (kept in sync with server-side spend_credits calls)
+// Image gen and character creation: 100c each.
+// Video pricing is tiered by duration: every 5-second block adds 200c.
+//   1-5s   → 500c
+//   6-10s  → 700c
+//   11-15s → 900c
+const CREDIT_COSTS = {
+  character: 100,
+  image: 100,
+  video_base: 500,            // ≤ 5 seconds
+  video_per_extra_block: 200, // each additional 5-second block
+};
+
+// Compute video cost based on duration in seconds
+// Tiered in 5-second blocks: 1-5s → 500c, 6-10s → 700c, 11-15s → 900c
+function videoCreditCost(seconds) {
+  const s = Math.max(1, Math.ceil(seconds || 5));
+  const blocks = Math.ceil(s / 5);
+  return CREDIT_COSTS.video_base + Math.max(0, blocks - 1) * CREDIT_COSTS.video_per_extra_block;
+}
+
+// Update the Generate Video button label to reflect the actual cost
+// based on the uploaded reference video's duration.
+function updateVideoButtonText() {
+  const btn = document.getElementById('vid-btn');
+  if (!btn) return;
+  const dur = S.vidRefVideoDuration;
+  if (!dur) {
+    btn.textContent = `✦ Generate Video · 500 credits`;
+    return;
+  }
+  const cost = videoCreditCost(dur);
+  const sec = Math.ceil(dur);
+  btn.textContent = `✦ Generate Video · ${cost.toLocaleString()} credits (${sec}s)`;
+}
+
+// Cache the user's current credit balance and plan
+S.credits = null;       // null = not loaded; -1 = admin (unlimited)
+S.plan = 'free';
+
+async function loadCredits() {
+  if (!S.user) { S.credits = null; renderCreditsBadge(); return; }
+  if (S.user.app_metadata?.is_admin) {
+    S.credits = -1; // sentinel: unlimited
+    S.plan = 'admin';
+    renderCreditsBadge();
+    return;
+  }
+  try {
+    const { data, error } = await supa
+      .from('user_credits')
+      .select('credits, plan_name')
+      .eq('user_id', S.user.id)
+      .maybeSingle();
+    if (error) throw error;
+    S.credits = data?.credits ?? 0;
+    S.plan = data?.plan_name || 'free';
+    renderCreditsBadge();
+  } catch (e) {
+    console.error('[credits] load failed:', e);
+  }
+}
+
+function renderCreditsBadge() {
+  const el = document.getElementById('sb-credits');
+  if (!el) return;
+  if (!S.user) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  if (S.credits === -1) {
+    el.innerHTML = `<span class="cb-icon">∞</span><div><div class="cb-amt">Unlimited</div><div class="cb-plan">Admin</div></div>`;
+  } else {
+    const planLabel = (S.plan || 'free').charAt(0).toUpperCase() + (S.plan || 'free').slice(1);
+    el.innerHTML = `<span class="cb-icon">⚡</span><div><div class="cb-amt">${(S.credits ?? 0).toLocaleString()}</div><div class="cb-plan">${planLabel} plan</div></div>`;
+  }
+}
+
+// Try to spend credits via the SQL RPC. Returns the new balance, or throws.
+async function spendCredits(amount, reason, refId, metadata) {
+  if (S.credits === -1) return -1; // admin bypass
+  const { data, error } = await supa.rpc('spend_credits', {
+    p_amount: amount,
+    p_reason: reason,
+    p_ref_id: refId || null,
+    p_metadata: metadata || null,
+  });
+  if (error) {
+    if (error.message?.includes('insufficient_credits')) {
+      throw new Error('insufficient_credits');
+    }
+    throw error;
+  }
+  S.credits = data;
+  renderCreditsBadge();
+  return data;
+}
+
+// Open the "out of credits" modal
+function openOutOfCreditsModal(needed, action) {
+  const modal = document.getElementById('credits-modal');
+  const have = (S.credits ?? 0).toLocaleString();
+  document.getElementById('credits-modal-msg').innerHTML = `
+    You need <b>${needed.toLocaleString()}</b> credits to ${action || 'continue'}.<br>
+    You have <b>${have}</b>.
+  `;
+  modal.classList.add('show');
+}
+function closeCreditsModal() {
+  document.getElementById('credits-modal').classList.remove('show');
+}
+
+// Pre-flight check: is the user able to spend `amount` right now?
+function canSpend(amount) {
+  if (S.credits === -1) return true; // admin
+  return (S.credits ?? 0) >= amount;
+}
+
+// ═══════════════════════════════════════════════════════════
+// BACKGROUND JOB RECOVERY
+// ═══════════════════════════════════════════════════════════
+// On app boot or sign-in, check if the user has any pending image/video jobs
+// from a previous session (browser closed, page reloaded, etc.) and resume polling.
+async function resumePendingJobs() {
+  if (!S.user) return;
+  try {
+    // Find pending image jobs from this user (last 30 minutes — older ones likely dead)
+    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+
+    const { data: pendingImgs } = await supa
+      .from('images')
+      .select('id, atlas_request_id, character_id, prompt, created_at')
+      .eq('user_id', S.user.id)
+      .eq('status', 'pending')
+      .gt('created_at', cutoff)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    const { data: pendingVids } = await supa
+      .from('videos')
+      .select('id, atlas_request_id, character_id, created_at')
+      .eq('user_id', S.user.id)
+      .eq('status', 'pending')
+      .gt('created_at', cutoff)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    const totalPending = (pendingImgs?.length || 0) + (pendingVids?.length || 0);
+    if (!totalPending) return;
+
+    // Mark older-than-30min as failed (cleanup)
+    const ancient = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    await supa.from('images').update({ status: 'failed' })
+      .eq('user_id', S.user.id).eq('status', 'pending').lt('created_at', ancient);
+    await supa.from('videos').update({ status: 'failed' })
+      .eq('user_id', S.user.id).eq('status', 'pending').lt('created_at', ancient);
+
+    // Show a heads-up toast
+    toast(`Resuming ${totalPending} in-progress job${totalPending > 1 ? 's' : ''}...`);
+
+    // Resume image polling in the background
+    for (const row of (pendingImgs || [])) {
+      if (!row.atlas_request_id) continue;
+      resumeImageJob(row).catch(e => console.warn('[resume img]', e.message));
+    }
+    for (const row of (pendingVids || [])) {
+      if (!row.atlas_request_id) continue;
+      resumeVideoJob(row).catch(e => console.warn('[resume vid]', e.message));
+    }
+  } catch (e) {
+    console.warn('[resumePendingJobs]', e.message);
+  }
+}
+
+async function resumeImageJob(row) {
+  try {
+    progShow('img', 'Resuming previous image job...');
+    const url = await pollAtlasJob(row.atlas_request_id, 'img');
+    await supa.from('images').update({ image_url: url, status: 'completed' }).eq('id', row.id);
+    // Spend credits now that we have a confirmed result (idempotent — only once)
+    try { await spendCredits(CREDIT_COSTS.image, 'spend_image', row.id); } catch (e) { console.warn('[credits]', e); }
+    toast('Image ready ✓ (from previous session) — check History');
+    loadCharacters();
+  } catch (e) {
+    progHide('img');
+    await supa.from('images').update({ status: 'failed' }).eq('id', row.id);
+    console.warn('[resumeImageJob]', e.message);
+  }
+}
+
+async function resumeVideoJob(row) {
+  try {
+    progShow('vid', 'Resuming previous video job...');
+    const url = await pollAtlasJob(row.atlas_request_id, 'vid');
+    await supa.from('videos').update({ video_url: url, status: 'completed' }).eq('id', row.id);
+    try { await spendCredits(CREDIT_COSTS.video_base, 'spend_video', row.id); } catch (e) { console.warn('[credits]', e); }
+    toast('Video ready ✓ (from previous session) — check History');
+    loadCharacters();
+  } catch (e) {
+    progHide('vid');
+    await supa.from('videos').update({ status: 'failed' }).eq('id', row.id);
+    console.warn('[resumeVideoJob]', e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// LANDING PAGE INIT (gallery preview + scroll reveals)
+// ═══════════════════════════════════════════════════════════
+async function initLanding() {
+  // Load showcase items into the landing gallery (mixed types, all)
+  await loadGallery('home-landing-gallery', null);
+
+  // IntersectionObserver for fade-in-on-scroll
+  const reveals = document.querySelectorAll('.reveal');
+  if (reveals.length && 'IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    reveals.forEach(el => obs.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add('visible'));
+  }
+}
+// Defer until full DOM + script load (loadGallery is defined later in the file)
+window.addEventListener('load', initLanding);
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+let toastT;
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast ${type} show`;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// FRIENDLY ERROR MESSAGES
+// ═══════════════════════════════════════════════════════════
+// Maps raw technical errors to short, friendly user-facing strings.
+// Pattern is order-sensitive: first match wins. Add specific cases above generic ones.
+const ERROR_HINTS = [
+  // Network / connection
+  { match: /failed to fetch|network|err_failed|err_network/i,
+    say: 'Network issue — check your connection and try again.' },
+  { match: /timeout|timed out|aborted/i,
+    say: 'The request took too long. Please try again.' },
+  // Auth
+  { match: /not authenticated|auth.*required|jwt.*expired/i,
+    say: 'Please sign in again to continue.' },
+  { match: /403|forbidden|permission denied|row-level security/i,
+    say: "You don't have permission for that action." },
+  // Credits / quota
+  { match: /insufficient_credits|not enough credits/i,
+    say: 'Not enough credits. Top up to continue.' },
+  { match: /rate limit|too many requests|429/i,
+    say: "We're getting a lot of requests right now. Please wait a moment and try again." },
+  // Generation pipeline
+  { match: /atlas.*(?:failed|error)|generation failed/i,
+    say: 'Image generation failed. The model may be busy — please try again.' },
+  { match: /content.*(?:filter|moderation|policy|nsfw|inappropriate)/i,
+    say: 'Your prompt was flagged by our content filter. Try a different description.' },
+  { match: /face.*(?:not detected|not found|no face)/i,
+    say: "Couldn't detect a clear face in the image. Try a photo with the face more visible." },
+  { match: /video.*(?:duration|too long)/i,
+    say: 'Video is too long. Use a clip 15 seconds or shorter.' },
+  // Upload
+  { match: /file.*(?:too large|size limit)|max.*100/i,
+    say: 'File is too large. Maximum size is 100MB.' },
+  { match: /upload.*failed|invalid.*file/i,
+    say: 'Upload failed. Please try a different file.' },
+  // Generic 4xx / 5xx
+  { match: /^(40\d|404)/,
+    say: 'The request was invalid. Please refresh and try again.' },
+  { match: /^(50\d|502|503|504)/,
+    say: "Our servers are having a moment. Please try again in a few seconds." },
+];
+
+function friendlyError(err) {
+  const raw = (err?.message || err?.error || String(err || '')).slice(0, 500);
+  for (const hint of ERROR_HINTS) {
+    if (hint.match.test(raw)) return hint.say;
+  }
+  // Fallback: show first sentence of error or a generic message
+  const firstSentence = raw.split(/[.!?\n]/)[0].trim();
+  if (firstSentence && firstSentence.length < 120) return firstSentence;
+  return 'Something went wrong. Please try again.';
+}
+
+// Friendly error toast — use this instead of toast(e.message, 'err')
+function toastError(err, fallback) {
+  const msg = friendlyError(err) || fallback || 'Something went wrong.';
+  console.error('[error]', err); // keep raw error in console for debugging
+  toast(msg, 'err');
+}
+
+// Show a "failed + try again" UI inside a result container.
+// retryFn is a function that re-runs the action.
+function showRetryUI(containerId, errMessage, retryFn) {
+  const friendly = friendlyError({ message: errMessage });
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  // Stash the retry function on the element so the inline onclick can find it
+  el._retryFn = retryFn;
+  el.innerHTML = `
+    <div style="text-align:center;color:var(--muted);padding:1.5rem 1rem">
+      <div style="font-size:2.5rem;margin-bottom:.6rem">⚠️</div>
+      <div style="font-weight:700;color:var(--white);margin-bottom:.4rem">Generation failed</div>
+      <div style="font-size:.85rem;margin-bottom:1.2rem;line-height:1.5;max-width:340px;margin-left:auto;margin-right:auto">${escapeHtml(friendly)}</div>
+      <button class="btn btn-grad" onclick="document.getElementById('${containerId}')._retryFn?.()">↻ Try Again</button>
+    </div>
+  `;
+}
+
+function progShow(id, msg) {
+  document.getElementById(`${id}-prog`).classList.add('show');
+  document.getElementById(`${id}-prog-msg`).textContent = msg;
+}
+function progHide(id) {
+  document.getElementById(`${id}-prog`).classList.remove('show');
+}
+
+// Default no-op so the Cancel button never errors when no job is running.
+// pollAtlasJob overrides this with a real cancel function while a job is active.
+window.cancelCurrentJob = window.cancelCurrentJob || (() => {});
+
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+// ── History modal: media + Share-to-gallery button + close-on-outside ──
+// Used when the user clicks any item in the History tab. Lets them share old work.
+function openHistoryModal(type, id, url, status) {
+  const isVideo = type === 'video';
+  const isCharacter = type === 'character';
+
+  const media = isVideo
+    ? `<video src="${url}" controls loop autoplay style="max-width:90vw;max-height:80vh;display:block;border-radius:14px;margin:0 auto"></video>`
+    : `<img src="${url}" style="max-width:90vw;max-height:80vh;display:block;border-radius:14px;margin:0 auto">`;
+
+  // Share button reflects current status
+  let shareBtn = '';
+  if (S.user) {
+    const stat = status || 'none';
+    if (stat === 'pending') {
+      shareBtn = `<button class="btn btn-ghost" disabled style="opacity:.7">⏳ Pending review</button>`;
+    } else if (stat === 'approved') {
+      shareBtn = `<button class="btn btn-ghost" disabled style="opacity:.7">✓ Live in gallery</button>`;
+    } else if (stat === 'rejected') {
+      shareBtn = `<button class="btn btn-ghost" disabled style="opacity:.5">— Not added to gallery</button>`;
+    } else {
+      shareBtn = `<button class="btn btn-grad" onclick="shareFromHistory('${type}','${id}')">🌟 Share to gallery</button>`;
+    }
+  }
+
+  const dlBtn = `<a href="${url}" download class="btn btn-ghost" target="_blank">⬇ Download</a>`;
+
+  document.getElementById('modal-content').innerHTML = `
+    <div style="background:var(--s1);border-radius:14px;padding:1rem;max-width:90vw">
+      ${media}
+      <div style="display:flex;gap:.6rem;justify-content:center;margin-top:.9rem;flex-wrap:wrap">
+        ${dlBtn}
+        ${shareBtn}
+      </div>
+    </div>
+  `;
+  document.getElementById('modal').classList.add('show');
+}
+
+// Share a row from the History tab (instead of the result screen).
+// Reuses the same gallery_status -> 'pending' update pattern.
+async function shareFromHistory(type, id) {
+  if (!requireAuth('Sign in to share to the gallery.')) return;
+  if (!confirm('Share this to the public gallery?\n\nIt will be reviewed before appearing in the gallery.')) return;
+
+  const table = type === 'video' ? 'videos' : type === 'image' ? 'images' : 'characters';
+  try {
+    const { error } = await supa.from(table).update({
+      submitted_to_gallery: true,
+      submitted_at: new Date().toISOString(),
+      gallery_status: 'pending',
+    }).eq('id', id);
+    if (error) throw error;
+    closeModal();
+    toast('Submitted! We\'ll review it shortly ✓');
+    loadCharacters(); // refresh history
+  } catch (e) {
+    console.error('[shareFromHistory]', e);
+    toastError(e, 'Submit failed');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function openStudio() {
+  document.getElementById('home-page').classList.add('hidden');
+  document.getElementById('studio-page').classList.add('active');
+  loadCharacters();
+  loadGallery('gallery-home', 'character');
+}
+function goHome() {
+  document.getElementById('studio-page').classList.remove('active');
+  document.getElementById('home-page').classList.remove('hidden');
+}
+function setTab(tab) {
+  S.tab = tab;
+  document.querySelectorAll('.sb-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${tab}`).classList.add('active');
+  if (tab === 'image') {
+    renderProfileGrid('img');
+    renderPromptPresets('img-presets', 'img-prompt', IMAGE_PRESETS);
+    loadGallery('gallery-image', 'image');
+  }
+  if (tab === 'video') { renderProfileGrid('vid'); loadGallery('gallery-video', 'video'); }
+  if (tab === 'character') {
+    renderPromptPresets('cc-presets', 'cc-appearance', CHARACTER_PRESETS);
+    loadGallery('gallery-home', 'character');
+  }
+  if (tab === 'history') loadHistory();
+  if (window.innerWidth < 780) document.getElementById('sidebar').classList.remove('open');
+}
+function goToImageTab() {
+  if (S.ccCharacter?.id) S.imgSelectedProfileId = S.ccCharacter.id;
+  setTab('image');
+}
+function goToVideoTab() {
+  if (S.ccCharacter?.id) S.vidSelectedProfileId = S.ccCharacter.id;
+  setTab('video');
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+// REFERENCE FILE UPLOADS
+// ═══════════════════════════════════════════════════════════
+async function handleRefImage(event, prefix) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  toast('Uploading reference image...', 'info');
+
+  // Show local thumbnail immediately
+  const reader = new FileReader();
+  reader.onload = e => {
+    const thumbUrl = e.target.result;
+    if (prefix === 'img') S.imgRefImageDataUrl = thumbUrl;
+    document.getElementById(`${prefix}-ref-display`).innerHTML = `
+      <div style="display:flex;gap:.7rem;align-items:center;text-align:left">
+        <img src="${thumbUrl}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0">
+        <div style="flex:1;min-width:0">
+          <div class="upload-text" style="color:var(--v)">⏳ Uploading...</div>
+          <div class="upload-hint" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div>
+        </div>
+      </div>
+    `;
+  };
+  reader.readAsDataURL(file);
+
+  try {
+    const fd = new FormData(); fd.append('file', file);
+    const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'upload failed');
+
+    if (prefix === 'cc') S.ccRefImageUrl = data.url;
+    if (prefix === 'img') S.imgRefImageUrl = data.url;
+
+    // Update with success state, keep thumbnail
+    const reader2 = new FileReader();
+    reader2.onload = e => {
+      document.getElementById(`${prefix}-ref-zone`).classList.add('has-file');
+      document.getElementById(`${prefix}-ref-display`).innerHTML = `
+        <div style="display:flex;gap:.7rem;align-items:center;text-align:left">
+          <img src="${e.target.result}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0">
+          <div style="flex:1;min-width:0">
+            <div class="upload-text" style="color:var(--g);font-weight:600">✓ ${file.name}</div>
+            <div class="upload-hint">${(file.size/1024).toFixed(0)} KB · Click to change</div>
+          </div>
+        </div>
+      `;
+    };
+    reader2.readAsDataURL(file);
+    toast('Reference ready ✓');
+  } catch (e) {
+    document.getElementById(`${prefix}-ref-display`).innerHTML = `
+      <div class="upload-icon">⚠️</div>
+      <div class="upload-text" style="color:var(--r)">Upload failed</div>
+      <div class="upload-hint">Click to try again</div>
+    `;
+    toast('Upload failed', 'err');
+  }
+}
+
+async function handleRefVideo(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  if (file.size > 100 * 1024 * 1024) { toast('File too large. Max 100MB.', 'err'); return; }
+
+  // Check video duration (must be ≤ 15 seconds)
+  const localUrl = URL.createObjectURL(file);
+  const duration = await new Promise((resolve, reject) => {
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => resolve(v.duration);
+    v.onerror = () => reject(new Error('Could not read video metadata'));
+    v.src = localUrl;
+  }).catch(() => null);
+
+  if (duration && duration > 15.5) {
+    toast(`Video is ${duration.toFixed(1)}s — must be 15 seconds or less`, 'err');
+    event.target.value = ''; // reset input
+    URL.revokeObjectURL(localUrl);
+    return;
+  }
+
+  toast('Uploading video...', 'info');
+
+  // Show video thumbnail (first frame)
+  document.getElementById('vid-ref-display').innerHTML = `
+    <div style="display:flex;gap:.7rem;align-items:center;text-align:left">
+      <video src="${localUrl}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0" muted></video>
+      <div style="flex:1;min-width:0">
+        <div class="upload-text" style="color:var(--v)">⏳ Uploading...</div>
+        <div class="upload-hint" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}${duration ? ` · ${duration.toFixed(1)}s` : ''}</div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const fd = new FormData(); fd.append('file', file);
+    const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'upload failed');
+
+    S.vidRefVideoUrl = data.url;
+    S.vidRefVideoDuration = duration || 0;
+    updateVideoButtonText();
+    document.getElementById('vid-ref-zone').classList.add('has-file');
+    document.getElementById('vid-ref-display').innerHTML = `
+      <div style="display:flex;gap:.7rem;align-items:center;text-align:left">
+        <video src="${localUrl}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0" muted></video>
+        <div style="flex:1;min-width:0">
+          <div class="upload-text" style="color:var(--g);font-weight:600">✓ ${file.name}</div>
+          <div class="upload-hint">${(file.size/1024/1024).toFixed(1)} MB · Click to change</div>
+        </div>
+      </div>
+    `;
+    toast('Video ready ✓');
+  } catch (e) {
+    document.getElementById('vid-ref-display').innerHTML = `
+      <div class="upload-icon">⚠️</div>
+      <div class="upload-text" style="color:var(--r)">Upload failed</div>
+      <div class="upload-hint">Click to try again</div>
+    `;
+    toast('Upload failed', 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 1. CREATE CHARACTER
+// ═══════════════════════════════════════════════════════════
+async function createCharacter() {
+  if (!requireAuth('Sign in to design your AI character.')) return;
+
+  // Pre-flight credit check
+  const cost = CREDIT_COSTS.character;
+  if (!canSpend(cost)) {
+    openOutOfCreditsModal(cost, 'create a character');
+    return;
+  }
+
+  const name = document.getElementById('cc-name').value.trim();
+  const appearance = document.getElementById('cc-appearance').value.trim();
+  const niche = document.getElementById('cc-niche').value.trim();
+  const persona = document.getElementById('cc-persona').value.trim();
+
+  // Allow empty input — AI will decide everything
+  const btn = document.getElementById('cc-btn');
+  btn.disabled = true; btn.textContent = 'Designing...';
+  progShow('cc', 'Designing character profile...');
+
+  try {
+    // Step 1: Claude builds the persona
+    const designRes = await fetch(`${API}/api/character`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, appearance, niche, persona, reference_image_url: S.ccRefImageUrl })
+    });
+    const design = await designRes.json();
+    if (!design.ok) throw new Error(design.error || 'design failed');
+    const character = design.character;
+
+    // Step 2: Generate profile image
+    progShow('cc', 'Generating profile image (1-2 min)...');
+    const imgRes = await fetch(`${API}/api/character/image`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: character.image_prompt })
+    });
+    const imgData = await imgRes.json();
+    if (!imgData.ok) throw new Error(imgData.error || 'image submit failed');
+
+    console.log('[CC] imgData received:', imgData);
+    let imageUrl;
+    if (imgData.sync && imgData.output) {
+      imageUrl = imgData.output;
+      console.log('[CC] sync path, imageUrl:', imageUrl);
+    } else if (imgData.provider === 'atlas_image' && imgData.atlas_request_id) {
+      progShow('cc', 'Generating profile image (~1 min)...');
+      console.log('[CC] starting atlas poll for:', imgData.atlas_request_id);
+      imageUrl = await pollAtlasJob(imgData.atlas_request_id, 'cc');
+      console.log('[CC] atlas poll resolved, imageUrl:', imageUrl);
+    } else {
+      imageUrl = await pollJob(imgData.model, imgData.request_id, 'cc', 'Rendering character face...', imgData.status_url);
+    }
+
+    console.log('[CC] saving to Supabase, imageUrl:', imageUrl);
+    progShow('cc', 'Saving to your library...');
+    const { data: saved, error } = await supa.from('characters').insert({
+      user_id: S.user.id,
+      name: character.name,
+      persona: character.persona,
+      niche: character.niche,
+      appearance: character.appearance,
+      image_url: imageUrl,
+      image_prompt: character.image_prompt,
+      reference_image_url: S.ccRefImageUrl,
+    }).select().single();
+
+    if (error) {
+      console.error('[CC] Supabase save error:', error);
+      throw new Error('DB save failed: ' + error.message);
+    }
+    console.log('[CC] saved record:', saved);
+
+    S.ccCharacter = saved;
+    // Spend credits (after success). RLS prevents users from manipulating this.
+    try { await spendCredits(CREDIT_COSTS.character, 'spend_character', saved.id); } catch (e) { console.warn('[credits]', e); }
+    progHide('cc');
+    renderCharacterResult(saved);
+    toast(`${saved.name} created! ✓`);
+    await loadCharacters();
+  } catch (e) {
+    progHide('cc');
+    toastError(e, 'Failed');
+    showRetryUI('cc-img-preview', e?.message || 'failed', createCharacter);
+  }
+  btn.disabled = false; btn.textContent = '✦ Design My Character';
+}
+
+function renderCharacterResult(c) {
+  // Top: name + niche + persona card
+  document.getElementById('cc-info').style.display = 'block';
+  document.getElementById('cc-info').innerHTML = `
+    <div class="char-card">
+      <div class="char-card-name">${c.name}</div>
+      ${c.niche ? `<div class="char-card-niche">${c.niche}</div>` : ''}
+      ${c.persona ? `<div class="char-card-persona">${c.persona}</div>` : ''}
+    </div>
+  `;
+  // Middle: profile image with error handlers for debugging
+  document.getElementById('cc-img-preview').innerHTML = `<img src="${c.image_url}" alt="${c.name}" onclick="openModal('<img src=\\'${c.image_url}\\'>')" onerror="console.error('[render] IMAGE LOAD FAILED:', this.src);" onload="console.log('[render] image loaded successfully')">`;
+  // Bottom: appearance details
+  if (c.appearance) {
+    document.getElementById('cc-traits').style.display = 'block';
+    document.getElementById('cc-traits').innerHTML = `
+      <div class="traits-box">
+        <div class="traits-title">Character Details</div>
+        <div class="trait-row"><div class="trait-row-label">Look</div><div class="trait-row-value">${c.appearance}</div></div>
+      </div>
+    `;
+  }
+  document.getElementById('cc-actions').style.display = 'flex';
+
+  // Show share button (state-aware: none/pending/approved/rejected)
+  const shareBtn = document.getElementById('cc-share-btn');
+  if (shareBtn) {
+    shareBtn.style.display = 'flex';
+    const status = c.gallery_status || 'none';
+    switch (status) {
+      case 'pending':
+        shareBtn.textContent = '⏳ Pending review';
+        shareBtn.disabled = true; shareBtn.style.opacity = '.7'; break;
+      case 'approved':
+        shareBtn.textContent = '✓ Live in gallery';
+        shareBtn.disabled = true; shareBtn.style.opacity = '.7'; break;
+      case 'rejected':
+        shareBtn.textContent = '— Not added to gallery';
+        shareBtn.disabled = true; shareBtn.style.opacity = '.5'; break;
+      default:
+        shareBtn.textContent = '🌟 Share to gallery';
+        shareBtn.disabled = false; shareBtn.style.opacity = '1';
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 2. GENERATE IMAGE
+// ═══════════════════════════════════════════════════════════
+async function generateImage() {
+  if (!requireAuth('Sign in to generate images.')) return;
+  if (!S.imgSelectedProfileId) { toast('Select a profile first', 'err'); return; }
+
+  // Pre-flight credit check
+  const cost = CREDIT_COSTS.image;
+  if (!canSpend(cost)) {
+    openOutOfCreditsModal(cost, 'generate an image');
+    return;
+  }
+  let userPrompt = document.getElementById('img-prompt').value.trim();
+  const hasRef = !!S.imgRefImageUrl;
+
+  if (!userPrompt && !hasRef) {
+    toast('Add a prompt or reference image', 'err'); return;
+  }
+
+  const profile = S.characters.find(c => c.id === S.imgSelectedProfileId);
+  if (!profile) { toast('Profile not found', 'err'); return; }
+
+  const btn = document.getElementById('img-btn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+
+  // Step 1: If reference uploaded, analyze it with Claude
+  let analyzedPrompt = '';
+  if (hasRef) {
+    progShow('img', 'Analyzing reference image with AI...');
+    try {
+      const aRes = await fetch(`${API}/api/image/analyze`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_url: S.imgRefImageUrl })
+      });
+      const a = await aRes.json();
+      if (a.ok && a.prompt) analyzedPrompt = a.prompt;
+      else throw new Error(a.error || 'analysis failed');
+    } catch (e) {
+      progHide('img'); btn.disabled = false; btn.textContent = '✦ Generate Image';
+      toastError(e, 'Reference analysis failed');
+      return;
+    }
+  }
+
+  // Combine prompts: user text + analyzed reference (no faces)
+  let finalPrompt;
+  if (userPrompt && analyzedPrompt) {
+    finalPrompt = `${analyzedPrompt}, ${userPrompt}`;
+  } else {
+    finalPrompt = userPrompt || analyzedPrompt;
+  }
+  // Strong identity-preservation directive at the top.
+  // The model gets explicit instructions to keep the input face EXACTLY,
+  // and to only change the scene/clothing/pose described after.
+  finalPrompt = [
+    'KEEP THE EXACT SAME PERSON from the input image — preserve facial features (eye shape, nose, mouth, face proportions), skin tone, AND hair (same color, same length, same style, same parting) 100% identical.',
+    'DO NOT redesign the face or hair. DO NOT change hair color, hair length, or hairstyle. Only change the scene, clothing, pose, and background as described below.',
+    'Photorealistic photo of the same person from the input image — same face, same hair — in this new scene:',
+    finalPrompt
+  ].join(' ');
+
+  console.log('[generateImage] final prompt:', finalPrompt);
+
+  progShow('img', 'Generating image (1-2 min)...');
+
+  let pendingRowId = null;  // declared outside try so catch can mark it failed
+
+  try {
+    // If user picked a non-1:1 ratio, extend the profile image client-side first.
+    // This gives the model an input that already has the target aspect ratio.
+    let profileUrlForGen = profile.image_url;
+    if (S.imgAspectRatio && S.imgAspectRatio !== '1:1') {
+      progShow('img', `Preparing ${S.imgAspectRatio} canvas...`);
+      profileUrlForGen = await extendImageToAspect(profile.image_url, S.imgAspectRatio);
+    }
+
+    const res = await fetch(`${API}/api/image/generate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        profile_image_url: profileUrlForGen,
+        prompt: finalPrompt,
+        aspect_ratio: S.imgAspectRatio || null,
+        // Do NOT pass reference_image_url — we extracted its info into the prompt instead
+      })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'submit failed');
+
+    // ── Background-friendly flow ──
+    // Insert a 'pending' row right after submit so this job survives reload.
+    // The poll runs as before, but on completion we UPDATE this row instead of INSERT.
+    const atlasReqId = data.atlas_request_id || data.request_id || null;
+    if (atlasReqId) {
+      const { data: pending } = await supa.from('images').insert({
+        user_id: S.user.id,
+        character_id: profile.id,
+        image_url: '',  // not yet ready
+        prompt,
+        reference_image_url: S.imgRefImageUrl,
+        atlas_request_id: atlasReqId,
+        status: 'pending',
+      }).select().single();
+      pendingRowId = pending?.id || null;
+      S.lastImageRowId = pendingRowId;
+    }
+
+    // Helper: show a non-blocking note that the user can leave & come back
+    progShow('img', `Generating image — feel free to do other things, your result will appear in History.`);
+
+    let url;
+    if (data.sync && data.output) {
+      url = data.output;
+    } else if ((data.provider === 'atlas_image' || data.provider === 'atlas_image_wan') && data.atlas_request_id) {
+      progShow('img', 'Generating image (~1-2 min)...');
+      url = await pollAtlasJob(data.atlas_request_id, 'img');
+    } else {
+      url = await pollJob(data.model, data.request_id, 'img', 'Rendering image...', data.status_url);
+    }
+
+    // Either UPDATE the pending row (background flow) or INSERT (fallback for sync results)
+    let imgRow;
+    if (pendingRowId) {
+      const { data: updated } = await supa
+        .from('images')
+        .update({ image_url: url, status: 'completed' })
+        .eq('id', pendingRowId)
+        .select().single();
+      imgRow = updated;
+    } else {
+      const { data: inserted } = await supa.from('images').insert({
+        user_id: S.user.id,
+        character_id: profile.id,
+        image_url: url,
+        prompt,
+        reference_image_url: S.imgRefImageUrl,
+        status: 'completed',
+      }).select().single();
+      imgRow = inserted;
+    }
+
+    S.lastImage = url;
+    S.lastImageRowId = imgRow?.id || null;
+    S.lastImageStatus = imgRow?.gallery_status || 'none';
+    try { await spendCredits(CREDIT_COSTS.image, 'spend_image', imgRow?.id || null); } catch (e) { console.warn('[credits]', e); }
+    document.getElementById('img-result').innerHTML = `<img src="${url}" alt="generated" onclick="openModal('<img src=\\'${url}\\'>')">`;
+    document.getElementById('img-dl-btn').style.display = 'flex';
+    document.getElementById('img-caption-btn').style.display = 'flex';
+    document.getElementById('img-caption-result').innerHTML = '';
+    refreshShareButton('img');
+    progHide('img');
+    toast('Image ready! ✓');
+  } catch (e) {
+    progHide('img'); toastError(e, 'Failed');
+    // Show inline retry UI in the result area
+    showRetryUI('img-result', e?.message || 'failed', generateImage);
+    // Mark pending row as failed so user is not charged + UI reflects state
+    if (pendingRowId) {
+      await supa.from('images').update({ status: 'failed' }).eq('id', pendingRowId);
+    }
+  }
+  btn.disabled = false; btn.textContent = '✦ Generate Image';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 3. GENERATE VIDEO
+// ═══════════════════════════════════════════════════════════
+async function generateVideo() {
+  if (!requireAuth('Sign in to generate videos.')) return;
+  if (!S.vidSelectedProfileId) { toast('Select a profile first', 'err'); return; }
+  if (!S.vidRefVideoUrl) { toast('Upload a reference video', 'err'); return; }
+
+  // Pre-flight credit check (cost depends on video duration)
+  const cost = videoCreditCost(S.vidRefVideoDuration);
+  if (!canSpend(cost)) {
+    openOutOfCreditsModal(cost, `generate a ${Math.ceil(S.vidRefVideoDuration || 5)}s video`);
+    return;
+  }
+
+  const profile = S.characters.find(c => c.id === S.vidSelectedProfileId);
+  if (!profile) { toast('Profile not found', 'err'); return; }
+
+  const btn = document.getElementById('vid-btn');
+  btn.disabled = true; btn.textContent = 'Processing...';
+  progShow('vid', 'Step 1: Extracting frame from video...');
+
+  let pendingRowId = null;  // declared outside try so catch can mark it failed
+
+  try {
+    const res = await fetch(`${API}/api/video`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        profile_image_url: profile.image_url,
+        video_url: S.vidRefVideoUrl,
+      })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'submit failed');
+
+    // ── Background-friendly flow ──
+    const atlasReqId = data.atlas_request_id || data.request_id || null;
+    if (atlasReqId) {
+      const { data: pending } = await supa.from('videos').insert({
+        user_id: S.user.id,
+        character_id: profile.id,
+        video_url: '',
+        reference_video_url: S.vidRefVideoUrl,
+        swapped_image_url: data.swapped_image_url || null,
+        atlas_request_id: atlasReqId,
+        status: 'pending',
+      }).select().single();
+      pendingRowId = pending?.id || null;
+      S.lastVideoRowId = pendingRowId;
+    }
+
+    progShow('vid', `Generating video — feel free to do other things, your result will appear in History.`);
+
+    let url;
+    if (data.sync && data.output) {
+      url = data.output;
+    } else if (data.provider === 'atlas' && data.atlas_request_id) {
+      progShow('vid', '🎬 Starting video generation...');
+      url = await pollAtlasJob(data.atlas_request_id, 'vid');
+    } else {
+      progShow('vid', 'Step 3: Applying motion (2-4 min)...');
+      url = await pollJob(data.model, data.request_id, 'vid', 'Rendering final video...', data.status_url);
+    }
+
+    // Either UPDATE the pending row or INSERT (sync fallback)
+    let vidRow;
+    if (pendingRowId) {
+      const { data: updated } = await supa
+        .from('videos')
+        .update({ video_url: url, status: 'completed' })
+        .eq('id', pendingRowId)
+        .select().single();
+      vidRow = updated;
+    } else {
+      const { data: inserted } = await supa.from('videos').insert({
+        user_id: S.user.id,
+        character_id: profile.id,
+        video_url: url,
+        reference_video_url: S.vidRefVideoUrl,
+        swapped_image_url: data.swapped_image_url,
+        status: 'completed',
+      }).select().single();
+      vidRow = inserted;
+    }
+
+    S.lastVideo = url;
+    S.lastVideoRowId = vidRow?.id || null;
+    S.lastVideoStatus = vidRow?.gallery_status || 'none';
+    try {
+      const dur = S.vidRefVideoDuration;
+      await spendCredits(videoCreditCost(dur), 'spend_video', vidRow?.id || null, { video_seconds: Math.ceil(dur || 5) });
+    } catch (e) { console.warn('[credits]', e); }
+    document.getElementById('vid-result').innerHTML = `<video src="${url}" controls loop playsinline></video>`;
+    document.getElementById('vid-dl-btn').style.display = 'flex';
+    document.getElementById('vid-caption-btn').style.display = 'flex';
+    document.getElementById('vid-caption-result').innerHTML = '';
+    refreshShareButton('vid');
+    progHide('vid');
+    toast('Video ready! ✓');
+  } catch (e) {
+    progHide('vid'); toastError(e, 'Failed');
+    showRetryUI('vid-result', e?.message || 'failed', generateVideo);
+    if (pendingRowId) {
+      await supa.from('videos').update({ status: 'failed' }).eq('id', pendingRowId);
+    }
+  }
+  btn.disabled = false; btn.textContent = '✦ Generate Video';
+}
+
+// ═══════════════════════════════════════════════════════════
+// JOB POLLING (uses model path + request_id)
+// ═══════════════════════════════════════════════════════════
+// Rotating story-driven messages for video generation
+// (estimated ~8 min total: messages cycle through realistic stages)
+const VIDEO_LOADING_MESSAGES = [
+  '🎬 Analyzing reference video frames...',
+  '🎭 Mapping your character\'s facial features...',
+  '👁️  Capturing eye details and expression...',
+  '💇 Preserving hairstyle and texture...',
+  '✨ Matching skin tone and lighting...',
+  '🎨 Blending facial proportions...',
+  '🌟 Refining micro-expressions...',
+  '🎥 Tracking motion frame by frame...',
+  '🏃 Calculating body movement curves...',
+  '👋 Mapping hand and gesture motion...',
+  '🎞️  Synchronizing pose transitions...',
+  '✨ Adding natural fluid motion...',
+  '🌈 Color grading and tone matching...',
+  '💫 Polishing final transitions...',
+  '🎬 Compiling video frames...',
+  '🚀 Almost done — final touches...',
+];
+
+const IMAGE_LOADING_MESSAGES = [
+  '🎨 Composing the scene...',
+  '👁️  Refining facial features...',
+  '✨ Detailing eye color and shape...',
+  '💇 Sculpting hair texture and flow...',
+  '🌟 Adjusting skin tone for natural glow...',
+  '👗 Rendering outfit details...',
+  '💎 Adding accessories and jewelry...',
+  '☀️  Setting up natural lighting...',
+  '🌈 Color grading and tone matching...',
+  '📸 Applying professional photography style...',
+  '✨ Adding finishing touches...',
+  '🚀 Almost done — final polish...',
+];
+
+async function pollAtlasJob(atlasRequestId, progPrefix) {
+  // Pick message set + estimated time based on context
+  const isVideo = progPrefix === 'vid';
+  const messages = isVideo ? VIDEO_LOADING_MESSAGES : IMAGE_LOADING_MESSAGES;
+  const ESTIMATED_TOTAL_SEC = isVideo ? 480 : 90; // video: 8min, image: 1.5min
+  const MAX_CONSECUTIVE_ERRORS = 5; // bail out if status endpoint keeps failing
+
+  return new Promise((resolve, reject) => {
+    let polls = 0;
+    const startTime = Date.now();
+    let msgIndex = 0;
+    let lastMsgChange = 0;
+    let consecutiveErrors = 0;
+    let cancelled = false;
+
+    // Expose cancel — user can call window.cancelCurrentJob() from a UI button
+    window.cancelCurrentJob = () => {
+      cancelled = true;
+      clearInterval(iv);
+      reject(new Error('Cancelled by user'));
+    };
+
+    const iv = setInterval(async () => {
+      if (cancelled) return;
+      try {
+        const res = await fetch(`${API}/api/atlas/status?id=${encodeURIComponent(atlasRequestId)}`);
+        const data = await res.json();
+        consecutiveErrors = 0; // reset on any successful response
+
+        if (data.status === 'done') {
+          clearInterval(iv);
+          console.log('[pollAtlas] DONE, data:', data);
+          if (data.output) {
+            console.log('[pollAtlas] resolving with:', data.output);
+            resolve(data.output);
+          } else {
+            console.error('[pollAtlas] no output URL in done response');
+            reject(new Error('No output URL returned'));
+          }
+          return;
+        }
+        if (data.status === 'failed') {
+          clearInterval(iv); reject(new Error(data.error || 'Generation failed'));
+          return;
+        }
+
+        // Update progress UI
+        const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+        const elapsedMin = Math.floor(elapsedSec / 60);
+        const elapsedRem = elapsedSec % 60;
+        const elapsedStr = elapsedMin > 0 ? `${elapsedMin}m ${elapsedRem}s` : `${elapsedRem}s`;
+
+        // Estimated progress (cap at 95% until actually done)
+        const pct = Math.min(95, Math.floor((elapsedSec / ESTIMATED_TOTAL_SEC) * 100));
+
+        // Rotate message every ~6-12 seconds (faster for image)
+        const rotateInterval = isVideo ? 12 : 6;
+        if (elapsedSec - lastMsgChange >= rotateInterval) {
+          msgIndex = (msgIndex + 1) % messages.length;
+          lastMsgChange = elapsedSec;
+        }
+        const currentMsg = messages[msgIndex];
+
+        // Build display: emoji message + percent + elapsed time
+        let displayMsg = `${currentMsg}  ·  ${pct}%  ·  ${elapsedStr}`;
+        const longThreshold = isVideo ? 10 : 3;
+        if (elapsedMin >= longThreshold) {
+          displayMsg += ' (taking longer than usual)';
+        }
+        progShow(progPrefix, displayMsg);
+
+        if (++polls > 300) { clearInterval(iv); reject(new Error('Timeout (20 min) — the model may be overloaded.')); }
+      } catch (e) {
+        consecutiveErrors++;
+        console.warn(`[pollAtlas] error ${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}:`, e.message);
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          clearInterval(iv);
+          reject(new Error('Connection lost — please check your network and try again.'));
+        }
+        // else: tolerate transient errors and keep polling
+      }
+    }, 4000);
+  });
+}
+
+async function pollJob(modelPath, requestId, progPrefix, msg, statusUrl) {
+  return new Promise((resolve, reject) => {
+    let polls = 0;
+    const iv = setInterval(async () => {
+      try {
+        // Prefer status_url (passed from submit response), fallback to constructing
+        const url = statusUrl
+          ? `${API}/api/status/?status_url=${encodeURIComponent(statusUrl)}&model=${encodeURIComponent(modelPath)}`
+          : `${API}/api/status/${modelPath}/${requestId}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === 'done') {
+          clearInterval(iv);
+          if (data.output) resolve(data.output);
+          else reject(new Error('No output URL returned'));
+        } else if (data.status === 'failed') {
+          clearInterval(iv); reject(new Error(data.error || 'Generation failed'));
+        } else {
+          if (data.queue_position != null) {
+            progShow(progPrefix, `${msg} (queue: ${data.queue_position})`);
+          }
+        }
+        if (++polls > 80) { clearInterval(iv); reject(new Error('Timeout')); }
+      } catch (e) { clearInterval(iv); reject(e); }
+    }, 4000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHARACTERS / HISTORY
+// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// PROMPT PRESETS — quick scenarios users can tap to fill the prompt
+// ═══════════════════════════════════════════════════════════
+const CHARACTER_PRESETS = [
+  { emoji: '✨', label: 'K-pop idol look',
+    prompt: 'early 20s Korean woman, doll-like delicate features, slim tall figure, long straight black hair with bangs, K-pop idol aesthetic, fair skin' },
+  { emoji: '🌙', label: 'Mysterious femme',
+    prompt: 'late 20s woman, sharp angular features, long dark wavy hair, smoky eye makeup, all-black wardrobe, intense gaze, model-like presence' },
+  { emoji: '☀️', label: 'Girl-next-door',
+    prompt: 'early 20s woman, warm friendly features, light brown shoulder-length hair, natural makeup, casual cozy fashion, bright genuine smile' },
+  { emoji: '🌸', label: 'Soft pastel',
+    prompt: 'early 20s woman, soft round features, dusty pink hair, pastel fashion, gentle dreamy expression, fair porcelain skin' },
+  { emoji: '🔥', label: 'Edgy streetwear',
+    prompt: 'mid 20s woman, sharp cheekbones, platinum blonde bob, septum piercing, oversized streetwear, confident edgy attitude' },
+  { emoji: '🌿', label: 'Earthy bohemian',
+    prompt: 'mid 20s woman, sun-kissed skin, long wavy chestnut hair, freckles, flowy linen dresses, free-spirited bohemian vibe' },
+  { emoji: '🎭', label: 'Vintage Hollywood',
+    prompt: 'late 20s woman, elegant classic features, dark waved hair, red lipstick, vintage glamour fashion, timeless cinematic beauty' },
+  { emoji: '🏃‍♀️', label: 'Athletic fit',
+    prompt: 'early 20s woman, toned athletic build, ponytail, activewear aesthetic, energetic confident posture, healthy glowing skin' },
+];
+
+const IMAGE_PRESETS = [
+  { emoji: '🌅', label: 'Cafe at golden hour',
+    prompt: 'sitting at an outdoor cafe at golden hour, holding an iced latte, cream linen blouse, warm side light, candid laughter, shallow depth of field' },
+  { emoji: '🏙️', label: 'Tokyo street night',
+    prompt: 'walking through a neon-lit Tokyo street at night, oversized leather jacket, looking back toward the camera, motion blur in the background, cinematic' },
+  { emoji: '🌸', label: 'Spring blossoms',
+    prompt: 'standing under cherry blossoms in full bloom, soft pastel sundress, gentle smile, petals falling around her, soft natural light' },
+  { emoji: '🌊', label: 'Coastal getaway',
+    prompt: 'on a windswept cliff overlooking the ocean, white linen shirt and shorts, sun-kissed skin, hair flowing in the wind, golden hour light' },
+  { emoji: '🏃', label: 'Streetwear flex',
+    prompt: 'editorial streetwear shot, oversized hoodie and cargo pants, urban concrete background, confident pose, three-quarter angle, high contrast' },
+  { emoji: '💼', label: 'Professional headshot',
+    prompt: 'professional studio headshot, tailored blazer, soft beauty lighting, neutral gray background, subtle smile, sharp focus on the eyes' },
+  { emoji: '🎀', label: 'Y2K aesthetic',
+    prompt: 'Y2K aesthetic, low-rise jeans, baby tee, butterfly clips, shopping mall backdrop, film grain, 2000s nostalgic vibe' },
+  { emoji: '🍷', label: 'Wine bar evening',
+    prompt: 'in an intimate wine bar in the evening, slip dress, candlelight, holding a glass of red wine, warm bokeh background, sophisticated mood' },
+  { emoji: '🏖️', label: 'Beach day',
+    prompt: 'on a sandy beach at sunset, light cover-up over swimwear, golden hour, hair tousled by the breeze, walking toward the camera, cinematic warm tones' },
+  { emoji: '🌃', label: 'Rooftop city',
+    prompt: 'on a rooftop overlooking the city skyline at dusk, fitted black dress, ambient city lights in the background, glamorous editorial portrait' },
+  { emoji: '☕', label: 'Cozy reading',
+    prompt: 'curled up by a window with a book and coffee, soft knit sweater, rainy day light, warm intimate atmosphere, candid lifestyle shot' },
+  { emoji: '🌷', label: 'Spring picnic',
+    prompt: 'at a flower-filled meadow picnic, vintage floral dress, holding a basket, golden afternoon light, dreamy soft focus, romantic mood' },
+];
+
+function renderPromptPresets(targetId, textareaId, presets) {
+  const wrap = document.getElementById(targetId);
+  if (!wrap) return;
+  wrap.innerHTML = presets.map((p, i) => `
+    <button type="button" class="prompt-preset" onclick="applyPreset('${textareaId}', ${i}, '${targetId}')">
+      <span>${p.emoji}</span><span>${escapeHtml(p.label)}</span>
+    </button>
+  `).join('');
+  // Stash the data on the element for the click handler
+  wrap._presets = presets;
+}
+
+function applyPreset(textareaId, index, presetsContainerId) {
+  const wrap = document.getElementById(presetsContainerId);
+  const ta = document.getElementById(textareaId);
+  if (!wrap || !ta || !wrap._presets) return;
+  ta.value = wrap._presets[index].prompt;
+  ta.focus();
+  // Scroll into view so the user sees the filled text
+  ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function loadCharacters() {
+  // Without auth, the user has no characters of their own — RLS will return 0 rows.
+  // Skip the network call to keep things snappy and avoid noisy errors.
+  if (!S.user) { S.characters = []; return; }
+  try {
+    // Explicit user_id filter — without this, admins would see other users' characters
+    // due to the "admins can select all" RLS policy. The studio shows only the current
+    // user's profiles, so we filter at the query level.
+    const { data, error } = await supa
+      .from('characters')
+      .select('*')
+      .eq('user_id', S.user.id)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    S.characters = data || [];
+  } catch (e) { console.error('loadCharacters:', e); }
+}
+
+function renderProfileGrid(prefix) {
+  const grid = document.getElementById(`${prefix}-profile-grid`);
+  const selectedId = prefix === 'img' ? S.imgSelectedProfileId : S.vidSelectedProfileId;
+
+  // Always-present "upload new" tile at the start
+  const uploadTile = `
+    <div class="profile-card profile-upload-tile" onclick="document.getElementById('${prefix}-extra-upload').click()">
+      <input type="file" id="${prefix}-extra-upload" accept="image/*" style="display:none" onchange="handleExtraImageUpload(event,'${prefix}')">
+      <div class="profile-card-img profile-upload-img">
+        <div style="font-size:1.8rem;line-height:1">+</div>
+      </div>
+      <div class="profile-card-name" style="color:var(--muted)">Upload</div>
+    </div>
+  `;
+
+  const cardsHtml = S.characters.map(c => `
+    <div class="profile-card ${c.id === selectedId ? 'selected' : ''}" onclick="selectProfile('${prefix}','${c.id}')">
+      <div class="profile-card-img"><img src="${c.image_url}" alt="${c.name || 'character'}"></div>
+      <div class="profile-card-name">${c.name || 'Uploaded'}</div>
+    </div>
+  `).join('');
+
+  // Empty-state hint when the user has no characters yet
+  let emptyHint = '';
+  if (S.characters.length === 0) {
+    emptyHint = `
+      <div style="grid-column:1/-1;background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(244,114,182,.06));border:1px dashed rgba(167,139,250,.3);border-radius:12px;padding:1.4rem 1.2rem;display:flex;align-items:center;gap:1rem">
+        <div style="font-size:1.8rem">✨</div>
+        <div style="flex:1">
+          <div style="font-weight:700;color:var(--white);margin-bottom:.25rem">No characters yet</div>
+          <div style="font-size:.85rem;color:var(--muted);line-height:1.5">Create your first AI character — or upload a reference image to get started.</div>
+        </div>
+        <button class="btn btn-grad" style="white-space:nowrap" onclick="setTab('character')">Design Character</button>
+      </div>
+    `;
+  }
+
+  grid.innerHTML = emptyHint + uploadTile + cardsHtml;
+}
+
+function selectRatio(btnEl) {
+  document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  S.imgAspectRatio = btnEl.dataset.ratio || '';
+}
+
+// Client-side: extend a 1:1 image into a wider/taller canvas by stretching edge pixels.
+// This gives the model an input that already has the target aspect ratio,
+// so its output also matches that ratio.
+async function extendImageToAspect(imageUrl, aspectRatio) {
+  if (!aspectRatio || aspectRatio === '1:1') return imageUrl; // no-op
+
+  // If the source image is NOT on fal.media (which we trust + has CORS),
+  // pre-rehost it through our worker so Canvas can read pixel data.
+  // External hosts (oss.filenest.top, dashscope.aliyuncs.com etc.) often block CORS.
+  let safeUrl = imageUrl;
+  if (!/(?:fal\.media|fal\.ai)/i.test(imageUrl)) {
+    try {
+      console.log('[extend] non-fal source, rehosting:', imageUrl);
+      const r = await fetch(`${API}/api/rehost-image`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: imageUrl })
+      });
+      const d = await r.json();
+      if (d.ok && d.url) {
+        safeUrl = d.url;
+        console.log('[extend] rehosted to:', safeUrl);
+      } else {
+        console.warn('[extend] rehost failed, will try direct:', d);
+      }
+    } catch (e) {
+      console.warn('[extend] rehost call failed:', e.message);
+    }
+  }
+
+  // Now load the (potentially rehosted) image
+  const img = await new Promise((resolve, reject) => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => resolve(im);
+    im.onerror = () => reject(new Error('Failed to load profile image even after rehost'));
+    im.src = safeUrl;
+  });
+
+  // Target dimensions
+  const targets = { '9:16': { w: 1024, h: 1820 }, '16:9': { w: 1820, h: 1024 } };
+  const tgt = targets[aspectRatio];
+  if (!tgt) return imageUrl;
+
+  // Create canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = tgt.w;
+  canvas.height = tgt.h;
+  const ctx = canvas.getContext('2d');
+
+  // Compute placement: scale source to fit one dimension fully, center on the other
+  // For 9:16: image height fills the canvas height, width is centered
+  // For 16:9: image width fills the canvas width, height is centered
+  const srcAspect = img.width / img.height;
+  let drawW, drawH, drawX, drawY;
+  if (aspectRatio === '9:16') {
+    // Source 1:1 → fit by width, then we have empty top/bottom (rare with 1:1 source) or fit by height
+    drawH = tgt.h;
+    drawW = drawH * srcAspect;
+    drawX = (tgt.w - drawW) / 2;
+    drawY = 0;
+  } else {
+    // 16:9 — fit by width
+    drawW = tgt.w;
+    drawH = drawW / srcAspect;
+    drawX = 0;
+    drawY = (tgt.h - drawH) / 2;
+  }
+
+  // Step 1: stretch edge pixels to fill the empty space (pre-fill)
+  // We do this by sampling a thin strip from each edge and stretching it.
+  // This creates a smooth gradient-like fill that resembles the original background.
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  if (aspectRatio === '9:16') {
+    // Stretch left edge of image to fill left side
+    const stripW = 4; // thin strip from source edge
+    // Left fill
+    ctx.drawImage(img, 0, 0, stripW, img.height,
+                  0, drawY, drawX, drawH);
+    // Right fill
+    ctx.drawImage(img, img.width - stripW, 0, stripW, img.height,
+                  drawX + drawW, drawY, tgt.w - (drawX + drawW), drawH);
+  } else {
+    // 16:9 — stretch top/bottom edges
+    const stripH = 4;
+    // Top fill
+    ctx.drawImage(img, 0, 0, img.width, stripH,
+                  drawX, 0, drawW, drawY);
+    // Bottom fill
+    ctx.drawImage(img, 0, img.height - stripH, img.width, stripH,
+                  drawX, drawY + drawH, drawW, tgt.h - (drawY + drawH));
+  }
+
+  // Step 2: draw the original image on top in its centered position
+  ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+  // Convert to Blob and upload to our storage
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.92));
+  const fd = new FormData();
+  fd.append('file', blob, `profile_${aspectRatio.replace(':', 'x')}.png`);
+  const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+  const data = await res.json();
+  if (!data.ok) throw new Error('Upload of extended profile failed');
+  return data.url;
+}
+
+async function handleExtraImageUpload(event, prefix) {
+  if (!requireAuth('Sign in to upload custom images.')) {
+    event.target.value = '';
+    return;
+  }
+  const file = event.target.files?.[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) { toast('Image too large. Max 20MB.', 'err'); return; }
+
+  toast('Uploading image...', 'info');
+  try {
+    // Step 1: upload to fal storage so worker can read it
+    const fd = new FormData(); fd.append('file', file);
+    const uploadRes = await fetch(`${API}/api/upload`, { method: 'POST', body: fd });
+    const uploadData = await uploadRes.json();
+    if (!uploadData.ok) throw new Error(uploadData.error || 'upload failed');
+
+    // Step 2: save as a lightweight character record (image only, no persona)
+    const tempName = `Upload ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const { data: saved, error } = await supa.from('characters').insert({
+      user_id: S.user.id,
+      name: tempName,
+      persona: '',
+      niche: '',
+      appearance: '',
+      image_url: uploadData.url,
+      image_prompt: '',
+      reference_image_url: null,
+    }).select().single();
+    if (error) throw new Error('DB save failed: ' + error.message);
+
+    // Step 3: refresh + auto-select this new character
+    await loadCharacters();
+    selectProfile(prefix, saved.id);
+    toast('Image added ✓');
+  } catch (e) {
+    console.error('[ExtraUpload]', e);
+    toastError(e, 'Upload failed');
+  }
+  // Reset input so same file can be re-uploaded
+  event.target.value = '';
+}
+
+function selectProfile(prefix, id) {
+  if (prefix === 'img') S.imgSelectedProfileId = id;
+  else S.vidSelectedProfileId = id;
+  renderProfileGrid(prefix);
+}
+
+async function loadHistory() {
+  await loadCharacters();
+  const groupedEl = document.getElementById('hist-grouped');
+
+  if (!S.characters.length) {
+    groupedEl.innerHTML = `
+      <div class="history-empty" style="padding:3rem 1rem;text-align:center;background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(244,114,182,.04));border:1px dashed rgba(167,139,250,.2);border-radius:14px">
+        <div style="font-size:3rem;margin-bottom:.6rem">📭</div>
+        <div style="font-weight:700;color:var(--white);margin-bottom:.4rem;font-size:1.05rem">Your history is empty</div>
+        <div style="font-size:.88rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.6">Once you create characters, generate images, or render videos — they'll show up here, organized by character.</div>
+        <button class="btn btn-grad" onclick="setTab('character')">Design your first character</button>
+      </div>`;
+    return;
+  }
+
+  // Fetch all images & videos so we can group them by character.
+  // Explicit user_id filter to prevent admins from seeing other users' content.
+  let allImages = [], allVideos = [];
+  try {
+    const r1 = await supa.from('images').select('*').eq('user_id', S.user.id).order('created_at', { ascending: false });
+    allImages = r1.data || [];
+  } catch (e) { console.error('[hist] images', e); }
+  try {
+    const r2 = await supa.from('videos').select('*').eq('user_id', S.user.id).order('created_at', { ascending: false });
+    allVideos = r2.data || [];
+  } catch (e) { console.error('[hist] videos', e); }
+
+  groupedEl.innerHTML = S.characters.map(c => {
+    const imgs = allImages.filter(i => i.character_id === c.id);
+    const vids = allVideos.filter(v => v.character_id === c.id);
+    const stats = `${imgs.length} image${imgs.length !== 1 ? 's' : ''} · ${vids.length} video${vids.length !== 1 ? 's' : ''}`;
+
+    return `
+      <div class="char-group" id="group-${c.id}">
+        <div class="char-group-h" onclick="toggleCharGroup('${c.id}')">
+          <div class="char-group-avatar"><img src="${c.image_url}" alt="${c.name}"></div>
+          <div class="char-group-meta">
+            <div class="char-group-name">${c.name || 'Untitled'}</div>
+            <div class="char-group-stats">${stats} · ${new Date(c.created_at).toLocaleDateString()}</div>
+          </div>
+          <div class="char-group-actions">
+            <button class="char-group-del" onclick="event.stopPropagation();deleteCharacter('${c.id}','${(c.name || 'this character').replace(/'/g, '\\\'')}')">Delete</button>
+          </div>
+          <div class="char-group-toggle">▼</div>
+        </div>
+        <div class="char-group-content">
+          <div class="char-group-section">
+            <div class="char-group-section-title">Profile</div>
+            <div class="history-grid">
+              <div class="history-card" onclick="openHistoryModal('character','${c.id}','${c.image_url}','${c.gallery_status || 'none'}')">
+                <div class="history-thumb"><img src="${c.image_url}"></div>
+                <div class="history-info">
+                  <div class="history-name">${c.name || 'Profile'}</div>
+                  <div class="history-time">${new Date(c.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="char-group-section">
+            <div class="char-group-section-title">🖼️ Images (${imgs.length})</div>
+            ${imgs.length === 0 ? '<div class="char-group-empty">No images yet</div>' : `
+              <div class="history-grid">
+                ${imgs.map(i => {
+                  if (i.status === 'pending') {
+                    return `
+                      <div class="history-card" style="opacity:.85;cursor:default;position:relative">
+                        <button class="history-del" onclick="event.stopPropagation();cancelPendingJob('image','${i.id}')" title="Cancel">✕</button>
+                        <div class="history-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--s2),var(--s3))">
+                          <div style="font-size:2rem;animation:spin 2s linear infinite">⏳</div>
+                        </div>
+                        <div class="history-info">
+                          <div class="history-name" style="color:var(--v)">Generating...</div>
+                          <div class="history-time">${new Date(i.created_at).toLocaleString()}</div>
+                        </div>
+                      </div>`;
+                  }
+                  if (i.status === 'failed') {
+                    return `
+                      <div class="history-card" style="opacity:.5">
+                        <button class="history-del" onclick="event.stopPropagation();deleteAsset('image','${i.id}')" title="Delete">✕</button>
+                        <div class="history-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--s3)">
+                          <div style="font-size:2rem;color:var(--r)">⚠️</div>
+                        </div>
+                        <div class="history-info">
+                          <div class="history-name" style="color:var(--r)">Generation failed</div>
+                          <div class="history-time">${new Date(i.created_at).toLocaleDateString()}</div>
+                        </div>
+                      </div>`;
+                  }
+                  return `
+                    <div class="history-card" onclick="openHistoryModal('image','${i.id}','${i.image_url}','${i.gallery_status || 'none'}')">
+                      <button class="history-del" onclick="event.stopPropagation();deleteAsset('image','${i.id}')" title="Delete">✕</button>
+                      <div class="history-thumb"><img src="${i.image_url}"></div>
+                      <div class="history-info">
+                        <div class="history-name">${(i.prompt || '').slice(0, 40) || 'Image'}</div>
+                        <div class="history-time">${new Date(i.created_at).toLocaleDateString()}</div>
+                      </div>
+                    </div>`;
+                }).join('')}
+              </div>
+            `}
+          </div>
+          <div class="char-group-section">
+            <div class="char-group-section-title">🎬 Videos (${vids.length})</div>
+            ${vids.length === 0 ? '<div class="char-group-empty">No videos yet</div>' : `
+              <div class="history-grid">
+                ${vids.map(v => {
+                  if (v.status === 'pending') {
+                    return `
+                      <div class="history-card" style="opacity:.85;cursor:default;position:relative">
+                        <button class="history-del" onclick="event.stopPropagation();cancelPendingJob('video','${v.id}')" title="Cancel">✕</button>
+                        <div class="history-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--s2),var(--s3))">
+                          <div style="font-size:2rem;animation:spin 2s linear infinite">⏳</div>
+                        </div>
+                        <div class="history-info">
+                          <div class="history-name" style="color:var(--v)">Generating...</div>
+                          <div class="history-time">${new Date(v.created_at).toLocaleString()}</div>
+                        </div>
+                      </div>`;
+                  }
+                  if (v.status === 'failed') {
+                    return `
+                      <div class="history-card" style="opacity:.5">
+                        <button class="history-del" onclick="event.stopPropagation();deleteAsset('video','${v.id}')" title="Delete">✕</button>
+                        <div class="history-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--s3)">
+                          <div style="font-size:2rem;color:var(--r)">⚠️</div>
+                        </div>
+                        <div class="history-info">
+                          <div class="history-name" style="color:var(--r)">Generation failed</div>
+                          <div class="history-time">${new Date(v.created_at).toLocaleDateString()}</div>
+                        </div>
+                      </div>`;
+                  }
+                  return `
+                    <div class="history-card" onclick="openHistoryModal('video','${v.id}','${v.video_url}','${v.gallery_status || 'none'}')">
+                      <button class="history-del" onclick="event.stopPropagation();deleteAsset('video','${v.id}')" title="Delete">✕</button>
+                      <div class="history-thumb"><video src="${v.video_url}" muted></video></div>
+                      <div class="history-info">
+                        <div class="history-name">Video</div>
+                        <div class="history-time">${new Date(v.created_at).toLocaleDateString()}</div>
+                      </div>
+                    </div>`;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// GALLERY / SHOWCASE
+// Loads curated examples from the 'showcase' Supabase table.
+// Videos play on hover (no autoplay, no sound).
+// ═══════════════════════════════════════════════════════════
+async function loadGallery(targetId, filterType) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+
+  let items = [];
+  try {
+    let q = supa.from('showcase').select('*').eq('is_active', true).order('display_order', { ascending: true }).order('created_at', { ascending: false }).limit(12);
+    if (filterType) q = q.eq('type', filterType);
+    const { data, error } = await q;
+    if (error) throw error;
+    items = data || [];
+  } catch (e) {
+    console.warn('[gallery] load failed:', e.message);
+    el.innerHTML = '<div class="gallery-empty">Showcase coming soon ✨</div>';
+    return;
+  }
+
+  if (!items.length) {
+    el.innerHTML = '<div class="gallery-empty">Showcase coming soon ✨ Check back later for inspiration.</div>';
+    return;
+  }
+
+  el.innerHTML = items.map(it => {
+    const badge = it.type === 'video' ? '🎬 Video' : '🖼️ Image';
+    const caption = it.title ? `<div class="gallery-item-caption">${escapeHtml(it.title)}</div>` : '';
+    const onClickModal = it.type === 'video'
+      ? `openModal('<video src=\'${it.url}\' controls loop autoplay playsinline>')`
+      : `openModal('<img src=\'${it.url}\'>')`;
+
+    if (it.type === 'video') {
+      // Hover-to-play: muted/loop/playsinline; play on mouseenter, pause+reset on mouseleave
+      const poster = it.thumbnail_url ? ` poster="${it.thumbnail_url}"` : '';
+      return `
+        <div class="gallery-item" onclick="${onClickModal}">
+          <video src="${it.url}"${poster} muted loop playsinline preload="metadata"
+                 onloadeddata="this.classList.add('loaded')"
+                 onerror="handleBrokenGalleryItem(this,'${it.id}')"
+                 onmouseenter="this.play().catch(()=>{})"
+                 onmouseleave="this.pause();this.currentTime=0"></video>
+          <div class="gallery-badge">${badge}</div>
+          ${caption}
+        </div>
+      `;
+    }
+    // For 'character' type: show clean image without badge or caption (use thumbnail if available)
+    if (it.type === 'character') {
+      const displayUrl = it.thumbnail_url || it.url;
+      return `
+        <div class="gallery-item" onclick="${onClickModal}">
+          <img src="${displayUrl}" alt="" loading="lazy" onload="this.classList.add('loaded')" onerror="handleBrokenGalleryItem(this,'${it.id}')">
+        </div>
+      `;
+    }
+    // Default: image with badge + caption (use thumbnail if available, original on click)
+    const displayUrl = it.thumbnail_url || it.url;
+    return `
+      <div class="gallery-item" onclick="${onClickModal}">
+        <img src="${displayUrl}" alt="" loading="lazy" onload="this.classList.add('loaded')" onerror="handleBrokenGalleryItem(this,'${it.id}')">
+        <div class="gallery-badge">${badge}</div>
+        ${caption}
+      </div>
+    `;
+  }).join('');
+}
+
+// When a gallery image/video fails to load (404, hotlink blocked, etc.),
+// hide the card immediately AND tell the server to deactivate it so future visitors
+// don't see the broken slot. Best effort — admin can permanently fix later.
+async function handleBrokenGalleryItem(el, showcaseId) {
+  try {
+    el.parentElement.style.display = 'none';
+    console.warn('[gallery] hiding broken card:', showcaseId);
+    // Only admins/owners can update; for everyone else, this fails silently and just hides locally.
+    await supa.from('showcase').update({ is_active: false }).eq('id', showcaseId);
+  } catch (e) {
+    // RLS will block non-admins — that's fine, card is already hidden visually
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function toggleCharGroup(id) {
+  const el = document.getElementById('group-' + id);
+  if (el) el.classList.toggle('expanded');
+}
+
+async function deleteCharacter(id, name) {
+  if (!confirm(`Delete "${name}" and ALL its images & videos?\n\nThis cannot be undone.`)) return;
+  try {
+    // Delete dependent assets first
+    await supa.from('images').delete().eq('character_id', id);
+    await supa.from('videos').delete().eq('character_id', id);
+    // Then character
+    const { error } = await supa.from('characters').delete().eq('id', id);
+    if (error) throw error;
+    toast('Character deleted ✓');
+    await loadHistory();
+    await loadCharacters();
+  } catch (e) {
+    console.error('[deleteCharacter]', e);
+    toastError(e, 'Delete failed');
+  }
+}
+
+async function deleteAsset(type, id) {
+  if (!confirm(`Delete this ${type}?`)) return;
+  try {
+    const table = type === 'image' ? 'images' : 'videos';
+    const { error } = await supa.from(table).delete().eq('id', id);
+    if (error) throw error;
+    toast(`${type[0].toUpperCase() + type.slice(1)} deleted ✓`);
+    await loadHistory();
+  } catch (e) {
+    console.error('[deleteAsset]', e);
+    toastError(e, 'Delete failed');
+  }
+}
+
+// Cancel a pending generation job from History.
+// Marks the row as failed (stops the local poller from charging credits)
+// and stops the active in-page poller if this is the job currently running.
+async function cancelPendingJob(type, id) {
+  if (!confirm(`Cancel this pending ${type}? The generation will stop and you won't be charged.`)) return;
+  try {
+    const table = type === 'image' ? 'images' : 'videos';
+    // Mark as failed so resumePendingJobs won't pick it up + UI updates
+    const { error } = await supa.from(table).update({ status: 'failed' }).eq('id', id);
+    if (error) throw error;
+    // If this is the currently-running job, stop the active poller
+    if (typeof window.cancelCurrentJob === 'function') {
+      try { window.cancelCurrentJob(); } catch {}
+    }
+    toast('Cancelled ✓');
+    await loadHistory();
+  } catch (e) {
+    console.error('[cancelPendingJob]', e);
+    toastError(e, 'Cancel failed');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// DOWNLOADS
+// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// SHARE TO COMMUNITY (gallery submission)
+// User clicks → status becomes 'pending' → admin reviews → if approved,
+// item is added to showcase table.
+// ═══════════════════════════════════════════════════════════
+function refreshShareButton(prefix) {
+  const btn = document.getElementById(`${prefix}-share-btn`);
+  if (!btn) return;
+  const status = prefix === 'img' ? S.lastImageStatus : S.lastVideoStatus;
+  const rowId = prefix === 'img' ? S.lastImageRowId : S.lastVideoRowId;
+  if (!rowId) { btn.style.display = 'none'; return; }
+  btn.style.display = 'flex';
+  switch (status) {
+    case 'pending':
+      btn.textContent = '⏳ Pending review';
+      btn.disabled = true;
+      btn.style.opacity = '.7';
+      break;
+    case 'approved':
+      btn.textContent = '✓ Live in gallery';
+      btn.disabled = true;
+      btn.style.opacity = '.7';
+      break;
+    case 'rejected':
+      btn.textContent = '— Not added to gallery';
+      btn.disabled = true;
+      btn.style.opacity = '.5';
+      break;
+    default:
+      btn.textContent = '🌟 Share to gallery';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+  }
+}
+
+async function shareCharacter() {
+  if (!requireAuth('Sign in to share to the gallery.')) return;
+  if (!S.ccCharacter?.id) { toast('No character to share', 'err'); return; }
+  if (!confirm('Share this character to the public gallery?\n\nIt will be reviewed before appearing in the gallery.')) return;
+
+  try {
+    const { error } = await supa
+      .from('characters')
+      .update({
+        submitted_to_gallery: true,
+        submitted_at: new Date().toISOString(),
+        gallery_status: 'pending',
+      })
+      .eq('id', S.ccCharacter.id);
+    if (error) throw error;
+
+    S.ccCharacter.gallery_status = 'pending';
+    renderCharacterResult(S.ccCharacter);
+    toast('Submitted! We\'ll review it shortly ✓');
+  } catch (e) {
+    console.error('[shareCharacter]', e);
+    toastError(e, 'Submit failed');
+  }
+}
+
+async function shareToGallery(type) {
+  if (!requireAuth('Sign in to share to the gallery.')) return;
+  const prefix = type === 'image' ? 'img' : 'vid';
+  const table = type === 'image' ? 'images' : 'videos';
+  const rowId = prefix === 'img' ? S.lastImageRowId : S.lastVideoRowId;
+  if (!rowId) { toast('Cannot share — record not found', 'err'); return; }
+
+  if (!confirm('Share this to the public gallery?\n\nIt will be reviewed before appearing in the gallery.')) return;
+
+  try {
+    const { error } = await supa
+      .from(table)
+      .update({
+        submitted_to_gallery: true,
+        submitted_at: new Date().toISOString(),
+        gallery_status: 'pending',
+      })
+      .eq('id', rowId);
+    if (error) throw error;
+
+    if (prefix === 'img') S.lastImageStatus = 'pending';
+    else S.lastVideoStatus = 'pending';
+    refreshShareButton(prefix);
+    toast('Submitted! We\'ll review it shortly ✓');
+  } catch (e) {
+    console.error('[shareToGallery]', e);
+    toastError(e, 'Submit failed');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SNS CAPTION GENERATION
+// ═══════════════════════════════════════════════════════════
+async function generateCaption(contentType) {
+  // Determine which character was used
+  const profileId = contentType === 'image' ? S.imgSelectedProfileId : S.vidSelectedProfileId;
+  const profile = S.characters.find(c => c.id === profileId);
+  if (!profile) { toast('Character not found', 'err'); return; }
+
+  // Asset URL
+  const assetUrl = contentType === 'image' ? S.lastImage : S.lastVideo;
+  const resultId = contentType === 'image' ? 'img-caption-result' : 'vid-caption-result';
+  const btnId = contentType === 'image' ? 'img-caption-btn' : 'vid-caption-btn';
+
+  const resultEl = document.getElementById(resultId);
+  const btn = document.getElementById(btnId);
+
+  // Render platform picker first
+  resultEl.innerHTML = `
+    <div class="caption-box">
+      <div class="caption-box-title">Choose Platform</div>
+      <div class="caption-platform-row">
+        <button class="caption-platform-btn" data-platform="instagram" onclick="pickCaptionPlatform('${contentType}','instagram')">📷 Instagram</button>
+        <button class="caption-platform-btn" data-platform="tiktok" onclick="pickCaptionPlatform('${contentType}','tiktok')">🎵 TikTok</button>
+        <button class="caption-platform-btn" data-platform="twitter" onclick="pickCaptionPlatform('${contentType}','twitter')">🐦 X/Twitter</button>
+        <button class="caption-platform-btn" data-platform="youtube" onclick="pickCaptionPlatform('${contentType}','youtube')">▶️ YouTube</button>
+      </div>
+      <div id="${resultId}-output"></div>
+    </div>
+  `;
+  btn.style.display = 'none';
+}
+
+async function pickCaptionPlatform(contentType, platform) {
+  const profileId = contentType === 'image' ? S.imgSelectedProfileId : S.vidSelectedProfileId;
+  const profile = S.characters.find(c => c.id === profileId);
+  const assetUrl = contentType === 'image' ? S.lastImage : S.lastVideo;
+  const resultId = contentType === 'image' ? 'img-caption-result' : 'vid-caption-result';
+  const outEl = document.getElementById(`${resultId}-output`);
+
+  // Highlight selected
+  document.querySelectorAll(`#${resultId} .caption-platform-btn`).forEach(b => b.classList.remove('selected'));
+  document.querySelector(`#${resultId} [data-platform="${platform}"]`)?.classList.add('selected');
+
+  outEl.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.85rem"><span class="spin" style="display:inline-block;vertical-align:middle;margin-right:.4rem"></span>Crafting captions...</div>';
+
+  try {
+    const res = await fetch(`${API}/api/caption`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        character_name: profile.name,
+        character_persona: profile.persona,
+        character_niche: profile.niche,
+        content_type: contentType,
+        platform,
+        // Pass image URL for vision context (only for image type)
+        image_url: contentType === 'image' ? assetUrl : null,
+      })
+    });
+    const data = await res.json();
+    if (!data.ok || !data.captions) throw new Error(data.error || 'failed');
+
+    outEl.innerHTML = data.captions.map(c => `
+      <div class="caption-style">
+        <span class="caption-style-label">${c.style}</span>
+        <div class="caption-text">${c.text}</div>
+        <div class="caption-tags">${(c.hashtags || []).join(' ')}</div>
+        <button class="caption-copy-btn" onclick="copyCaption(this, \`${(c.text + '\n\n' + (c.hashtags || []).join(' ')).replace(/\\/g,'\\\\').replace(/\`/g,'\\\`')}\`)">📋 Copy</button>
+      </div>
+    `).join('');
+  } catch (e) {
+    outEl.innerHTML = `<div style="color:var(--r);font-size:.85rem;padding:.7rem">Caption generation failed: ${e.message || ''}</div>`;
+  }
+}
+
+function copyCaption(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied';
+    btn.style.color = 'var(--g)';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+  }).catch(() => toast('Copy failed', 'err'));
+}
+
+async function downloadImage() {
+  if (!S.lastImage) return;
+  try {
+    const r = await fetch(S.lastImage); const b = await r.blob();
+    const u = URL.createObjectURL(b);
+    const a = document.createElement('a'); a.href = u; a.download = 'character.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(u);
+  } catch { toast('Download failed','err'); }
+}
+async function downloadVideo() {
+  if (!S.lastVideo) return;
+  try {
+    const r = await fetch(S.lastVideo); const b = await r.blob();
+    const u = URL.createObjectURL(b);
+    const a = document.createElement('a'); a.href = u; a.download = 'video.mp4';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(u);
+  } catch { toast('Download failed','err'); }
+}
 </script>
 </body>
 </html>
